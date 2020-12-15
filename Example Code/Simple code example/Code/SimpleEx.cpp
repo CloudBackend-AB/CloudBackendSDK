@@ -38,7 +38,7 @@ int main(void) {
   printf("Hello! This is a test program.\n");
 
   /** Creates a new instance of this class which we need to access the cloudBackend object from.*/
-  CBEExample *cbeEx = new CBEExample();
+  std::shared_ptr<CBEExample> cbeEx = std::make_shared<CBEExample>();
   CBE::AccountDelegatePtr accountDelegate(cbeEx);
   /** Loging in to the account that you where provided with when downloading this example code. 
    *  username and password can be found in the scripts and binary folder in user_credentials.cpp if you wish to change the credentials.
@@ -68,6 +68,7 @@ void CBEExample::query(CBE::ContainerPtr container, std::string name) {
   _queryName = name;
 
   /** Query has the callback onQueryLoaded and if an error occures then onLoadError is called. To make the program complete implement both. */
+  CBE::ItemDelegatePtr itemDelegate = getPtr();
   container->query(itemDelegate);
 }
 
@@ -77,6 +78,7 @@ void CBEExample::uploadToContainer(std::string path, std::string name, CBE::Cont
    *  transfer delegate defined in the .h file.
    *  upload has the callback onObjectUploaded and if file is missing from folder or other failure occurs then onObjectUploadFailed() is where the respond is.
    */
+  CBE::TransferDelegatePtr transferDelegate = getPtr();
   container->upload(name, path, transferDelegate);
 }
 
@@ -89,6 +91,7 @@ void CBEExample::createContainer(CBE::ContainerPtr container, std::string name) 
    *  
    *  Create has the corresponding callback onContainerAdded(CBE::ContainerPtr container) seen down below in callbacks.
    */
+  CBE::ItemDelegatePtr itemDelegate = getPtr();
   container->create(name, itemDelegate);
 }
 
@@ -131,6 +134,7 @@ void CBEExample::onQueryLoaded(CBE::QueryResultPtr qr) {
      * company personel that have tested the library, we delete the container and then create it again. 
      * When deleting a container all the sub containers and its objects are removed/deleted as well.
     */
+    CBE::ItemDelegatePtr itemDelegate = getPtr();
     container->remove(itemDelegate);
   } else {
     /** Since we did not find the container on the account we can create it directly. */

@@ -12,6 +12,7 @@
 #include "CBE/Protocols/AccountEventProtocol.h"
 #include "CBE/Protocols/TransferEventProtocol.h"
 #include "CBE/Protocols/ItemEventProtocol.h"
+#include <memory>
 
 class CBEExample :  public std::enable_shared_from_this<CBEExample>,
                     public CBE::AccountEventProtocol,
@@ -21,8 +22,12 @@ class CBEExample :  public std::enable_shared_from_this<CBEExample>,
 public:
   /*implementation of delegates */
   CBE::CloudBackendPtr cloudBackend;
-  CBE::ItemDelegatePtr itemDelegate{this};
-  CBE::TransferDelegatePtr transferDelegate{this};
+  // CBE::ItemDelegatePtr itemDelegate{shared_from_this()};
+  // CBE::TransferDelegatePtr transferDelegate{shared_from_this()};
+  
+  std::shared_ptr<CBEExample> getPtr() {
+    return shared_from_this();
+  }
 
   /** From AccountEventProtocol: */
 
