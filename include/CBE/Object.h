@@ -84,6 +84,11 @@ public:
     virtual std::string getMimeType() const;
 
     /**
+     * Returns the binary length/size of the object.
+    */
+    virtual uint64_t length() const;
+
+    /**
    * Returns all the keyValues
    */
     virtual std::map<std::string, SDK_tuple<std::string, bool>> keyValues();

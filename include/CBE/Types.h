@@ -7,16 +7,7 @@
 #include <stdint.h>
 #include <vector>
 #include <map>
-
-#if __cplusplus < 201103L
-#include <boost/config.hpp>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/tuple/tuple.hpp>
-#else
 #include <memory>
-#endif
-
 #include <tuple>
 
 namespace CBE {
@@ -238,36 +229,28 @@ namespace CBE {
     S4 = 9
   };
 
-  #if __cplusplus < 201103L
-    #define SDK_tuple boost::tuple
-    #define SDK_make_tuple boost::make_tuple
-    #define SDK_tie boost::tie
-    #define SDK_tuple_get boost::get
-    #define SDK_CBE boost
-  #else
     #define SDK_tuple std::tuple
     #define SDK_make_tuple std::make_tuple
     #define SDK_tie std::tie
     #define SDK_tuple_get std::get
-    #define SDK_CBE std
-  #endif
-    // if you have c++11 or higher SDK_CBE will be defined as std else it will be boost.
-    typedef SDK_CBE::shared_ptr<CBE::Item> ItemPtr;
-    typedef SDK_CBE::shared_ptr<CBE::Object> ObjectPtr;
-    typedef SDK_CBE::shared_ptr<CBE::Container> ContainerPtr;
-    typedef SDK_CBE::shared_ptr<CBE::Group> GroupPtr;
-    typedef SDK_CBE::shared_ptr<CBE::Account> AccountPtr;
-    typedef SDK_CBE::shared_ptr<CBE::CloudBackend> CloudBackendPtr;
+    // #define SDK_CBE std
+     // if you have c++11 or higher SDK_CBE will be defined as std else it will be boost.
+    typedef std::shared_ptr<CBE::Item> ItemPtr;
+    typedef std::shared_ptr<CBE::Object> ObjectPtr;
+    typedef std::shared_ptr<CBE::Container> ContainerPtr;
+    typedef std::shared_ptr<CBE::Group> GroupPtr;
+    typedef std::shared_ptr<CBE::Account> AccountPtr;
+    typedef std::shared_ptr<CBE::CloudBackend> CloudBackendPtr;
 
-    typedef SDK_CBE::shared_ptr<AccountEventProtocol> AccountDelegatePtr;
-    typedef SDK_CBE::shared_ptr<ItemEventProtocol> ItemDelegatePtr;
-    typedef SDK_CBE::shared_ptr<ItemDataEventProtocol> ItemDataDelegatePtr;
-    typedef SDK_CBE::shared_ptr<TransferEventProtocol> TransferDelegatePtr;
-    typedef SDK_CBE::shared_ptr<TransferDownloadEventProtocol> TransferDownloadDelegatePtr;
-    typedef SDK_CBE::shared_ptr<TransferUploadEventProtocol> TransferUploadDelegatePtr;
-    typedef SDK_CBE::shared_ptr<ShareEventProtocol> ShareDelegatePtr;
-    typedef SDK_CBE::shared_ptr<GroupEventProtocol> GroupDelegatePtr;
-    typedef SDK_CBE::shared_ptr<QueryResult> QueryResultPtr;
+    typedef std::shared_ptr<AccountEventProtocol> AccountDelegatePtr;
+    typedef std::shared_ptr<ItemEventProtocol> ItemDelegatePtr;
+    typedef std::shared_ptr<ItemDataEventProtocol> ItemDataDelegatePtr;
+    typedef std::shared_ptr<TransferEventProtocol> TransferDelegatePtr;
+    typedef std::shared_ptr<TransferDownloadEventProtocol> TransferDownloadDelegatePtr;
+    typedef std::shared_ptr<TransferUploadEventProtocol> TransferUploadDelegatePtr;
+    typedef std::shared_ptr<ShareEventProtocol> ShareDelegatePtr;
+    typedef std::shared_ptr<GroupEventProtocol> GroupDelegatePtr;
+    typedef std::shared_ptr<QueryResult> QueryResultPtr;
     //The generic metadata_type for keyValue
     typedef std::map<std::string, SDK_tuple<std::string, bool>> metadata_type;
     //Data index values, just because its nice

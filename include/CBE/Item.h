@@ -4,14 +4,9 @@
 
 #ifndef INCLUDE_CBE_ITEM_H_
 #define INCLUDE_CBE_ITEM_H_
-#if __cplusplus < 201103L
-#include <boost/thread.hpp>
-#include <boost/thread/locks.hpp>
-#include <boost/unordered_map.hpp>
-#else
+
 #include <thread>
 #include <mutex>
-#endif
 #include <map>
 #include <string>
 #include <vector>
@@ -83,7 +78,7 @@ class Item {
   virtual CBE::item_t type() const;
 
   /** Returns the bit size of an object (ex file size). */
-  virtual uint64_t length() const;
+  // virtual uint64_t length() const;    move to object
 
   // virtual std::map<uint64_t, permission_status_t> ACLMap() const;
   
@@ -105,11 +100,9 @@ protected:
   // Item(CBE::item_id_t _tempId, CBE::item_id_t _id, CBE::container_id_t _parentId, CBE::container_id_t _oldParentId, std::string _name, CBE::user_id_t _userId, CBE::user_id_t _ownerId, CBE::container_id_t _driveId, std::string _username, CBE::date_t _created, CBE::date_t _updated, CBE::date_t _deleted, CBE::item_t _type);
   static CBE::item_id_t _currentTempId;
   
-  #if __cplusplus < 201103L
-    static boost::mutex _tempIdMutex;
-  #else
-    static std::mutex _tempIdMutex;
-  #endif
+
+  static std::mutex _tempIdMutex;
+
 };
 } // namespace CBE
 // namespace XAPI
