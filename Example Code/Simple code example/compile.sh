@@ -45,8 +45,8 @@ case "$exercise" in
   "1")
   # Section 1:
     echo "compile example code."
-     ${COMPILER_COMMAND} -o "simpleExample" "${CODE_PATH}SimpleEx.cpp" ${libCBE} -I "../../Include/"
-     #${COMPILER_COMMAND} -o "simpleExample" "${CODE_PATH}SimpleEx.cpp" ${libCBE} -I "../../Include/" "-Wl,-rpath,../../SDK/Linux_x86" "-Wl,-rpath,."
+     ${COMPILER_COMMAND} -o "simpleExample" "${CODE_PATH}SimpleEx.cpp" ${libCBE} -I "../../include/"
+     #${COMPILER_COMMAND} -o "simpleExample" "${CODE_PATH}SimpleEx.cpp" ${libCBE} -I "../../include/" "-Wl,-rpath,../../SDK/Linux_x86" "-Wl,-rpath,."
     if [ $? -eq 0 ]
     then
         echo "to run use: sh run.sh"
