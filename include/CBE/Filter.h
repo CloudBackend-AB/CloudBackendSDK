@@ -11,69 +11,90 @@
 #include "CBE/Types.h"
 #include <vector>
 
+
 namespace CBE {
 
-// This class is currently being examined
-    struct Term {
-      std::string modifier;
-      std::string prefix;
-      std::string str;
-    };
-
-    class Filter {
+  enum FilterOrder : uint32_t {
+    Title = 1,
+    Relevance = 2,
+    Published = 3,
+    Updated = 4,
+    Length = 5,
+    S1 = 6,
+    S2 = 7,
+    S3 = 8,
+    S4 = 9
+  };
+  class Filter {
 
     public:
       Filter();
 
-      CBE::user_id_t getUserId();
 
-      //std::string getDataType;
-      CBE::item_t getDataType();
-      std::vector<uint64_t> getDataId();
-      std::map<std::string, std::string> getTagLabels();
-      std::string getPath();
-      std::string getUrl();
-      std::string getQuery();
-      std::string getGroup(); //Group - NYI
-      std::string getOrder();
-      int getLoopBack();
+      
+      /** Returns the requested data type I.E CBE::ItemType::Container, Object, Tag, ... */
+      CBE::item_t getDataType() const;
+      
+      /** Returns the query string that was set on the filter. I.E key:value (name:*) would be an example. */
+      std::string getQuery() const;
+      
+      /** Returns the settings on how the data was sorted and displayed. */
+      bool getAscending() const;
+      bool getDeleted() const;
+      bool getContainerFirst() const;
+      
+      /** Returns the offset that was used for the filter in the query. */
+      uint32_t getOffset() const;
+      
+      /** Returns the value of the count that was set for the query.*/
+      uint32_t getCount() const;
+      
+      /** Returns if skipping the cache was used or not. */
+      bool getByPassCache() const;
+      
+      /** Returns the order the query was sorted check enum FilterOrder to see options for sorting. */
+      CBE::FilterOrder getItemOrder() const;
 
-      bool getAscending();
-      bool getDeleted();
-      bool getFolderFirst();
-      bool getItem();
-      uint32_t getOffset();
-      uint32_t getCount();
+      /** Returns the parent container / container that was queried if it is in the cache, if not nullptr will be returned. (this is after a query was done not before.) */
+      CBE::ContainerPtr container();
+      
+      /** Set which data types to query for. */
+      void setDataType(CBE::item_t);
+      
 
-      void    setUserId(CBE::user_id_t);
-      void    setDataType(CBE::item_t);
-      void    setDataId(std::vector<uint64_t>);
-      void    setTagLabels(std::map<std::string, std::string>);
-      void    setPath(std::string);
-      void    setUrl(std::string);
-      void    setQuery(std::string);
-      void    setGroup(std::string); //Group - NYI
-      void    setOrder(std::string);
-      void    setAscending(bool);
-      void    setDeleted(bool);
-      void    setFolderFirst(bool);
-      void    setItem(bool);
-      void    setOffset(uint32_t);
-      void    setCount(uint32_t);
-      void    setItemOrder(std::string o);
-      void    setLoopBack(int n);
+      
+      /** Set the query string, e.x: Name:* (would search for all objects with the metadata key of Name). 
+       * Note* if used with rootContainer id as the dataId to search in the whole account will be searched. 
+      */
+      void setQuery(std::string);
+      
+      /** Sets the Order in which data should be displayed: Ascending, show deleted items and if Containers should be displayed top down first.  */
+      void setAscending(bool);
+      void setDeleted(bool);
+      void setContainerFirst(bool);
 
-     int loopBack;
-     CBE::user_id_t userId;
-     CBE::item_t dataType;
-     std::vector<uint64_t> dataId;
-     std::map<std::string, std::string> tagLabels;
-     std::string path;
-     std::string fullPath;
-     std::string url;
-     std::string query;
-     std::string group; //Group - NYI
-     std::map<FilterOrder, std::string> orderStrings = {
+      /** Set the offset for paging, offset is the item offset where to start your query. i.e:
+       *  There is already a query of the first 99 items and to get the rest you've setOffest to 100 to get the next set.
+       */
+      void setOffset(uint32_t);
+      
+      /** Set the Number of items you want to get from a container. 
+       * So if a container has 50 items but you only want the 10 first in ascending order then set ascending to true and setCount to 10. */
+      void setCount(uint32_t);
+      
+      /** Set the order of how data will be shown by the enum of FilterOrder ex: Titel first, Relevance, published e.t.c */
+      void setItemOrder(CBE::FilterOrder order);
+      
+      /** Set bool to true, to skip the cache. Force update from Server. */
+      void setByPassCache(bool);
+
+    protected:
+
+      /**
+       * Internal do not use this. 
+      */
+      static std::vector<std::string> _approvedOrder;
+      std::map<FilterOrder, std::string> orderStrings = {
                               { FilterOrder::Title, "title"},
                               { FilterOrder::Relevance, "relevance"},
                               { FilterOrder::Published, "published"},
@@ -83,41 +104,29 @@ namespace CBE {
                               { FilterOrder::S2, "s2"},
                               { FilterOrder::S3, "s3"},
                               { FilterOrder::S4, "s4"}
-                           };
-     std::string order();
-     void order(std::string o);
-     void order(FilterOrder o);
-     bool ascending;
-     bool deleted;
-     bool folderFirst;
-     bool item;
-     uint32_t offset;
-     uint32_t count;
-
-     bool matchesDataId(uint64_t id);
-     bool matchesQuery(uint64_t parentId, CBE::item_t type, bool isDeleted);
-     bool matchesQuery(CBE::Item& item);
-     bool matchesQueryString(CBE::Item item);
-     void parseQueryString();
-
-     bool equals(Filter filter);
-
-     std::vector<CBE::item_t> getDataTypes();
-
-     bool bypassCache;
-
-    protected:
-     void updateCompareValue();
-     std::string _compareValue;
-
-     std::vector<Term> _parsedQueryString;
-
-     std::string _order;
-     static std::vector<std::string> _approvedOrder;
-
-
+                              };
+      uint32_t offset;
+      uint32_t count;
+      bool ascending;
+      bool deleted;
+      bool containerFirst;
+      std::string query;
+      CBE::item_t dataType;
+      std::string _order;
+      bool bypassCache;
+      void parseQueryString();
+      CBE::ContainerPtr _container;
+      
+      struct Term {
+      std::string modifier;
+      std::string prefix;
+      std::string str;
+      };
+      
+      std::vector<Term> _parsedQueryString;
+    
+    
   };
 }
-// namespace CBE
 
 #endif // INCLUDE_CBE_FILTER_H_

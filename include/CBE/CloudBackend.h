@@ -61,7 +61,7 @@ public:
        * @param filter
        * @param delegate is a shared pointer to the class in which you implement CBE::ItemEventProtocol to recieve the callback on function completion.
     */
-   virtual void query(CBE::Filter filter, CBE::ItemDelegatePtr delegate);
+   virtual void query(CBE::container_id_t containerId, CBE::Filter filter, CBE::ItemDelegatePtr delegate); // add a Container Id
 
    /**
      * Queries with a given path to the container or object given in the path

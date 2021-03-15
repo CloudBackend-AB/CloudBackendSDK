@@ -21,11 +21,14 @@ namespace CBE {
     friend class CloudBackend;
     public:
        QueryResult();
-       QueryResult(CBE::Filter f);
+      //  QueryResult(CBE::Filter f);
       virtual ~QueryResult();
 
       ///Filter can be used to see what has been loaded.
-      CBE::Filter filter;
+      // CBE::Filter filter;
+
+      /** Returns a copy of the filter used for query.*/
+      virtual CBE::Filter filter() const;
 
       /**
        * 
