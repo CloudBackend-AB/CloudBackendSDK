@@ -12,9 +12,13 @@ namespace CBE {
 
 class Stream {
  public:
-     //Future get functions and other functionality will be added here.
+    //Future get functions and other functionality will be added here.
+    uint64_t _streamId;
+    size_t _length;
  protected:
-     Stream() {}
+    Stream() : _length{0}, _streamId{0} {}
+    Stream(uint64_t streamId, size_t length);
+     
 };
 }  // namespace CBE
 // namespace CBE

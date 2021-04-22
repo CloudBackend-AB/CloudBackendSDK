@@ -25,13 +25,11 @@ class Item {
 
   virtual std::map<uint64_t, std::vector<CBE::ShareData>> getShareIds() const;
 
-    /** Get the shareId from userId */
+  /** Get the shareId from userId */
   virtual CBE::share_id_t getShareFromUserId(user_id_t userId);
 
   /** Get the shareId from userId */
   virtual CBE::user_id_t getUserFromShareId(user_id_t shareId); 
-
-  //virtual void addShareId(uint64_t shareId, uint64_t id, bool isUserId = true) const;
 
   virtual std::string aclTag() const;
 
@@ -52,8 +50,6 @@ class Item {
 
   /** Returns the owner id. */
   virtual CBE::user_id_t ownerId() const;
-
-  // virtual user_id_t userId() const;
 
   /** Returns which drive the container resides on. */
   virtual CBE::container_id_t driveId() const;
@@ -76,21 +72,10 @@ class Item {
 
   /** Container or Object*/
   virtual CBE::item_t type() const;
-
-  /** Returns the bit size of an object (ex file size). */
-  // virtual uint64_t length() const;    move to object
-
-  // virtual std::map<uint64_t, permission_status_t> ACLMap() const;
   
   virtual bool operator<(const CBE::Item &other) const;
 
   std::map<uint64_t, CBE::permission_status_t> ACLMap() const; 
-
-  ///This function should not be called as it will not continue to be public and any call made on the item will fail.
-  static CBE::item_id_t nextId();
-
-  ///This function should not be called as it will not continue to be public and any call made on the item will fail.
-  static void resetTempId();
 
   ///This function should not be called as it will not continue to be public and any call made on the item will fail.
   virtual ~Item(){};
@@ -98,10 +83,10 @@ class Item {
 protected:
   Item() {}
   // Item(CBE::item_id_t _tempId, CBE::item_id_t _id, CBE::container_id_t _parentId, CBE::container_id_t _oldParentId, std::string _name, CBE::user_id_t _userId, CBE::user_id_t _ownerId, CBE::container_id_t _driveId, std::string _username, CBE::date_t _created, CBE::date_t _updated, CBE::date_t _deleted, CBE::item_t _type);
-  static CBE::item_id_t _currentTempId;
+  // static CBE::item_id_t _currentTempId;
   
 
-  static std::mutex _tempIdMutex;
+  // static std::mutex _tempIdMutex;
 
 };
 } // namespace CBE

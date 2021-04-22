@@ -26,3 +26,10 @@ Note: These test accounts can be used by anyone with access to this repository s
 Change the user account for the sample program in user_credentials.cpp
 
 Notes: This SDK has been built and tested on Ubuntu
+
+SDK Version:
+1.3.5
+
+Release notes:
+Bug fixes.
+CLI added to repository. 

@@ -10,9 +10,11 @@ username: githubtester2 ; password: gitHubTester2password ; email: githubtester1
 username: githubtester3 ; password: gitHubTester3password ; email: githubtester2MockEmailForTest@CreateAccountTest.com;
 */
 
-std::string username      = "githubtester1";
-std::string password      = "gitHubTester1password";
-std::string tenant        = "cbe_githubtesters";
+//std::string username      = "githubtester1";
+//std::string password      = "gitHubTester1password";
+std::string username = "qwet";
+std::string password = "asdfasdf";
+std::string tenant = "cbe_githubtesters";
 std::string firstname     = "Test";
 std::string lastname      = "User";
 std::string email         = "";

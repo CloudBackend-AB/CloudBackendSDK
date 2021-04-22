@@ -58,7 +58,7 @@ public:
         * @param streamId: Get which stream you want by first calling getStream and then choose which one to download.
         * @param delegate: Delegate is a shared pointer to a TransferEventProtocol that the user has implemented. The pointer is defined in Types.h.
    */
-    virtual void downloadStream(const std::string &path, uint64_t streamId, CBE::TransferDownloadDelegatePtr delegate);
+    virtual void downloadStream(const std::string &path, CBE::Stream stream, CBE::TransferDownloadDelegatePtr delegate);
 
     /**
    * Adds keyValue data to the existing object, if data has the same name it will be overwritten else itt will add to the existing keyValue on the object.
@@ -71,7 +71,7 @@ public:
    * Returns the streams attached to the Object, use object->_streams after this call to use the streams e.g in downloadStream.   
         * @param delegate: Delegate is a shared pointer to a ItemEventProtocol that the user has implemented. The pointer is defined in Types.h.
    */
-    virtual std::vector<CBE::Stream> getStreams(CBE::ItemDelegatePtr delegate);
+    virtual void getStreams(CBE::ItemDelegatePtr delegate);
 
     /**
    * Returns the currently loaded stream / streams attached to the object. (NB if getStreams has not been called then streams() will return NULL).
