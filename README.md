@@ -31,5 +31,5 @@ SDK Version:
 1.4.0
 
 Release notes:
-Bug fixes.
-CLI added to repository. 
+Bug fixes, listGroups on groupManager added. CreateAccount added.
+New CLI with new extended Readme. 
