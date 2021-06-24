@@ -35,6 +35,29 @@ public:
     */
    static CloudBackendPtr logIn(const std::string &username, const std::string &password, const std::string &source, CBE::AccountDelegatePtr delegate);
 
+   //This is currently used for test servers and is not secure.
+   static CloudBackendPtr logIn(const std::string &username, const std::string &password,
+                                const std::string &source, const std::string &host,
+                                CBE::AccountDelegatePtr delegate);
+
+   /// Source is not currently being used and should be fixed.
+   /**
+    *  Call to create an account. Implement onCreated to from CBE::AccountDelegatePtrto recieve the
+    * callback. currently disabled
+    * @param username
+    * @param password
+    * @param email
+    * @param firstName
+    * @param lastName
+    * @param source
+    * @param delegate is a shared pointer to the class in which you implement
+    * CBE::AccountDelegatePtr
+    */
+   static CloudBackendPtr createAccount(const std::string& username, const std::string& password,
+                                        const std::string& email, const std::string& firstName,
+                                        const std::string& lastName, const std::string& source,
+                                        CBE::AccountDelegatePtr delegate);
+
    /**
     * adds a listner that will recieve updates as changes occur on the account.  removeListener should always be called when you stop using the delegate.
     * @param delegate: Delegate is a shared pointer to the class ItemEventProtocol that the user has implemented. The pointer is defined in Types.h.
@@ -70,6 +93,7 @@ public:
     */
    virtual void queryWithPath(std::string path, CBE::ItemDelegatePtr delegate);
 
+   
    /** 
      * casts an item to a container.
     */
@@ -80,13 +104,18 @@ public:
     */
    static CBE::ObjectPtr castObject(CBE::ItemPtr item);
 
+   //Can be used to clear the cache if you are having memory issues.
+   virtual bool clearCache();
+
    //retunrs an account objct with information on the user
    CBE::AccountPtr account();
 
+
    //returns the version number
    std::string version();
-  
-   CBE::GroupManager *groupManager(); //Group - NYI
+
+
+       CBE::GroupManager* groupManager();  // Group - NYI
    CBE::ShareManager* shareManager(); // Shares 
    
    virtual ~CloudBackend();

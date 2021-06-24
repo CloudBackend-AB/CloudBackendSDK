@@ -28,8 +28,8 @@ Change the user account for the sample program in user_credentials.cpp
 Notes: This SDK has been built and tested on Ubuntu
 
 SDK Version:
-1.3.5
+1.4.0
 
 Release notes:
-Bug fixes.
-CLI added to repository. 
+Bug fixes, listGroups on groupManager added. CreateAccount added.
+New CLI with new extended Readme. 

@@ -115,11 +115,10 @@ ShareEventProtocol.
     */
     virtual void unShare(uint64_t shareId, CBE::ShareDelegatePtr delegate);
 
- protected:
-  typedef std::map<std::string, SDK_tuple<std::string, bool>> metadata_type;
-  ///This function should not be called directly.
-  Container() : CBE::Item() {
-    }
+   protected:
+    typedef std::map<std::string, SDK_tuple<std::string, bool>> metadata_type;
+    /// This function should not be called directly.
+    Container() : CBE::Item() {}
 };
 } // namespace CBE
 
