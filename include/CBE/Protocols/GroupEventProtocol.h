@@ -27,6 +27,11 @@ namespace CBE {
 
       virtual void onGroupAdded(uint64_t operationId, CBE::persistence_t newPersistenceState, CBE::group_id_t newGroupId) {}
 
+      /**
+      * Lists the groups that the user is included in.
+      */
+      virtual void onListGroups(std::vector<CBE::GroupPtr> &groups) {}
+
       virtual void onGroupRemoved(uint64_t operationId, CBE::persistence_t newPersistenceState) {}
 
       virtual void onMemberLeaveGroup(uint64_t operationId, CBE::persistence_t newPersistenceState) {}

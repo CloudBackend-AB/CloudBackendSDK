@@ -10,12 +10,23 @@
 namespace CBE {
   class Group  {
     public:
-      virtual std::string name();
+      /**
+      * Returns the name of the group.
+      */
+      virtual std::string name() const;
+      
+      /**
+      * Returns the id of the group.
+      */
+      virtual CBE::group_id_t id() const;
+      
+      /**
+      * Returns the mutual container for the group.
+      */
+      virtual CBE::ContainerPtr groupContainer() const;
+
       virtual ~Group() {};
 
-    protected:
-      ///This function should not be called as it will not continue to be public and any call made on the object will fail.
-      Group(){}
   };
 
   /** Struct with information about a given group member.
