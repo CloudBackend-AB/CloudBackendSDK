@@ -67,6 +67,16 @@ case "$exercise" in
     fi
     ;;
 
+  "5")
+  # Section 5:
+    echo "compile example code."
+     ${COMPILER_COMMAND} -o "cb_traverse5" "${CODE_PATH}cb_traverse5.cpp" ${libCBE} -I "../../include/"
+    if [ $? -eq 0 ]
+    then
+        echo "to run use: ./cb_traverse5"
+    fi
+    ;;
+
   *)
     # Default.
     echo "syntax: "$0" <1-7> "
