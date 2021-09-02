@@ -211,7 +211,6 @@ int main(void) {
     std::cout << itemPtr->name() << ", " << itemPtr->description()
               << ",\t" << itemPtr->parentId() 
               << ", " << itemPtr->ownerId()
-              << ", " << itemPtr->driveId()
               << "."  << std::endl;
     if (itemPtr->type() == CBE::ItemType::Container) {
       auto shareContainer = cloudBackend->castContainer(itemPtr);

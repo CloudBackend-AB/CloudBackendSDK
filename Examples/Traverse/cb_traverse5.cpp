@@ -40,27 +40,27 @@ class Sync {
 
   using ResultPtr = std::shared_ptr<ResultT>;
   ResultPtr                 resultPtr;
-  public:
-    void onSuccess(ResultPtr resultPtr) {
-      {
-        std::lock_guard<std::mutex> lock(mutex);
-        this->resultPtr = resultPtr;
-        responseReceived = true;
-      }
-      conditionVariable.notify_one();
+public:
+  void onSuccess(ResultPtr resultPtr) {
+    {
+      std::lock_guard<std::mutex> lock(mutex);
+      this->resultPtr = resultPtr;
+      responseReceived = true;
     }
-    void onError() {
-      {
-        std::lock_guard<std::mutex> lock(mutex);
-        responseReceived = true;
-      }
-      conditionVariable.notify_one();
+    conditionVariable.notify_one();
+  }
+  void onError() {
+    {
+      std::lock_guard<std::mutex> lock(mutex);
+      responseReceived = true;
     }
-    ResultPtr wait() {
-      std::unique_lock<std::mutex> lock(mutex);
-      conditionVariable.wait(lock, [this]{ return responseReceived; } );
-      return resultPtr;
-    }
+    conditionVariable.notify_one();
+  }
+  ResultPtr wait() {
+    std::unique_lock<std::mutex> lock(mutex);
+    conditionVariable.wait(lock, [this]{ return responseReceived; } );
+    return resultPtr;
+  }
 }; // class Sync
 
 int main(void) {
@@ -70,22 +70,22 @@ int main(void) {
 
   class AccountEventProtocol : public CBE::AccountEventProtocol {
     Sync<CBE::CloudBackend> sync;
-    public:
-      void onLogin(uint32_t atState, CBE::CloudBackendPtr cloudbackend) final {
-        std::cout << "Account Login complete"
-                  << " - name: "<< cloudbackend->account()->username()
-                  << " - id: "<< cloudbackend->account()->userId() << std::endl;
-        sync.onSuccess(cloudbackend);
-      }
-      void onError(CBE::persistence_t failedAtState, uint32_t code,
-                                      std::string reason,
-                                      std::string message) final {
-        std::cerr << "Account Event Error: Login failed" << '\n' ;
-        sync.onError();
-      }
-      CBE::CloudBackendPtr wait() {
-        return sync.wait();
-      }
+  public:
+    void onLogin(uint32_t atState, CBE::CloudBackendPtr cloudbackend) final {
+      std::cout << "Account Login complete"
+                << " - name: "<< cloudbackend->account()->username()
+                << " - id: "<< cloudbackend->account()->userId() << std::endl;
+      sync.onSuccess(cloudbackend);
+    }
+    void onError(CBE::persistence_t failedAtState, uint32_t code,
+                                    std::string reason,
+                                    std::string message) final {
+      std::cerr << "Account Event Error: Login failed" << '\n' ;
+      sync.onError();
+    }
+    CBE::CloudBackendPtr wait() {
+      return sync.wait();
+    }
   }; // class AccountEventProtocol
 
   auto accountDelegate = std::make_shared<AccountEventProtocol>();
@@ -105,22 +105,27 @@ int main(void) {
   class ItemEventProtocol : public CBE::ItemEventProtocol {
     CBE::ContainerPtr       container;
     Sync<CBE::QueryResult>  sync;
-    public:
-      ItemEventProtocol(CBE::ContainerPtr container) : container{container} {}
-      CBE::QueryResultPtr  wait() {
-        return sync.wait();
-      }
-    private:
-      void onQueryLoaded(CBE::QueryResultPtr dir) final {
-        sync.onSuccess(dir);
-      }
+  public:
+    ItemEventProtocol(CBE::ContainerPtr container) : container{container} {}
+    CBE::QueryResultPtr  wait() {
+      return sync.wait();
+    }
+  private:
+    void onQueryLoaded(CBE::QueryResultPtr dir) final {
+      sync.onSuccess(dir);
+    }
 
-      void onLoadError(CBE::Filter filter, uint32_t operation, uint32_t code,
-                      std::string reason, std::string message) final {
-        std::cerr << "Failed to query container \""
-                  << container->path() << container->name() <<'\n' ;
-        sync.onError();
-      }
+    void onLoadError(CBE::Filter filter, uint32_t operation, uint32_t code,
+                     std::string reason, std::string message) final {
+      std::cerr << "\nFailed to query container:\n"
+                << "container->name=\"" << container->name() << "\"\n"
+                << "operation=\"" << operation << "\"\n"
+                << "code=\"" << code << "\"\n"
+                << "reason=\"" << reason << "\"\n"
+                << "message=\"" << message << "\"\n"
+                ;
+      sync.onError();
+    }
   }; // class ItemEventProtocol
 
   auto query = [](CBE::ContainerPtr container) {
@@ -132,30 +137,40 @@ int main(void) {
   class ShareEventProtocol : public CBE::ShareEventProtocol {
     CBE::ContainerPtr       container;
     Sync<CBE::QueryResult>  sync;
-    public:
-      ShareEventProtocol(CBE::ContainerPtr container) : container{container} {}
-      CBE::QueryResultPtr  wait() {
-        return sync.wait();
-      }
-    private:
-      void onListAvailableShares(CBE::QueryResultPtr result) final {
-        sync.onSuccess(result);
-      }
+  public:
+    ShareEventProtocol(CBE::ContainerPtr container) : container{container} {}
+    CBE::QueryResultPtr  wait() {
+      return sync.wait();
+    }
+  private:
+    void onListAvailableShares(CBE::QueryResultPtr result) final {
+      sync.onSuccess(result);
+    }
 
-      void onShareError(CBE::item_t type, CBE::persistence_t operation,
-                        uint32_t code,
-                        std::string reason, std::string message) final {
-        std::cerr << __PRETTY_FUNCTION__ << "\nFailed to query share \""
-                  << container->path() << container->name() <<'\n' ;
-        sync.onError();
-      }
-      void onACLError(CBE::item_t type, CBE::persistence_t operation,
+    void onShareError(CBE::item_t type, CBE::persistence_t operation,
                       uint32_t code,
                       std::string reason, std::string message) final {
-        std::cerr << __PRETTY_FUNCTION__ << "\nFailed to query share \""
-                  << container->path() << container->name() <<'\n' ;
-        sync.onError();
-      }
+      std::cerr << __PRETTY_FUNCTION__ << "\nFailed to query share:"
+                << "container->name=\"" << container->name() << "\"\n"
+                << "operation=\"" << operation << "\"\n"
+                << "code=\"" << code << "\"\n"
+                << "reason=\"" << reason << "\"\n"
+                << "message=\"" << message << "\"\n"
+                ;
+      sync.onError();
+    }
+    void onACLError(CBE::item_t type, CBE::persistence_t operation,
+                    uint32_t code,
+                    std::string reason, std::string message) final {
+      std::cerr << __PRETTY_FUNCTION__ << "\nFailed to query share:"
+                << "container->name=\"" << container->name() << "\"\n"
+                << "operation=\"" << operation << "\"\n"
+                << "code=\"" << code << "\"\n"
+                << "reason=\"" << reason << "\"\n"
+                << "message=\"" << message << "\"\n"
+                ;
+      sync.onError();
+    }
   }; // class ShareEventProtocol
 
 
@@ -176,37 +191,48 @@ int main(void) {
       buildPath(*this);
       return oss.str();
     }
-  };
+  };  // struct Container
 
   using ContainerMap = std::map<CBE::container_id_t, Container>;
   struct Object {
     const std::string name;
-    Container&        parentContainer;
-  };
+    Container*        parentContainer;
+    std::string path() const {
+      return parentContainer? (parentContainer->path() + '/' + name) : name;
+    }
+  };  // struct Object
+
   using ObjectMap = std::map<CBE::item_id_t, Object>;
   ContainerMap containerMap;
   ObjectMap objectMap;
-  std::function<void(CBE::ContainerPtr,Container*)> processContainer =
-    [&containerMap, &objectMap, &processContainer, &query, &cloudBackend](
+
+  std::function<void(CBE::ContainerPtr,Container*)> processContainer;
+  std::function<void(CBE::ItemPtr,Container*)> processItem =
+      [&objectMap, &processContainer, &cloudBackend](CBE::ItemPtr  itemPtr,
+                                      Container*    parentContainer) {
+    if (itemPtr->type() == CBE::ItemType::Container) {
+      auto childCbeContainer = cloudBackend->castContainer(itemPtr);
+      processContainer(childCbeContainer, parentContainer);
+    } else if (itemPtr->type() == CBE::ItemType::Object) {
+      objectMap.emplace(itemPtr->id() /* key */,
+                        Object{itemPtr->name(), parentContainer });
+    }
+  };  // function processItem lambda
+  
+  processContainer =
+    [&containerMap, &objectMap, &processContainer, &query, &cloudBackend, &processItem](
         CBE::ContainerPtr cbeContainer,
         Container*        parentContainer) {
     std::cout << '.' << std::flush;
     auto p = containerMap.emplace(cbeContainer->id() /* key */,
                                   Container{cbeContainer, parentContainer});
-    assert(p.second); // entry inserted
-    auto currentContainer = &p.first->second;
+    assert(p.second); // entry inserted, conainer not encountered before
+    auto& /* Container* */ currentContainer = p.first->second;
     auto queryResult = query(cbeContainer);
     for (auto& itemPtr : queryResult->getItemsSnapshot()) {
-      if (itemPtr->type() == CBE::ItemType::Container) {
-        auto childCbeContainer = cloudBackend->castContainer(itemPtr);
-        processContainer(childCbeContainer,
-                         currentContainer /* parentContainer */);
-      } else if (itemPtr->type() == CBE::ItemType::Object) {
-        objectMap.emplace(itemPtr->id() /* key */,
-                          Object{itemPtr->name(), *currentContainer });
-      }
+      processItem(itemPtr, &currentContainer /* parentContainer */);
     }
-  }; // processContainer() lambda
+  }; // function processContainer() lambda
 
   auto shareManager = cloudBackend->shareManager();
   auto shareDelegate =
@@ -219,17 +245,17 @@ int main(void) {
               << ",\t" << itemPtr->parentId() 
               << ", " << itemPtr->ownerId()
               << "."  << std::endl;
-    if (itemPtr->type() == CBE::ItemType::Container) {
-      auto shareContainer = cloudBackend->castContainer(itemPtr);
-      processContainer(shareContainer, nullptr /* parentContainer */);
-    }
+    processItem(itemPtr, nullptr /* parentContainer */);
   }
+
   std::cout << "\n***** Shares sorted *****\n";
   for (const auto& elem : containerMap) {
     std::cout << elem.first << " " << elem.second.path() << '\n';
   }
 
-  processContainer(account->rootContainer(), nullptr /* parentContainer */);
+  processContainer(account->rootContainer(),
+                   nullptr /* parentContainer, nullptr implies root container */);
+
   std::cout << "\n***** Containers sorted  *****\n";
   for (const auto& elem : containerMap) {
     std::cout << elem.first << " " << elem.second.path() << '\n';
@@ -237,9 +263,7 @@ int main(void) {
 
   std::cout << "\n+++++ Objects sorted +++++\n";
   for (const auto& elem : objectMap) {
-    std::cout << elem.first << " "
-              << elem.second.parentContainer.path() << '/' << elem.second.name
-              << '\n';
+    std::cout << elem.first << " " << elem.second.path() << '\n';
   }
 
-}  // main
+}

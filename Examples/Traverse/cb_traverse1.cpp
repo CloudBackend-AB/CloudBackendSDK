@@ -143,6 +143,7 @@ int main(void) {
     return map;
   };  // function processContainer lambda
 
+  std::cout << std::endl;
   std::cout << std::setw(16) << account->rootContainer()->id()
             << std::string(cnt* 2, ' ') << ' ' << "/" << '\n';
   auto map = processContainer(account->rootContainer(), "/" /* parentPath */, Map{});

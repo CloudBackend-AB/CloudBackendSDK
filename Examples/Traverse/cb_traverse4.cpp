@@ -225,8 +225,11 @@ int main(void) {
   shareManager->listAvailableShares(shareDelegate);
   auto shares = shareDelegate->wait();
   for (auto& itemPtr : shares->getItemsSnapshot()) {
+    std::cout << std::endl;
     std::cout << itemPtr->name() << ", " << itemPtr->description()
-              << ", " << itemPtr->username() << std::endl;
+              << ",\t" << itemPtr->parentId() 
+              << ", " << itemPtr->ownerId()
+              << "."  << std::endl;
     processItem(itemPtr, nullptr /* parentContainer */);
   }
 
