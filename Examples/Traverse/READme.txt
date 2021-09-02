@@ -29,6 +29,12 @@ It uses: AccountEventProtocol, ItemEventProtocol, ShareEventProtocol.
 Functions processContainer, buildPath and processItem use C++ lambda expressions.
 
 
+Fifth program
+It uses: AccountEventProtocol, ItemEventProtocol, ShareEventProtocol.
+Functions processContainer, buildPath and processItem use C++ lambda expressions.
+Include more descriptive information on some errors.
+
+
 Acknowledgement:
 Many thanks to Forware AB for valuable contribution to the example code here.
 
