@@ -7,23 +7,43 @@
 
 #include <string>
 #include <vector>
-#include "CBE/Protocols/GroupEventProtocol.h"
 #include "CBE/Types.h"
+#include "CBE/GroupFilter.h"
+#include "CBE/GroupQuery.h"
 
 namespace CBE {
   class GroupManager {
     public:
-      virtual void createGroup(std::string name, std::string memberAlias, CBE::group_id_t parentGroup, CBE::GroupDelegatePtr delegate);
+      /**
+       * List all current joined groups. 
+      */  
       virtual void listGroups(CBE::GroupDelegatePtr delegate);
-
-      /** Returns the list of groups that the user is part of. 
-       * Returns either a vector of groups or NULL if the Async call to listGroups have not been made.
+      
+      /**
+       * Search for open public groups.
+       * @param filter is a group filter to set search criteria for open public groups. Look att class GroupFilter for more information.
+       * @param delegate is the callback protocol template for group actions.
+       * @param parentGroupId is the id of the group to be searched within. if this is not set the tenent id will be used.
       */
-      std::vector<CBE::GroupPtr> groups() const;
+      virtual void searchGroups(CBE::GroupFilter filter, CBE::GroupDelegatePtr delegate, CBE::group_id_t parentGroupId = 0);
+      
+      /**
+       * Returns the current groups that are joined. note* GroupQuery class has also a vector of groups getter called groups(), difference is that in that list both joined and not joined groups may appear.
+      */
+      virtual std::vector<CBE::GroupPtr> groups() const;
+
+      /**
+       * Returns the tenant id of the Tenant user group that the user is in.
+      */
+      virtual CBE::group_id_t getTenantId() const;
+      
+      /**
+       * Destructor.
+      */
       virtual ~GroupManager(){};
+    
     protected:
-      std::vector<CBE::GroupPtr> _groups_;
-     ///This function should not be called as it will not continue to be public and any call made on the object will fail.
+    
      GroupManager(){}
   };
 }

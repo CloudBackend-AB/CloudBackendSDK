@@ -88,6 +88,11 @@ public:
     */
     virtual uint64_t length() const;
 
+     /**
+      * Returns the Object type currently Other | GroupInvite | ShareInvite
+     */
+    virtual CBE::object_t getObjectType() const;
+
     /**
    * Returns all the keyValues
    */

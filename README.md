@@ -27,7 +27,27 @@ Change the user account for the sample program in user_credentials.cpp
 
 Notes: This SDK has been built and tested on Ubuntu
 
-SDK Version:
+SDK Android Version:
+
+built on c++ version 1.3.5 of the SDK.
+
+SDK Java Version:
+
+built on c++ version 1.3.5 of the SDK.
+
+Release notes JAVA/Android:
+
+The java and android wrappers are built on the c++ sdk version 1.3.5 this includes share actions but not group actions.
+
+SDK c++ Version:
+1.4.1
+
+Release notes:
+Extended group functionality, added create, join, listMembers, leave, remove, rename on the group object together with relevent data members like bool joined().
+On GroupManager added listing functionality searchGroups and a vector of currently joined groups on the GroupManager.
+Added classes for group searches includes GroupFilter and GroupQuery classes, these handle like QueryResult, the result of a group search where both joined and non-joined groups may appear.
+
+SDK c++ Version:
 1.4.0
 
 Release notes:

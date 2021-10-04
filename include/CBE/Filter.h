@@ -14,17 +14,17 @@
 
 namespace CBE {
 
-  enum FilterOrder : uint32_t {
-    Title = 1,
-    Relevance = 2,
-    Published = 3,
-    Updated = 4,
-    Length = 5,
-    S1 = 6,
-    S2 = 7,
-    S3 = 8,
-    S4 = 9
-  };
+  // enum FilterOrder : uint32_t {
+  //   Title = 1,
+  //   Relevance = 2,
+  //   Published = 3,
+  //   Updated = 4,
+  //   Length = 5,
+  //   S1 = 6,
+  //   S2 = 7,
+  //   S3 = 8,
+  //   S4 = 9
+  // };
   class Filter {
 
     public:
