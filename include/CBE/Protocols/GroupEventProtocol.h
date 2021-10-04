@@ -23,29 +23,46 @@ namespace CBE {
       virtual ~GroupEventProtocol() {}
 
       /* Gets called on a search groups response. */
-      virtual void onGroupSearchLoaded(uint64_t operationId, CBE::persistence_t newPersistenceState, std::vector<CBE::Group> groups) {}
-
-      virtual void onGroupAdded(uint64_t operationId, CBE::persistence_t newPersistenceState, CBE::group_id_t newGroupId) {}
+      virtual void onGroupSearchLoaded(CBE::persistence_t newPersistenceState, CBE::GroupQueryPtr queryResult) {}
 
       /**
-      * Lists the groups that the user is included in.
+       * Gets called when a group has been created.
       */
-      virtual void onListGroups(std::vector<CBE::GroupPtr> &groups) {}
+      virtual void onGroupAdded(CBE::persistence_t newPersistenceState, CBE::GroupPtr group) {}
 
-      virtual void onGroupRemoved(uint64_t operationId, CBE::persistence_t newPersistenceState) {}
+      /**
+      * Lists the groups that the user is included in or owner/admin of.
+      */
+      virtual void onListGroups(std::vector<CBE::GroupPtr> groups) {}
 
-      virtual void onMemberLeaveGroup(uint64_t operationId, CBE::persistence_t newPersistenceState) {}
+      /**
+       * Gets called when a group has been removed.
+      */
+      virtual void onGroupRemoved(CBE::persistence_t newPersistenceState) {}
 
-      virtual void onMemberJoinGroup(uint64_t operationId, CBE::persistence_t newPersistenceState) {}
+      /**
+       * Gets called when the user leaves a group.
+      */
+      virtual void onMemberLeaveGroup(CBE::persistence_t newPersistenceState) {}
 
-      virtual void onMemberInvited(uint64_t operationId, CBE::persistence_t newPersistenceState) {}
+      /**
+       * Gets called when a user have become a member of a group.
+      */
+      virtual void onMemberJoinGroup(CBE::persistence_t newPersistenceState) {}
 
-      virtual void onMemberKicked(uint64_t operationId, CBE::persistence_t newPersistenceState) {}
+      /**
+       * Gets called when a list call of members of a group have happened.
+      */
+      virtual void onListMembers(CBE::persistence_t newPersistenceState, std::vector<CBE::MemberPtr> members) {}
 
-      virtual void onListInvites(uint64_t operationId, CBE::persistence_t newPersistenceState) {}
+      /**
+       * Gets called when a group have been renamed.
+      */
+      virtual void onGroupRenamed(CBE::persistence_t newPersistenceState) {}
 
-      virtual void onListMembers(uint64_t operationId, CBE::persistence_t newPersistenceState, std::vector<CBE::Member> members) {}
-
+      /**
+       * Gets called when an error have occured.
+      */
       virtual void onGroupError(uint64_t operationId, CBE::persistence_t operation, CBE::persistence_t failedAtState, uint32_t code, std::string reason, std::string message) {}
     };
 }
