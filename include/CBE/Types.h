@@ -41,7 +41,9 @@ namespace CBE {
   typedef signed int permission_status_t;
   typedef int item_t;
   typedef int stream_t;
-
+  typedef int visibility;
+  typedef int application_t;
+  typedef int object_t;
   namespace XmlNamespaces {
     static const std::string ATOM = "http://www.w3.org/2005/Atom";
     static const std::string OS = "http://a9.com/-/spec/opensearch/1.1/";
@@ -54,8 +56,35 @@ namespace CBE {
     static const CBE::service_t LocalDB = 2;
   }
 
+  /**
+   * ApplicationType is not used in this version of groups but will be added later.
+  */
+  enum ApplicationType : application_t {
+    Open = 1,
+    Invite = 2,
+    Review = 3,
+    Closed = 4
+  };
 
+  enum ObjectType : object_t {
+    Other = 1,
+    GroupInvites = 2,
+    ShareInvite = 3
+  };
 
+  /**
+   * Visibility is used for both groups and members, in this version the member visibility will be Public for all members who join a group. 
+   * Members will in the future also have the option of visibility friends.
+  */
+  enum Visibility : visibility {
+    Public = 1,
+    Private = 2
+  }; 
+
+  /**
+   * Permission is can be set for any Object or Container the different combinations give access for users to use different API calls.
+   * Example: 6 = ReadDelete gives the ability to call Move on a Container or an Object.
+  */
   enum Permissions : permission_status_t
   {
     Read = 1,
@@ -76,6 +105,24 @@ namespace CBE {
     NoPermissions = 0
   };
 
+  /**
+   * Set the filter order in which the search or query will be sorted after.
+  */
+  enum FilterOrder : uint32_t {
+    Title = 1,
+    Relevance = 2,    //Note* group Searches does not use Relevance as order.
+    Published = 3,
+    Updated = 4,
+    Length = 5,
+    S1 = 6,
+    S2 = 7,
+    S3 = 8,
+    S4 = 9
+  };
+  
+  /**
+   * This is used Internally do not change.
+  */
   namespace Operations {
     enum Type {
       NoneOperation = 1,
@@ -88,6 +135,10 @@ namespace CBE {
     };
   };
 
+/**
+ * ItemType can be used to sort out CBE objects if the user would like to create a container to put all different kinds of CBE objects in.
+ * Currently the ItemType Tag is not used. 
+*/
   namespace ItemType {
     static const CBE::item_t Unapplicable = 1;
     static const CBE::item_t Unknown = 2;
@@ -110,7 +161,7 @@ namespace CBE {
     static const CBE::webshare_access_t Create = 3;
   }
 
-  namespace Visibility {
+  namespace WebShareVisibility {
     static const CBE::webshare_visibility_t Public = 1;
     static const CBE::webshare_visibility_t Friends = 2;
     static const CBE::webshare_visibility_t Private = 3;
@@ -156,6 +207,11 @@ namespace CBE {
     static const persistence_t SetObjectACL = 20;
     static const persistence_t GetContainerACL = 21;
     static const persistence_t GetObjectACL = 22;
+    static const persistence_t Join = 23;
+    static const persistence_t Leave = 24;
+    static const persistence_t Search = 25;
+    static const persistence_t AcceptJoinRequest = 26;
+    static const persistence_t RejectJoinRequest = 27;
 
   }
 
@@ -189,8 +245,11 @@ namespace CBE {
   class Object;
   class Stream;
   class Tag;
+  class Member;
   class Transfer;
+  class GroupInvite;
   class QueryResult;
+  class GroupQuery;
 
   //This is the data used from shares(shareId) to keep track of user/group-id relating to a shareid
   struct ShareData {
@@ -227,6 +286,7 @@ namespace CBE {
     typedef std::shared_ptr<CBE::Object> ObjectPtr;
     typedef std::shared_ptr<CBE::Container> ContainerPtr;
     typedef std::shared_ptr<CBE::Group> GroupPtr;
+    typedef std::shared_ptr<CBE::Member> MemberPtr;
     typedef std::shared_ptr<CBE::Account> AccountPtr;
     typedef std::shared_ptr<CBE::CloudBackend> CloudBackendPtr;
 
@@ -239,6 +299,8 @@ namespace CBE {
     typedef std::shared_ptr<ShareEventProtocol> ShareDelegatePtr;
     typedef std::shared_ptr<GroupEventProtocol> GroupDelegatePtr;
     typedef std::shared_ptr<QueryResult> QueryResultPtr;
+    typedef std::shared_ptr<GroupQuery> GroupQueryPtr;
+
     //The generic metadata_type for keyValue
     typedef std::map<std::string, SDK_tuple<std::string, bool>> metadata_type;
     //Data index values, just because its nice
