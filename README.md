@@ -43,9 +43,9 @@ SDK c++ Version:
 1.4.1
 
 Release notes:
-Extended group functionallity, added create, join, listMembers, leave, remove, rename on the group object together with relevent data members like bool joined().
-on GroupManager added listing functionality searchGroups and a vector of currently joined groups on the GroupManager.
-added classes for group searches includes GroupFilter and GroupQuery classes, these handle like QueryResult, the result of a group search where both joined and non-joined groups may appear.
+Extended group functionality, added create, join, listMembers, leave, remove, rename on the group object together with relevent data members like bool joined().
+On GroupManager added listing functionality searchGroups and a vector of currently joined groups on the GroupManager.
+Added classes for group searches includes GroupFilter and GroupQuery classes, these handle like QueryResult, the result of a group search where both joined and non-joined groups may appear.
 
 SDK c++ Version:
 1.4.0
