@@ -8,18 +8,21 @@ https://cloudbackend.com/
 SDK documentation at:
 https://cloudbackend.com/docs/APIov.html
 
-To build with the cloudbackend SDK include the libCloudbackend.a file and headers from this repository.
+include: To build with the CloudBackend SDK include the libCloudbackend.a file and headers from this repository.
 
-Example code - contains a simple example program and build script.
+Examples: contains a simple example program and build script.
+
+UI: XIOS/3 partner browser User Interface bundle 
+
 
 Accounts: 
 The following are Test accounts that can be used to login to CloudBackend:
 
-githubtester1 gitHubTester1password
-githubtester2 gitHubTester2password
-githubtester3 gitHubTester3password
+githubtester1 : gitHubTester1password || 
+githubtester2 : gitHubTester2password || 
+githubtester3 : gitHubTester3password 
 
-Signup source: cbe_githubtesters
+Tenant / Signup source: cbe_githubtesters
 
 Note: These test accounts can be used by anyone with access to this repository so it is advisable to create a container to work in and not upload anything private.
 
