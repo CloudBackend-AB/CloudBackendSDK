@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <row>
+    <PID>P0001</PID>
+    <Text>Stockholm Centralstation</Text>
+    <Latitude>59.329968</Latitude>
+    <Longitude>18.057683</Longitude>
+  </row>
+  <row>
+    <PID>P0002</PID>
+    <Text>Göteborg Centralstation</Text>
+    <Latitude>57.708538</Latitude>
+    <Longitude>11.973295</Longitude>
+  </row>
+  <row>
+    <PID>P0003</PID>
+    <Text>Malmö Centralstation</Text>
+    <Latitude>55.608827</Latitude>
+    <Longitude>12.999272</Longitude>
+  </row>
+  <row>
+    <PID>P0008</PID>
+    <Text>Linköping Centralstation</Text>
+    <Latitude>58.416172</Latitude>
+    <Longitude>15.625788</Longitude>
+  </row>
+</root>
