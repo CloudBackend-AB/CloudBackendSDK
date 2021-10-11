@@ -1,0 +1,24 @@
+<application name="My SE Map app">
+  <view name="listSE map" title="Kustpilen POI" icon="icon://network/earth_location">
+    <panel>
+      <map name="mapComp" controls="false" position="fast">
+        <rule match="root/row">
+          <marker lng="{Longitude}" lat="{Latitude}" title="{Text}"/>
+        </rule>
+      </map>
+    </panel>
+  </view>
+  <process name="listSE map process">
+    <trigger view="listSE map" event="Loaded" step="init"/>
+    <step id="init">
+      <operation name="channel">
+        <name>xios</name>
+        <title>CloudBackend</title>
+        <protocol>CloudBackend</protocol>
+      </operation>
+      <operation name="bind" value="xios://POI/list.xml">
+        <component name="mapComp" view="listSE map" />
+      </operation>
+    </step>
+  </process>
+</application>    

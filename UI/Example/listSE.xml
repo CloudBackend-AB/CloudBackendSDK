@@ -1,0 +1,26 @@
+<application name="My SE POI app">
+  <view name="listSE" title="Sverige POI" icon="icon://network/earth_location">
+    <panel>
+      <grid name="mapComp" selection="row">
+        <row match="/root/row">
+          <column match="Text" display="." width="150" label="Name"/>
+          <column match="Latitude" display="." width="50" label="Latitude"/>
+          <column match="Longitude" display="." width="50" label="Longitude"/>
+        </row>
+      </grid>
+    </panel>
+  </view>
+  <process name="listSE process">
+    <trigger view="listSE" event="Loaded" step="init"/>
+    <step id="init">
+      <operation name="channel">
+        <name>xios</name>
+        <title>CloudBackend</title>
+        <protocol>CloudBackend</protocol>
+      </operation>
+      <operation name="bind" value="xios://POI/list.xml">
+        <component name="mapComp" view="listSE" />
+      </operation>
+    </step>
+  </process>
+</application>    
