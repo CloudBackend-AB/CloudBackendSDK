@@ -10,6 +10,11 @@ Copyright © CloudBackend AB 2021.
 Release notes
 =============
 
+Release 2021-10-14
+------------------
+* Version 1.4.1
+* Improved error message on network.
+
 Release 2021-06-24
 ------------------
 * Version 1.4
