@@ -12,3 +12,7 @@ testdata is used by the simple test.
 
 This has been tested on Ubuntu LTS 20.04 with OpenJDK 11:
 sudo apt install openjdk-11-jre-headless
+cd lib
+bash install.sh
+jar --version
+java --version
