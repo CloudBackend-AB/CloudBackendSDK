@@ -75,14 +75,14 @@ public:
     *  Call to get a list of items in the container. Implement onQueryLoaded to from CBE::ItemDelegatePtrto recieve the callback.
        * @param delegate is a shared pointer to the class in which you implement CBE::ItemDelegate. CBE::ItemDelegate is defined in Types.h and is a shared pointer to an ItemEventProtocol.       
     */
-    virtual void query(CBE::ItemDelegatePtr delegate);
+    virtual QueryChainPtr query(CBE::ItemDelegatePtr delegate);
 
     /**
        *  Call to get a list of items in the contianer. Implement onQueryLoaded to from CBE::ItemDelegatePtrto recieve the callback.
        * @param filter
        * @param delegate is a shared pointer to the class in which you implement CBE::ItemDelegate. CBE::ItemDelegate is defined in Types.h and is a shared pointer to an ItemEventProtocol.       
         */
-    virtual void query(CBE::Filter filter, CBE::ItemDelegatePtr delegate);
+    virtual QueryChainPtr query(CBE::Filter filter, CBE::ItemDelegatePtr delegate);
 
     /**
      * set the Access control list for the container. For containers set does set the whole container tree, so all its' sub items as well. Remeber this is set and not update so everytime you set all ids' that should be there should be added.

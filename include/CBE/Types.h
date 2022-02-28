@@ -212,6 +212,9 @@ namespace CBE {
     static const persistence_t Search = 25;
     static const persistence_t AcceptJoinRequest = 26;
     static const persistence_t RejectJoinRequest = 27;
+    static const persistence_t Kick = 28;
+    static const persistence_t Ban = 29;
+    static const persistence_t UnBan = 30;
 
   }
 
@@ -250,6 +253,7 @@ namespace CBE {
   class GroupInvite;
   class QueryResult;
   class GroupQuery;
+  class QueryChain;
 
   //This is the data used from shares(shareId) to keep track of user/group-id relating to a shareid
   struct ShareData {
@@ -287,6 +291,7 @@ namespace CBE {
     typedef std::shared_ptr<CBE::Container> ContainerPtr;
     typedef std::shared_ptr<CBE::Group> GroupPtr;
     typedef std::shared_ptr<CBE::Member> MemberPtr;
+    typedef std::shared_ptr<CBE::GroupInvite> GroupInvitePtr;
     typedef std::shared_ptr<CBE::Account> AccountPtr;
     typedef std::shared_ptr<CBE::CloudBackend> CloudBackendPtr;
 
@@ -300,6 +305,7 @@ namespace CBE {
     typedef std::shared_ptr<GroupEventProtocol> GroupDelegatePtr;
     typedef std::shared_ptr<QueryResult> QueryResultPtr;
     typedef std::shared_ptr<GroupQuery> GroupQueryPtr;
+    typedef std::shared_ptr<QueryChain> QueryChainPtr;
 
     //The generic metadata_type for keyValue
     typedef std::map<std::string, SDK_tuple<std::string, bool>> metadata_type;

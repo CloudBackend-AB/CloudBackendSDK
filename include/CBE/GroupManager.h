@@ -26,11 +26,6 @@ namespace CBE {
        * @param parentGroupId is the id of the group to be searched within. if this is not set the tenent id will be used.
       */
       virtual void searchGroups(CBE::GroupFilter filter, CBE::GroupDelegatePtr delegate, CBE::group_id_t parentGroupId = 0);
-      
-      /**
-       * Returns the current groups that are joined. note* GroupQuery class has also a vector of groups getter called groups(), difference is that in that list both joined and not joined groups may appear.
-      */
-      virtual std::vector<CBE::GroupPtr> groups() const;
 
       /**
        * Returns the tenant id of the Tenant user group that the user is in.

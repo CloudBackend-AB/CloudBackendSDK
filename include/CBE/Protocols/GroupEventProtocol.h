@@ -50,6 +50,26 @@ namespace CBE {
       */
       virtual void onMemberJoinGroup(CBE::persistence_t newPersistenceState) {}
 
+      /** 
+       * Gets called when a member has been kicked.
+      */
+      virtual void onMemberKicked(CBE::persistence_t newPersistenceState) {}
+
+      /**
+       * Gets called when a member has been banned.
+      */
+      virtual void onMemberBanned(CBE::persistence_t newPersistenceState) {}
+       
+      /**
+       * Gets called when a member has been unbanned.
+      */
+      virtual void onMemberUnBanned(CBE::persistence_t newPersistenceState) {}
+      
+      /**
+       * Gets called when listBannedMembers has been called.
+      */
+      virtual void onListBannedMembers(std::vector<CBE::MemberPtr> members) {}
+
       /**
        * Gets called when a list call of members of a group have happened.
       */
