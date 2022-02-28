@@ -67,6 +67,9 @@ namespace CBE {
        */
       virtual void onLoadError(CBE::Filter filter, uint32_t operation, uint32_t code, std::string reason, std::string message){};
 
+      /** Gets called when an join error has happened, ex: Bad Request in form of key word searching for table does not exist. */
+      virtual void onJoinError(uint32_t operation, uint32_t code, std::string reason, std::string message){};
+
       /** Gets called when an error regarding an item occurred. e.g create rename, move, remove */
       virtual void onItemError(CBE::ItemPtr container, CBE::item_t type, uint32_t operation, uint32_t failedAtState, uint32_t code, std::string reason, std::string message){};
 
