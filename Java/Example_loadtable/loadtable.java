@@ -21,7 +21,7 @@ public class loadtable {
 
   public CloudBackend login(String credentials) {
     CloudBackend tempObj = null;
-    try (InputStream input = new FileInputStream(".cbe/" + credentials)) {
+    try (InputStream input = new FileInputStream("../resources/config.properties")) {
 
       Properties prop = new Properties();
 
@@ -383,7 +383,7 @@ public class loadtable {
     timestamp1 = Instant.now().getEpochSecond();
 
     loadtable inst = new loadtable();
-    CloudBackend cbobj = inst.login("dtm");  // referencing user credentials
+    CloudBackend cbobj = inst.login("cr1");  // referencing user credentials
     System.out.println("CloudBackend login as " + cbobj.account().username());
     Container level1Container=cbobj.account().rootContainer();
     Container level2Container=cbobj.account().rootContainer();
