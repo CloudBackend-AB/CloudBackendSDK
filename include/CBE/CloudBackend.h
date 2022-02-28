@@ -76,7 +76,7 @@ public:
        * @param containerId
        * @param delegate is a shared pointer to the class in which you implement CBE::ItemDelegatePtr to recieve the callback on function completion.       
     */
-   virtual void query(uint64_t containerId, CBE::ItemDelegatePtr delegate);
+   virtual QueryChainPtr query(uint64_t containerId, CBE::ItemDelegatePtr delegate);
 
    /**
        *  Call to get a list of items in the container using a filter. Implement onQueryLoaded to from CBE::ItemEventProtocol to recieve the callback. Requires you already signedIn
@@ -84,14 +84,14 @@ public:
        * @param filter
        * @param delegate is a shared pointer to the class in which you implement CBE::ItemEventProtocol to recieve the callback on function completion.
     */
-   virtual void query(CBE::container_id_t containerId, CBE::Filter filter, CBE::ItemDelegatePtr delegate); // add a Container Id
+   virtual QueryChainPtr query(CBE::container_id_t containerId, CBE::Filter filter, CBE::ItemDelegatePtr delegate); // add a Container Id
 
    /**
      * Queries with a given path to the container or object given in the path
      * @param path, e.g /documents/pictures/pic.jpg or /documents/pictures.
      * @param delegate, is a shared pointer to the class in which you implement CBE::ItemEventProtocol to recieve the callback on function completion.
     */
-   virtual void queryWithPath(std::string path, CBE::ItemDelegatePtr delegate);
+   virtual CBE::QueryChainPtr queryWithPath(std::string path, CBE::ItemDelegatePtr delegate);
 
    
    /** 

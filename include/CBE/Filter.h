@@ -42,7 +42,7 @@ namespace CBE {
       bool getAscending() const;
       bool getDeleted() const;
       bool getContainerFirst() const;
-      
+      bool isJoinedResult() const;      
       /** Returns the offset that was used for the filter in the query. */
       uint32_t getOffset() const;
       
@@ -110,6 +110,7 @@ namespace CBE {
       bool ascending;
       bool deleted;
       bool containerFirst;
+      bool isJoined;
       std::string query;
       CBE::item_t dataType;
       std::string _order;

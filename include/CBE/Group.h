@@ -45,19 +45,19 @@ namespace CBE {
       virtual bool joined() const;
 
       /**
-       * Members can be listed / fetched with listMembers. when this is done users can iterate through this list and see all users whom have access to this group.
+       * Requests to join the group. To retrive the list call listJoinRequests(CBE::GroupDelegatePtr delegate) on the group object.
       */
-      virtual std::vector<CBE::MemberPtr> members() const;
+      virtual std::vector<CBE::Request> requests() const;
 
       /**
-       * Create group, this is only available for owner/admin roles. In the first version only Open Groups will be available for creation, Groups can be Public or Private though.
+       * Create Group, can only be used by admin/owners to create new groups.
       */
       virtual CBE::GroupPtr createGroup(std::string name, std::string memberAlias, CBE::GroupDelegatePtr delegate, CBE::visibility visibility = CBE::Visibility::Public);
  
       /**
        * Request to join a group, in this first version All members will be Public, meaning visable for other member inside the group. All groups will also be open so all join requests should be accepted directly.
       */
-      virtual void join(std::string alias, CBE::GroupDelegatePtr delegate);
+      virtual void join(std::string alias, CBE::GroupDelegatePtr delegate, CBE::visibility memberVisibility = CBE::Visibility::Public, std::string applicationComment = "");
       
       /**
        * Leave group.
@@ -78,6 +78,12 @@ namespace CBE {
        * List all members in the group. After listing, all members will be available though a call to group->members().
       */
       virtual void listMembers(CBE::GroupDelegatePtr delegate);
+
+      /**
+       * Lists all banned former members, or users.
+      */
+      virtual void listBannedMembers(CBE::GroupDelegatePtr delegate);
+
 
       virtual ~Group() {};
 
