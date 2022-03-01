@@ -42,6 +42,14 @@ Release notes JAVA/Android:
 
 The java and android wrappers are built on the c++ sdk version 1.3.5 this includes share actions but not group actions.
 
+current version SDK c++:
+1.4.5
+
+Release notes:
+Main update for this release is join functionality on queries. ex: query(filter, delegate)->join(ContainerToQuery, key1, key2, filter, ContainerForResults)
+For more details check the header file for QueryChain class.
+Extended group functionality, added member functionality such as kick ban unban and listing of banned members on the group object.
+
 SDK c++ Version:
 1.4.1
 
