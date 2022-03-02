@@ -87,18 +87,6 @@ public:
    virtual QueryChainPtr query(CBE::container_id_t containerId, CBE::Filter filter, CBE::ItemDelegatePtr delegate); // add a Container Id
 
    /**
-     * Search the whole container for tags related to Objects in the container structure. 
-     * EX: Key = Name, Value Contract/Object/Song => Name:Contract1.
-     * 
-     * Search handles tags in combination / conjunction of keys and/or key values seperated by |.
-     * EX: Name:*|Country:Sweden|Country:Norway, this would search for objects with key Name but any value and where key Country is either Sweden or Norway.
-     * @param tags is a string of key tags or key:value pairs that are seperated by |.
-     * @param containerId is the uint64_t id of the rootContainer to start the search of Objects in. ex: if starting in the rootContainer, the whole account will be searched for matching tags, key:value's.
-     * @param delegate is the callback pointer to when the API returns from either cache or Server.  
-   */
-   virtual QueryResultPtr search(std::string tags, CBE::container_id_t containerId, CBE::ItemDelegatePtr delegate);
-   
-   /**
      * Queries with a given path to the container or object given in the path
      * @param path, e.g /documents/pictures/pic.jpg or /documents/pictures.
      * @param delegate, is a shared pointer to the class in which you implement CBE::ItemEventProtocol to recieve the callback on function completion.
