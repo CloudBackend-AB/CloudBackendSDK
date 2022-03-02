@@ -49,8 +49,6 @@ Release notes:
 Main update for this release is join functionality on queries. ex: query(filter, delegate)->join(ContainerToQuery, key1, key2, filter, ContainerForResults)
 For more details check the header file for QueryChain class or online on cloudbackend.com.
 
-Search has been added as a function of object search on whole account, ex search(string tag, containerId, delegate) will search the container structure (full container tree) for objects with the key and/or key:value. ex: search("artist|year:2006", rootContainerId, delegate) will return all objects that has the key artist and the key year with value 2006.
-
 Extended group functionality, added member functionality such as kick ban unban and listing of banned members on the group object.
 
 SDK c++ Version:
