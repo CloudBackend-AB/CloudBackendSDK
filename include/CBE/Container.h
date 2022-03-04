@@ -52,7 +52,7 @@ public:
         * @param delegate    Delegate is a shared pointer to an ItemEventProtocol that the user has implemented.  The pointer is defined in Types.h.
         * @param metadata    (Optional) Metadata is a map with the tag (key), the value of that tag and if it is indexed or not
     */
-    virtual CBE::ObjectPtr createObject(std::string name, CBE::ItemDelegatePtr delegate, std::map<std::string, SDK_tuple<std::string, bool>> metadata = metadata_type());
+    virtual CBE::ObjectPtr createObject(std::string name, CBE::ItemDelegatePtr delegate, std::map<std::string, std::pair<std::string, bool>> metadata = metadata_type());
 
     /** 
    * Upload object to container with path, the object is instantly returned with a temp. id. Once the respons from the server is called back the object gets updated with the correct unique object id:
@@ -83,6 +83,28 @@ public:
        * @param delegate is a shared pointer to the class in which you implement CBE::ItemDelegate. CBE::ItemDelegate is defined in Types.h and is a shared pointer to an ItemEventProtocol.       
         */
     virtual QueryChainPtr query(CBE::Filter filter, CBE::ItemDelegatePtr delegate);
+    
+    /**
+     * Search the whole container for tags related to Objects in the container structure. 
+     * EX: Key = Name, Value Contract/Object/Song => Name:Contract1.
+     * 
+     * Search handles tags in combination of conjunctions of keys and/or key values seperated by |.
+     * EX: Name:*|Country:Sweden|Country:Norway, this would search for objects with key Name but any value and where key Country is either Sweden or Norway.
+     * @param tags is a string of key tags or key:value pairs that are seperated by |.
+     * @param delegate is the callback pointer to when the API returns from either cache or Server.  
+    */
+    virtual QueryResultPtr search(std::string tags, CBE::ItemDelegatePtr delegate);
+
+    /**
+     * Search the whole container for tags related to Objects in the container structure. 
+     * EX: Key = Name, Value Contract/Object/Song => Name:Contract1.
+     * 
+     * Search handles tags in combination / conjunction of keys and/or key values seperated by |.
+     * EX: Name:*|Country:Sweden|Country:Norway, this would search for objects with key Name but any value and where key Country is either Sweden or Norway.
+     * @param filter is a CBE::Filter on which you can set how you want data to be ordered when searching, remember to set the queryString to be keys/tags or key:value pairs that are seperated by |.
+     * @param delegate is the callback pointer to when the API returns from either cache or Server.
+    */
+    virtual QueryResultPtr search(CBE::Filter filter, CBE::ItemDelegatePtr delegate);
 
     /**
      * set the Access control list for the container. For containers set does set the whole container tree, so all its' sub items as well. Remeber this is set and not update so everytime you set all ids' that should be there should be added.
@@ -116,7 +138,7 @@ ShareEventProtocol.
     virtual void unShare(uint64_t shareId, CBE::ShareDelegatePtr delegate);
 
    protected:
-    typedef std::map<std::string, SDK_tuple<std::string, bool>> metadata_type;
+    typedef std::map<std::string, std::pair<std::string, bool>> metadata_type;
     /// This function should not be called directly.
     Container() : CBE::Item() {}
 };
