@@ -1,5 +1,5 @@
 /*
-     Copyright © CloudBackend AB 2020.
+     Copyright © CloudBackend AB 2020 - 2022..
 */
 
 #ifndef INCLUDE_CBE_CLOUDBACKEND_H_
@@ -109,14 +109,6 @@ public:
      * @param delegate is the callback pointer to when the API returns from either cache or Server.
    */
    virtual CBE::QueryResultPtr search(CBE::Filter filter, CBE::container_id_t containerId, CBE::ItemDelegatePtr delegate);
-   
-   /**
-     * Queries with a given path to the container or object given in the path
-     * @param path, e.g /documents/pictures/pic.jpg or /documents/pictures.
-     * @param delegate, is a shared pointer to the class in which you implement CBE::ItemEventProtocol to recieve the callback on function completion.
-    */
-   virtual CBE::QueryChainPtr queryWithPath(std::string path, CBE::ItemDelegatePtr delegate);
-
    
    /** 
      * casts an item to a container.

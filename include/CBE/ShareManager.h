@@ -1,5 +1,5 @@
 /*
-     Copyright © CloudBackend AB 2020.
+     Copyright © CloudBackend AB 2020 - 2022..
 */
 
 #ifndef INCLUDE_CBE_SHARE_MANAGER_H_

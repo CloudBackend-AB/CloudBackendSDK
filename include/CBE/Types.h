@@ -1,6 +1,6 @@
 /*
   SDK type definitions.
-  Copyright © CloudBackend AB 2020-2022.
+  Copyright © CloudBackend AB 2020 - 2022.-2022.
 */
 #ifndef INCLUDE_CBE_TYPES_H_
 #define INCLUDE_CBE_TYPES_H_
@@ -135,7 +135,7 @@ namespace CBE {
       ShareOperation = 6,
       GroupOperation = 7
     };
-  };
+  }
 
 /**
  * ItemType can be used to sort out CBE objects if the user would like to create a container to put all different kinds of CBE objects in.
