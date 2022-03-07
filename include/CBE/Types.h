@@ -1,5 +1,6 @@
 /*
-     Copyright © CloudBackend AB 2020.
+  SDK type definitions.
+  Copyright © CloudBackend AB 2020 - 2022.-2022.
 */
 #ifndef INCLUDE_CBE_TYPES_H_
 #define INCLUDE_CBE_TYPES_H_
@@ -8,7 +9,8 @@
 #include <vector>
 #include <map>
 #include <memory>
-#include <tuple>
+#include <string>
+#include <utility>
 
 namespace CBE {
   typedef uint64_t container_id_t;
@@ -133,7 +135,7 @@ namespace CBE {
       ShareOperation = 6,
       GroupOperation = 7
     };
-  };
+  }
 
 /**
  * ItemType can be used to sort out CBE objects if the user would like to create a container to put all different kinds of CBE objects in.
@@ -280,11 +282,6 @@ namespace CBE {
       }
   };
 
-    #define SDK_tuple std::tuple
-    #define SDK_make_tuple std::make_tuple
-    #define SDK_tie std::tie
-    #define SDK_tuple_get std::get
-    // #define SDK_CBE std
      // if you have c++11 or higher SDK_CBE will be defined as std else it will be boost.
     typedef std::shared_ptr<CBE::Item> ItemPtr;
     typedef std::shared_ptr<CBE::Object> ObjectPtr;
@@ -308,7 +305,7 @@ namespace CBE {
     typedef std::shared_ptr<QueryChain> QueryChainPtr;
 
     //The generic metadata_type for keyValue
-    typedef std::map<std::string, SDK_tuple<std::string, bool>> metadata_type;
+    typedef std::map<std::string, std::pair<std::string, bool>> metadata_type;
     //Data index values, just because its nice
     #define metadata_dataindex_value 0
     #define metadata_dataindex_indexed 1

@@ -1,5 +1,5 @@
 /*
-     Copyright © CloudBackend AB 2020.
+     Copyright © CloudBackend AB 2020 - 2022..
 */
 
 #ifndef INCLUDE_CBE_OBJECT_H_
@@ -65,7 +65,7 @@ public:
         * @param delegate: Delegate is a shared pointer to an ItemEventProtocol that the user has implemented. The pointer is defined in Types.h. 
         * @param metadata: (Optional) Metadata is a map with the keyValue (key), the associated value of that key and if it is indexed or not
  */
-    virtual void updateKeyValues(CBE::ItemDelegatePtr delegate, std::map<std::string, SDK_tuple<std::string, bool>> metadata = metadata_type());
+    virtual void updateKeyValues(CBE::ItemDelegatePtr delegate, std::map<std::string, std::pair<std::string, bool>> metadata = metadata_type());
 
     /**
    * Returns the streams attached to the Object, use object->_streams after this call to use the streams e.g in downloadStream.   
@@ -96,7 +96,7 @@ public:
     /**
    * Returns all the keyValues
    */
-    virtual std::map<std::string, SDK_tuple<std::string, bool>> keyValues();
+    virtual std::map<std::string, std::pair<std::string, bool>> keyValues();
 
     /**
      * set the Access control list for the object.

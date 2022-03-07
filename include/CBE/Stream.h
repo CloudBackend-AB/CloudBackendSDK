@@ -1,5 +1,5 @@
 /*
-     Copyright © CloudBackend AB 2020.
+     Copyright © CloudBackend AB 2020 - 2022.
 */
 
 #ifndef INCLUDE_CBE_STREAM_H_
@@ -16,7 +16,7 @@ class Stream {
     uint64_t _streamId;
     size_t _length;
  protected:
-    Stream() : _length{0}, _streamId{0} {}
+    Stream() : _streamId{0}, _length{0} {}
     Stream(uint64_t streamId, size_t length);
      
 };
