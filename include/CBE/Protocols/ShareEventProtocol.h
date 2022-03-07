@@ -1,5 +1,5 @@
 /*
-     Copyright © CloudBackend AB 2020.
+     Copyright © CloudBackend AB 2020 - 2022..
 */
 #ifndef CBE_SHAREEVENTPROTOCOL_H_
 #define CBE_SHAREEVENTPROTOCOL_H_
