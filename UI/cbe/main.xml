@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+
+<application name="Application Launcher" icon="xios/icons/business/32x32/calendar.png" instances="1" xmlns:xlink="http://www.w3.org/1999/xlink" theme="marble">
+
+  <about loader="false" version="1.0" created="2019-02-04" revised="2021-10-27"
+      author="Daniel Arthursson, Martin Nilsson, Glenn Stenbring, Anders Weister" copyright="Copyright © 2021 XIOS/3 AB, All rights reserved." publisher="XIOS/3 AB">
+    <description>Application Launcher</description>
+    <license xlink:type="simple" xlink:actuate="onRequest" xlink:href="https://xios3.com/license/xios_1.xml">XIOS.1</license>
+  </about>
+
+  <settings>
+  </settings>
+
+  <resources></resources>
+  <access></access>
+
+  <process xlink:actuate="onLoad" name="Application Launcher" description="App Launcher Main Process Code" author="Martin Nilsson">
+
+    <trigger view="Launcher" component="apps" event="Select" step="click"/>
+
+    <step id="click" name="Load/show application">
+      <alias name="views" value="#ViewManager#/views"/>
+      <operation name="decision">
+        <when test="'{$views#/views/view[@href={#Launcher#apps#@path}]}'">
+          <!-- focus -->
+        </when>
+        <otherwise>
+          <operation name="open" value="{#Launcher#apps#@path}"/>
+        </otherwise>
+      </operation>
+    </step>
+
+  </process>
+
+  <view name="Launcher" xlink:actuate="onLoad" leftExclusion="105" icon="xios/icons/ie-o/beaker2.svg">
+    <panel type="column" width="100%" height="100%">
+      <iconlist name="apps" deselect="false" layout="sectionlist" width="105" height="100%" scroll="false" draggableitems="false" iconsize="48" style="background:#fff;">
+		<item name="list" text="Points Of Interest" icon="icon://business/table" path="cbe/listPOI.xml"/> 
+		<item name="plot" text="POI map" icon="icon://network/earth_location" path="cbe/plotPOI.xml"/> 
+        <item name="explorer" text="Explorer" icon="icon://applications/folders" path="xios/apps/system/document.xml"/>
+        <item name="shell" text="Shell" icon="icon://development/console" path="xios/apps/shell/shell.xml"/>
+        <item name="system" text="System" icon="icon://applications/gears" path="xios/apps/system/system.xml"/>
+		<item name="help" text="Help" icon="icon://applications/help" path="xios/apps/help/helpapp.xml"/>
+      </iconlist>
+
+      <panel type="row" height="100%" width="auto" padding="5">
+      </panel>
+    </panel>
+  </view>
+
+</application>

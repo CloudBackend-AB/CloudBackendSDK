@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<view name="Login" title="App Launcher Login" mode="plain" author="Daniel Arthursson, Anders Weister" created="2019-03-08" revised="2022-01-20" height="328" width="100%" bgcolor="#4066ae" theme="liquid" icon="xios/icons/ie-o/key2.svg">
+  <panel type="table" height="100%" style="background-image: url('cbe/cloud.jpg'); background-size: cover;">
+    <row>
+		<panel name="loginText" type="row" width="400" height="100" style="margin-top:13px;">
+			<image align="left" src="https://cloudbackend.com/assets/logo-white.svg" />
+      <panel type="row" height="100%" valign="left">
+        <label name="header" align="left" width="100%" height="100" default="Database Platform as a Service" font="verdana" size="25" color="#1668a8" style="margin-left: 4px;margin-top: 20px;"/>
+        <label name="header2" align="right" width="100%" default="Log in " font="verdana" size="19" color="#2e86c8" style="margin-right: 60px;margin-bottom: 60px;"/>
+        <panel type="column" align="center" height="250">
+          <panel type="table" name="panelLogin" style="padding-left:50px;" width="400" height="200">
+            <row>
+              <input name="Username" label="Username" focus="true" labelPos="left" style="padding-left:2px;padding-right:0px;" labelStyle="width:100%;" width="200"/>
+            </row>
+            <row>
+              <input name="Password" label="Password" labelPos="left" style="padding-left:2px;padding-right:0px;" labelStyle="width:1%;" type="password" width="200"/>
+            </row>
+            <row align="right" colspan="2">
+              <panel type="column" width="100%" valign="top" align="right">
+                <button name="Login" text="Login" default="true" width="80" style="margin-top: 5px;"/>
+              </panel>
+            </row>
+          </panel>
+          <panel name="panelProgress" type="column" align="left" width="416" style="padding-left:85px; overflow:hidden;" hide="true" label="Logging in..." lstyle="margin-top:30px; padding-left:85px;color:#fff; letter-spacing:1px; font-size:12pt; font-family:tahoma;"/>
+        </panel>
+      </panel>
+    </panel>
+    </row>
+    <row height="14">
+      <label style="text-align:right; margin-right:3px; padding-bottom:4px;" name="Copyright" color="#fff" default="Copyright © 2022 XIOS/3 AB, All rights reserved."/>
+    </row>
+  </panel>
+</view>

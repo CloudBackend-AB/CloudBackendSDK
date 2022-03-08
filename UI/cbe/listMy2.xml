@@ -1,0 +1,31 @@
+<application name="List My2 app">
+  <about publisher="CloudBackend"/>
+  <view name="listMy2" title="List My file" icon="icon://network/earth_location">
+    <panel>
+      <grid name="mapComp" selection="row">
+        <row match="/root/row">
+          <column match="Name" display="." width="150" label="Name"/>
+          <column match="Lat" display="." width="70" label="Latitude"/>
+          <column match="Long" display="." width="70" label="Longitude"/>
+        </row>
+      </grid>
+    </panel>
+  </view>
+  <process name="listMy2 process">
+    <trigger view="listMy2" event="Loaded" step="init"/>
+	<step id="1">
+	  <!-- ! = read -d parameter from shell -->
+      <alias name="dataDoc" value="!"/>
+    </step>
+    <step id="init">
+      <operation name="channel">
+        <name>xios</name>
+        <title>CloudBackend</title>
+        <protocol>XMLFS</protocol>
+      </operation>
+      <operation name="bind" value="$dataDoc">
+        <component name="mapComp" view="listMy2" />
+      </operation>
+    </step>
+  </process>
+</application>    

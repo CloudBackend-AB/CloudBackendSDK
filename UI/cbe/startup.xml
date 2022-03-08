@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+
+<process name="XIOS CLI System" description="Startup into XIOS" author="Martin Nilsson, Anders Weister" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <trigger communicator="xios" event="Login" step="2"/>
+  <trigger communicator="xios" event="Authorized" step="3"/>
+  <trigger communicator="xios" event="LoginFailure" step="6"/>
+  <trigger view="Login" component="Login" event="Select" step="4"/>
+
+  <step id="1" name="Start Channel">
+
+    <operation name="channel" value="https://v1.cloudbackend.com/v1/">
+      <name>xios</name>
+      <title>CloudBackend</title>
+      <protocol>XMLFS</protocol>
+      <authentication type="basic"/>
+    </operation>
+
+    <operation name="channel">
+      <name>https</name>
+      <title>HTTPS</title>
+      <protocol>HTTPS</protocol>
+    </operation>
+
+    <!--
+    <alias name="username" value="person" />
+    <alias name="password" value="blabla" />
+
+    <operation name="login" value="$Communicator">
+      <username>{$username}</username>
+      <password>{$password}</password>
+      <reset>false</reset>
+    </operation>
+    -->
+  </step>
+
+  <step id="2" name="LoginRequired">
+    <alias name="Communicator" value="!"/>
+    <operation name="call" value="6"/>
+  </step>
+
+  <step id="3" name="Authorized">
+    <operation name="close" value="Login"/>
+    <operation name="open" value="cbe/main.xml"/>
+  </step>
+
+  <step id="4" name="Login">
+    <!-- check for username and password -->
+    <alias name="regSpace" value="/\s/g"/>
+    <alias name="empty" value="''"/>
+    <!-- this is not "trim", this is just removing spaces so we can se if something contains just spaces -->
+    <alias name="emptyPassword" value="{={'{#Login#Password.getValue()}'.replace({$regSpace},{$empty})}}"/>
+    <alias name="emptyUsername" value="{={'{#Login#Username.getValue()}'.replace({$regSpace},{$empty})}}"/>
+    <operation name="decision">
+      <when test="'{$emptyUsername}'=''" step="promptForUsername"/>
+      <when test="'{$emptyPassword}'=''" step="promptForPassword"/>
+      <when test="contains('{#Login#Username}',' ')" step="promptForNoSpaces"/>
+      <otherwise step="ContinueLogin"/>
+    </operation>
+  </step>
+
+  <step id="ContinueLogin" name="">
+    <operation name="call" value="showProgress"/>
+    <operation name="call" value="5">
+      <yield/>
+    </operation>
+  </step>
+
+  <step id="5" name="Try to Login">
+    <operation name="login" value="$Communicator">
+      <username>{#Login#Username.getValue()}</username>
+      <password>{#Login#Password.getValue()}</password>
+      <reset>{$reset}</reset>
+    </operation>
+  </step>
+
+  <step id="6" name="Login failure">
+    <operation name="decision">
+      <when test="'{is-open(Login)}' = 'false'">
+        <operation name="open" value="cbe/login.xml"/>
+        <alias name="loginLogo" value="=loginLogo" />
+        <operation name="decision">
+          <when test="'{$loginLogo}' != ''">
+            <operation name="callMethod" value="#Login#logo">
+              <method name="setValue"><param>{$loginLogo}</param></method>
+            </operation>
+          </when>
+        </operation>
+        <operation name="action" value="#Login">
+          <component name="Username" action="activate"/>
+        </operation>
+      </when>
+    </operation>
+
+    <operation name="call" value="showLogin"/>
+  </step>
+
+  <step id="7" name="Display Communicator Error">
+    <operation name="open" value="cbe/error.xml"/>
+    <operation name="bind" value="!">
+      <component view="CommunicationError" name="Description" select="/error/@description"/>
+      <component view="CommunicationError" name="Channel" select="/error/@channel"/>
+      <component view="CommunicationError" name="Service" select="/error/@service"/>
+      <component view="CommunicationError" name="Accessed" select="/error/@updated"/>
+      <component view="CommunicationError" name="Method" select="/error/@method"/>
+      <component view="CommunicationError" name="Response" select="/error/*"/>
+      <component view="CommunicationError" name="Code" select="/error/@code"/>
+    </operation>
+  </step>
+
+  <step id="8" name="Close Communication Error">
+    <operation name="close" value="CommunicationError"/>
+  </step>
+
+  <step id="showLogin" name="">
+    <operation name="action" value="#Login">
+      <component name="panelProgress" action="hide"/>
+      <component name="panelLogin" action="show"/>
+    </operation>
+  </step>
+
+  <step id="showProgress" name="">
+    <operation name="action" value="#Login">
+      <component name="panelProgress" action="show"/>
+      <component name="panelLogin" action="hide"/>
+    </operation>
+  </step>
+
+</process>
