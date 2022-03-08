@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" href="/dashboard/images/favicon.ico">
+    <script>
+      var loginLogo = "/cbe/images/cloud.svg";
+      var boot = {
+        startup : "cbe/startup.xml",
+      };
+      function getUsernamePassword()
+      {
+          return "";
+      }
+    </script>
+    <style>
+      #activityLayer {
+        animation: spin 1s infinite linear;
+      }
+      @keyframes spin {
+        100% { transform: rotate(-360deg); }
+      }
+    </style>
+    </head>
+    <body scroll="no" style="overflow: hidden;background-color:#fff;">
+
+    <div style="position:absolute;right:50px;bottom:50px;z-index:9999;margin-left:-12px;">
+      <div id="activityLayer"><img width="64" height="64" style="opacity: 0.7;" src="xios/icons/ie-i/arrow_circle2.svg"></div>
+    </div>
+
+    <script src="xios/boot.js"></script>
+</body>
+</html>
