@@ -13,7 +13,7 @@ public class ShareDelegate extends ShareEventProtocol {
     
     @Override
     public void onListAvailableShares(QueryResult result) {
-        System.out.println("You've reached onListAvailableShares in Java congrats");
+        System.out.println("onListAvailableShares");
         this._qr = result;
         this.finished = true;
     }
@@ -31,7 +31,7 @@ public class ShareDelegate extends ShareEventProtocol {
     
     @Override
     public void onContainerUnShared(String message) {
-        System.out.println("onContainerUnShared unShared backend message: " + message);
+        System.out.println("onContainerUnShared message: " + message);
         this.finished = true;
     }
     
@@ -47,6 +47,7 @@ public class ShareDelegate extends ShareEventProtocol {
     
     @Override
     public void onShareError(int type, long operation, long code, String reason, String message) {
+        System.out.println("ShareError: code=" + code + ", reson=\"" + reason + "\", message=\"" + message + "\"");
         this.finished = true;
     }
     
