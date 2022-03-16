@@ -36,6 +36,8 @@ built on c++ version 1.3.5 of the SDK.
 
 SDK Java Version:
 
+built on c++ version 1.4.6 of the SDK, additional API from current c++ release is the public QueryChain queryWithPath(String relativePath, ItemEventProtocol delegate, long queryRoot) {}, public QueryChain queryWithPath(String relativePath, ItemEventProtocol delegate) {}. Returns the container with items on the specified cloud path relative to either rootContainer or a specified container (that will act as root for the path).
+
 built on c++ version 1.3.5 of the SDK.
 
 Release notes JAVA/Android:
