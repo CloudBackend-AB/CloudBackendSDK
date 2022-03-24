@@ -30,25 +30,37 @@ Change the user account for the sample program in user_credentials.cpp
 
 Notes: This SDK has been built and tested on Ubuntu
 
-SDK Android Version:
+---------------------------------------------------------------------------------------------------------------------------------------------------
 
+current version Android SDK:
+1.3.5
+
+Release notes:
 built on c++ version 1.3.5 of the SDK.
 
-SDK Java Version:
+---------------------------------------------------------------------------------------------------------------------------------------------------
 
-built on c++ version 1.4.6 of the SDK, additional API from current c++ release is the public QueryChain queryWithPath(String relativePath, ItemEventProtocol delegate, long queryRoot) {}, public QueryChain queryWithPath(String relativePath, ItemEventProtocol delegate) {}. Returns the container with items on the specified cloud path relative to either rootContainer or a specified container (that will act as root for the path).
+current version Java wrapper SDK:
+1.4.6
 
-built on c++ version 1.3.5 of the SDK.
+Release Notes:
+
+Built on c++ version 1.4.6 of the SDK.
+
+SDK Java version:
+1.3.5
 
 Release notes JAVA/Android:
-
 The java and android wrappers are built on the c++ sdk version 1.3.5 this includes share actions but not group actions.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 current version SDK c++:
 1.4.6
 
 Release notes:
 Fix for queryWithPath. API reachable both on CloudBackend class object and Container class objects.
+Additional API from version 1.4.5 is the QueryChainPtr queryWithPath(std::string relativePath, ItemDelegatePtr delegate, uint64_t queryRoot) {}, QueryChain queryWithPath(std::string relativePath, ItemDelegatePtr delegate) {}. Returns the container with items on the specified cloud path relative to either rootContainer or a specified container (that will act as root for the path).
 
 SDK c++ version:
 1.4.5
@@ -77,3 +89,5 @@ SDK c++ version:
 Release notes:
 Bug fixes, listGroups on groupManager added. CreateAccount added.
 New CLI with new extended Readme. 
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
