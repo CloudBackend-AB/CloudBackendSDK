@@ -87,6 +87,14 @@ public:
    virtual QueryChainPtr query(CBE::container_id_t containerId, CBE::Filter filter, CBE::ItemDelegatePtr delegate); // add a Container Id
 
    /**
+   * Queries with a given path to a container. obs no .. or . option available only top down search from start point (queryRoot id) to downwards path in container tree.
+   * @param relativePath, is the relative path from the queryRoot e.x /Documents/Pictures from a queryRoot that has the Documents and Pictures containers.
+   * @param delegate, is a shared pointer to the class in which you implement CBE::ItemEventProtocol to recieve the callback on function completion.
+   * @param queryRoot, is the Container id that will be the root of this query. Option to not add a id will resolve in rootContainer beeing the starting point.
+   */
+   virtual CBE::QueryChainPtr queryWithPath(std::string relativePath, CBE::ItemDelegatePtr delegate, CBE::container_id_t queryRoot = 0);
+
+   /**
      * Search the whole container for tags related to Objects in the container structure. 
      * EX: Key = Name, Value Contract/Object/Song => Name:Contract1.
      * 

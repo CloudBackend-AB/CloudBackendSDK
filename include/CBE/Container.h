@@ -85,6 +85,14 @@ public:
     virtual QueryChainPtr query(CBE::Filter filter, CBE::ItemDelegatePtr delegate);
     
     /**
+    * Queries the container with a given relative path, returns container with objects. ex: /Documents/Pictures will return objects and subContainers for Pictures.
+    * obs: .. or . options are  not available, top down Paths in the container tree are available.
+    * @param path, ex or /Documents/Pictures.
+    * @param delegate, is a shared pointer to the class in which you implement CBE::ItemEventProtocol to recieve the callback on function completion.
+    */
+    virtual CBE::QueryChainPtr queryWithPath(std::string relativePath, CBE::ItemDelegatePtr delegate);
+
+    /**
      * Search the whole container for tags related to Objects in the container structure. 
      * EX: Key = Name, Value Contract/Object/Song => Name:Contract1.
      * 
