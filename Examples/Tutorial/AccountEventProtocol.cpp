@@ -10,7 +10,9 @@ void AccountEventProtocol::onLogin(uint32_t atState, CBE::CloudBackendPtr cloudb
 }
 
 void AccountEventProtocol::onError(CBE::persistence_t failedAtState, uint32_t code, std::string reason, std::string message) {
-  std::cout << "Account Event Error: Login failed"  << std::endl;
+  std::cout << "Account Event Error: "
+            << "Login was " << reason
+            << " due to " << message << std::endl;
   cbeTL->programFinished();
 }
 

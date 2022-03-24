@@ -3,10 +3,14 @@
 Contains the files from the SDK tutorial document at
 https://cloudbackend.com/docs.html
 
-Copyright © CloudBackend AB 2021.
+Copyright © CloudBackend AB 2021-2022.
 
 Release notes
 =============
+
+Release 2022-03-24
+------------------
+* The code has been updated to the current version of the SDK C++.
 
 Release 2021-06-04
 ------------------

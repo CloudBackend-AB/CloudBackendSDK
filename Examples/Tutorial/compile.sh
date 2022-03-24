@@ -1,5 +1,7 @@
 #!/bin/sh
+# Copyright © CloudBackend AB 2022.
 # compile.sh #
+# version 2022-03-23
 # This compiler script has sections corresponding to
 # the different exercises in the Tutorial # on the website. 
 # Submit the number of the Exercise to compile.
@@ -12,12 +14,14 @@ else
     exe="0"
 fi
 ARCH=`uname -m`
-echo "computer architechture:" ${ARCH}
+echo "identified computer architechture:" ${ARCH}
 case "$ARCH" in
     "x86_64")
     COMPILER_COMMAND="g++ -std=c++17 -pthread "
     # your path to the copy of the SDK binary lib
+    # libCBE="../../SDK/Linux_x86/libcb_sdk.so"    # export LD_LIBRARY_PATH="../../SDK/Linux_x86/"
     libCBE="../../SDK/Linux_x86/libcb_sdk.a"
+    WARNINGS="-Wpedantic -Wall -Wextra -Weffc++ -Wsuggest-override -Wno-unused-parameter"
     ;;
 
     *)
@@ -26,17 +30,17 @@ case "$ARCH" in
     ;;
 esac
 
-echo "compile exercise:" ${exe}
+echo "about to compile exercise:" ${exe}
 case "${exe}" in
     1)
     # Tutorial exercise 1:
-    ${COMPILER_COMMAND} -o tut${exe} Main.cpp Logic${exe}.cpp AccountEventProtocol.cpp ${libCBE} -I "../../include"
+    ${COMPILER_COMMAND} ${WARNINGS} -o tut${exe} Main.cpp Logic${exe}.cpp AccountEventProtocol.cpp ${libCBE} -I "../../include"
     command_result=$?
     ;;
     
     2|3)
     # Tutorial exercise:
-    ${COMPILER_COMMAND} -o tut${exe} Main.cpp Logic${exe}.cpp AccountEventProtocol.cpp ItemEventProtocol.cpp ${libCBE} -I "../../include"
+    ${COMPILER_COMMAND} ${WARNINGS} -o tut${exe} Main.cpp Logic${exe}.cpp AccountEventProtocol.cpp ItemEventProtocol.cpp ${libCBE} -I "../../include"
     command_result=$?
     ;;
     

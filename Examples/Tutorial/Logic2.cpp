@@ -50,9 +50,11 @@ CBE::ContainerPtr Logic::createContainer(CBE::ContainerPtr container) {
 
 
 void Logic::loadContainerContents(CBE::ContainerPtr container) {
-  std::cout << "Getting container " << containerName(container) << std::endl;
+  std::cout << "Getting sub-container of " << containerName(container) << std::endl;
   CBE::ItemDelegatePtr itemDelegate = std::make_shared<ItemEventProtocol>(this);
-  container->query(itemDelegate);
+  CBE::Filter filter1;
+  filter1.setDataType(CBE::ItemType::Container);
+  container->query(filter1, itemDelegate);
 }
 
 

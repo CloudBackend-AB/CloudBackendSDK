@@ -50,9 +50,11 @@ CBE::ContainerPtr Logic::createContainer(CBE::ContainerPtr container) {
 
 
 void Logic::loadContainerContents(CBE::ContainerPtr container) {
-  std::cout << "Getting container " << containerName(container) << std::endl;
+  std::cout << "Getting sub-container of " << containerName(container) << std::endl;
   CBE::ItemDelegatePtr itemDelegate = std::make_shared<ItemEventProtocol>(this);
-  container->query(itemDelegate);
+  CBE::Filter filter1;
+  filter1.setDataType(CBE::ItemType::Container);
+  container->query(filter1, itemDelegate);
 }
 
 
@@ -64,6 +66,15 @@ void Logic::printContainerContents(CBE::QueryResultPtr q) {
 
 
 /* Exercise 3 */
+void Logic::loadContainerObjects(CBE::ContainerPtr container) {
+  std::cout << "Getting objects in container " << containerName(container) << std::endl;
+  CBE::ItemDelegatePtr itemDelegate = std::make_shared<ItemEventProtocol>(this);
+  CBE::Filter filter2;
+  filter2.setDataType(CBE::ItemType::Object);
+  container->query(filter2, itemDelegate);
+}
+
+
 void Logic::printObjects(CBE::QueryResultPtr q) {
   CBE::ObjectPtr tempObject{}; // nullptr;
   std::cout << "Printing Objects from query result: " << std::endl;
@@ -114,7 +125,7 @@ CBE::ObjectPtr Logic::createObject(CBE::ContainerPtr inContainer) {
   std::cout << "Create Object" << std::endl;
   const int numOftags =
                       inquireInt("Set the number of Key/Value pairs you want");
-  std::map<std::string, SDK_tuple<std::string, bool>> keyValues;
+  std::map<std::string, std::pair<std::string, bool>> keyValues;
   for(int i = 1; i <= numOftags; i++) {
     const auto tag = inquireString("Name of Key #" + std::to_string(i));
     const auto value =
@@ -123,7 +134,7 @@ CBE::ObjectPtr Logic::createObject(CBE::ContainerPtr inContainer) {
                        inquireBool("Make KeyValue pair #" + std::to_string(i) +
                                    " indexed or not (y indexed, n not indexed",
                                    true /* defaultVal */);
-    keyValues[tag] = SDK_tuple<std::string, bool>(value, indexed);
+    keyValues[tag] = std::pair<std::string, bool>(value, indexed);
   }
   const std::string name = inquireString("Set name for Object");
   CBE::ItemDelegatePtr itemDelegate = std::make_shared<ItemEventProtocol>(this);
@@ -197,7 +208,7 @@ void Logic::logic() {
       /* object created; load the top container list of items in cache */
       case 5: {
         std::cout << "Object name: " << objectName(object) << std::endl;
-        loadContainerContents(container);
+        loadContainerObjects(container);
         ++step;
         break;
       }

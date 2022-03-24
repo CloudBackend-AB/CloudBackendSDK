@@ -11,8 +11,8 @@ class Logic {
   void logic();
   void programFinished();
 
-  bool finished;
-  CBE::ContainerPtr rootContainer;
+  bool finished{}; // false
+  CBE::ContainerPtr rootContainer{};
 
   void saveQueryResultContinue(CBE::QueryResultPtr qR);
 
@@ -20,22 +20,23 @@ class Logic {
  private:
   int logicInstances = 0;
   int step = 1;
-  std::recursive_mutex logicMutex;
-  CBE::CloudBackendPtr cloudBackend; 
-  CBE::QueryResultPtr qResult;
+  std::recursive_mutex logicMutex{};
+  CBE::CloudBackendPtr cloudBackend{};
+  CBE::QueryResultPtr qResult{};
 
 #if 1
   // Exercise 2
   void loadContainerContents(CBE::ContainerPtr container);
   void printContainerContents(CBE::QueryResultPtr q);
   CBE::ContainerPtr createContainer(CBE::ContainerPtr container);
-  CBE::ContainerPtr container;
+  CBE::ContainerPtr container{};
 
   // Exercise 3
+  void loadContainerObjects(CBE::ContainerPtr container);
   void printObjects(CBE::QueryResultPtr q);
   CBE::ContainerPtr selectContainer(const std::string& prompt);
   CBE::ObjectPtr createObject(CBE::ContainerPtr inContainer);
-  CBE::ObjectPtr object;
+  CBE::ObjectPtr object{};
 #endif
 
   // Generic functions

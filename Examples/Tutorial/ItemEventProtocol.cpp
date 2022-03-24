@@ -30,7 +30,9 @@ void ItemEventProtocol::onQueryLoaded(CBE::QueryResultPtr q) {
 
 /** Gets called when loading a query fails. */
 void ItemEventProtocol::onLoadError(CBE::Filter filter, uint32_t operation, uint32_t code, std::string reason, std::string message) {
-  std::cout << "Item Event Load Error" << std::endl;
+  std::cout << "Item Event Load Error: "
+            << " was " << reason
+            << " due to " << message << std::endl;
   cbeTL->programFinished();
 }
 
