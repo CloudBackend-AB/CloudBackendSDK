@@ -1,24 +1,9 @@
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-  // In order to suppress warnings:
-  // warning: unused parameter ‘...’ [-Wunused-parameter]
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-  // warning: '...' will be initialized after [-Wreorder]
-#pragma GCC diagnostic ignored "-Wreorder"
-  // warning: extra ‘;’ [-Wpedantic]
-#pragma GCC diagnostic ignored "-Wpedantic"
-#endif // #if defined(__GNUC__)
 
 #include "CBE/Account.h"
 #include "CBE/CloudBackend.h"
 #include "CBE/Protocols/ItemEventProtocol.h"
 #include "CBE/Protocols/AccountEventProtocol.h"
 #include "CBE/Protocols/ShareEventProtocol.h"
-
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
-
 
 #include <cassert>
 #include <chrono>
@@ -34,12 +19,12 @@
 
 template <typename ResultT>
 class Sync {
-  std::mutex                mutex;
-  std::condition_variable   conditionVariable;
+  std::mutex                mutex{};
+  std::condition_variable   conditionVariable{};
   bool                      responseReceived = false;
 
   using ResultPtr = std::shared_ptr<ResultT>;
-  ResultPtr                 resultPtr;
+  ResultPtr                 resultPtr{};
   public:
     void onSuccess(ResultPtr resultPtr) {
       {
@@ -69,7 +54,7 @@ int main(void) {
   });
 
   class AccountEventProtocol : public CBE::AccountEventProtocol {
-    Sync<CBE::CloudBackend> sync;
+    Sync<CBE::CloudBackend> sync{};
     public:
       void onLogin(uint32_t atState, CBE::CloudBackendPtr cloudbackend) final {
         std::cout << "Account Login complete"
@@ -88,6 +73,7 @@ int main(void) {
       }
   }; // class AccountEventProtocol
 
+  std::cout << "about to log in" << std::endl;
   auto accountDelegate = std::make_shared<AccountEventProtocol>();
   CBE::CloudBackend::logIn("githubtester2", "gitHubTester2password", "cbe_githubtesters",
                            accountDelegate);
@@ -103,8 +89,8 @@ int main(void) {
             << std::endl;
 
   class ItemEventProtocol : public CBE::ItemEventProtocol {
-    CBE::ContainerPtr       container;
-    Sync<CBE::QueryResult>  sync;
+    CBE::ContainerPtr       container{};
+    Sync<CBE::QueryResult>  sync{};
     public:
       ItemEventProtocol(CBE::ContainerPtr container) : container{container} {}
       CBE::QueryResultPtr  wait() {
@@ -130,8 +116,8 @@ int main(void) {
   };
 
   class ShareEventProtocol : public CBE::ShareEventProtocol {
-    CBE::ContainerPtr       container;
-    Sync<CBE::QueryResult>  sync;
+    CBE::ContainerPtr       container{};
+    Sync<CBE::QueryResult>  sync{};
     public:
       ShareEventProtocol(CBE::ContainerPtr container) : container{container} {}
       CBE::QueryResultPtr  wait() {
@@ -219,6 +205,7 @@ int main(void) {
     }
   }; // function processContainer() lambda
 
+  std::cout << "***** listing shares *****";
   auto shareManager = cloudBackend->shareManager();
   auto shareDelegate =
       std::make_shared<ShareEventProtocol>(account->rootContainer());
@@ -233,20 +220,21 @@ int main(void) {
     processItem(itemPtr, nullptr /* parentContainer */);
   }
 
-  std::cout << "\n***** Shares sorted *****\n";
+  std::cout << "\n***** Shares sorted by id *****\n";
   for (const auto& elem : containerMap) {
     std::cout << elem.first << " " << elem.second.path() << '\n';
   }
 
+  std::cout << "\n***** traversing containers *****" << std::endl;
   processContainer(account->rootContainer(),
                    nullptr /* parentContainer, nullptr implies root container */);
 
-  std::cout << "\n***** Containers sorted  *****\n";
+  std::cout << "\n***** Containers sorted by id numbers *****\n";
   for (const auto& elem : containerMap) {
     std::cout << elem.first << " " << elem.second.path() << '\n';
   }
 
-  std::cout << "\n+++++ Objects sorted +++++\n";
+  std::cout << "\n+++++ Objects sorted by id +++++\n";
   for (const auto& elem : objectMap) {
     std::cout << elem.first << " " << elem.second.path() << '\n';
   }

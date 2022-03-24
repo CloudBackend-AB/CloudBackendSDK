@@ -1,23 +1,8 @@
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-  // In order to suppress warnings:
-  // warning: unused parameter ‘...’ [-Wunused-parameter]
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-  // warning: '...' will be initialized after [-Wreorder]
-#pragma GCC diagnostic ignored "-Wreorder"
-  // warning: extra ‘;’ [-Wpedantic]
-#pragma GCC diagnostic ignored "-Wpedantic"
-#endif // #if defined(__GNUC__)
 
 #include "CBE/Account.h"
 #include "CBE/CloudBackend.h"
 #include "CBE/Protocols/ItemEventProtocol.h"
 #include "CBE/Protocols/AccountEventProtocol.h"
-
-#if defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
-
 
 #include <chrono>
 #include <condition_variable>
@@ -34,9 +19,9 @@ int main(void) {
   });
 
   class AccountEventProtocol : public CBE::AccountEventProtocol {
-    std::mutex              mutex;
-    std::condition_variable conditionVariable;
-    CBE::CloudBackendPtr    cloudbackend;
+    std::mutex              mutex{};
+    std::condition_variable conditionVariable{};
+    CBE::CloudBackendPtr    cloudbackend{};
     bool  responseReceived = false;
     public:
       void onLogin(uint32_t atState, CBE::CloudBackendPtr cloudbackend) final {
@@ -68,6 +53,7 @@ int main(void) {
       }
   }; // class AccountEventProtocol
 
+  std::cout << "about to log in" << std::endl;
   auto accountDelegate = std::make_shared<AccountEventProtocol>();
   CBE::CloudBackend::logIn("githubtester1", "gitHubTester1password", "cbe_githubtesters",
                            accountDelegate);
@@ -83,10 +69,10 @@ int main(void) {
             << std::endl;
 
   class ItemEventProtocol : public CBE::ItemEventProtocol {
-    CBE::ContainerPtr       container;
-    std::mutex              mutex;
-    std::condition_variable conditionVariable;
-    CBE::QueryResultPtr     queryResult;
+    CBE::ContainerPtr       container{};
+    std::mutex              mutex{};
+    std::condition_variable conditionVariable{};
+    CBE::QueryResultPtr     queryResult{};
     bool                    responseReceived = false;
     public:
       ItemEventProtocol(CBE::ContainerPtr container) : container{container} {}
@@ -144,13 +130,15 @@ int main(void) {
   };  // function processContainer lambda
 
   std::cout << std::endl;
+  std::cout << "***** traversing containers *****" << std::endl;
   std::cout << std::setw(16) << account->rootContainer()->id()
             << std::string(cnt* 2, ' ') << ' ' << "/" << '\n';
   auto map = processContainer(account->rootContainer(), "/" /* parentPath */, Map{});
 
   map.emplace(account->rootContainer()->id(), "/");
 
-  std::cout << "\n***** sorted by number *****\n";
+  std::cout << std::endl;
+  std::cout << "***** containers sorted by id number *****" << std::endl;
   for (const auto& elem : map) {
     std::cout << elem.first << " " << elem.second << '\n';
   }
