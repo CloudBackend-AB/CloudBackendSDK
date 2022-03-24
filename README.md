@@ -45,6 +45,12 @@ Release notes JAVA/Android:
 The java and android wrappers are built on the c++ sdk version 1.3.5 this includes share actions but not group actions.
 
 current version SDK c++:
+1.4.6
+
+Release notes:
+Fix for queryWithPath. API reachable both on CloudBackend class object and Container class objects.
+
+SDK c++ version:
 1.4.5
 
 Release notes:
@@ -57,7 +63,7 @@ There is also search(CBE::Filter filter, ItemDelegatePtr delegate) on container,
 
 Extended group functionality, added member functionality such as kick ban unban and listing of banned members on the group object.
 
-SDK c++ Version:
+SDK c++ version:
 1.4.1
 
 Release notes:
@@ -65,7 +71,7 @@ Extended group functionality, added create, join, listMembers, leave, remove, re
 On GroupManager added listing functionality searchGroups and a vector of currently joined groups on the GroupManager.
 Added classes for group searches includes GroupFilter and GroupQuery classes, these handle like QueryResult, the result of a group search where both joined and non-joined groups may appear.
 
-SDK c++ Version:
+SDK c++ version:
 1.4.0
 
 Release notes:
