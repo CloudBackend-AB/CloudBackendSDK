@@ -221,10 +221,10 @@ std::string Logic::trimString(const std::string& str) {
 
 /*-- generic print functions --*/
 const char* Logic::itemTypeString(CBE::item_t itemType) {
-  static const struct ItemTypeTuple {
+  static const struct ItemTypeValue {
     CBE::item_t itemType;
     const char* str;
-  } itemTypeTuples[] {
+  } ItemTypeValues[] {
       { CBE::ItemType::Unapplicable , "Unapplicable"  },
       { CBE::ItemType::Unknown      , "Unknown"       },
       { CBE::ItemType::Object       , "Object"        },
@@ -232,12 +232,12 @@ const char* Logic::itemTypeString(CBE::item_t itemType) {
       { CBE::ItemType::Tag          , "Tag"           },
       { CBE::ItemType::Group        , "Group"         }
 };
-  const auto it = std::find_if(std::begin(itemTypeTuples) /* first */,
-                               std::end(itemTypeTuples)   /* last */,
-                               [itemType](const ItemTypeTuple& itemTypeTuple) {
-                                 return itemTypeTuple.itemType == itemType;
+  const auto it = std::find_if(std::begin(ItemTypeValues) /* first */,
+                               std::end(ItemTypeValues)   /* last */,
+                               [itemType](const ItemTypeValue& ItemTypeValue) {
+                                 return ItemTypeValue.itemType == itemType;
                                } /* p */);
-  return (it != std::end(itemTypeTuples))? it->str : "unknown-item-type";
+  return (it != std::end(ItemTypeValues))? it->str : "unknown-item-type";
 }
 
 void Logic::printItem(const CBE::Item& item, bool printParentId) {

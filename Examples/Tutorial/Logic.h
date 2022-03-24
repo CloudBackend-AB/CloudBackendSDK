@@ -4,6 +4,7 @@
 #include <iostream>
 #include <mutex>
 #include "CBE/CloudBackend.h"
+#include "CBE/Types.h"
 
 class Logic {
  public:

@@ -86,10 +86,10 @@ void Logic::printObjects(CBE::QueryResultPtr q) {
       if(!keyValues.empty()) {
         for (const auto& keyValue : keyValues) {
           const auto& key      = keyValue.first;
-          const auto& sdkTuple = keyValue.second;
-          const auto  indexed  = std::get<metadata_dataindex_indexed>(sdkTuple);
+          const auto& sdkValue = keyValue.second;
+          const auto  indexed  = std::get<metadata_dataindex_indexed>(sdkValue);
           std::cout << "    " << key << " = " << "'"
-                    << std::get<metadata_dataindex_value>(sdkTuple)
+                    << std::get<metadata_dataindex_value>(sdkValue)
                     << "'" << (indexed? " \t\t(indexed)" : "") << std::endl;
         }
       }  // if(!keyValues.empty())
@@ -125,7 +125,7 @@ CBE::ObjectPtr Logic::createObject(CBE::ContainerPtr inContainer) {
   std::cout << "Create Object" << std::endl;
   const int numOftags =
                       inquireInt("Set the number of Key/Value pairs you want");
-  std::map<std::string, std::pair<std::string, bool>> keyValues;
+  CBE::metadata_type keyValues;
   for(int i = 1; i <= numOftags; i++) {
     const auto tag = inquireString("Name of Key #" + std::to_string(i));
     const auto value =
@@ -336,10 +336,10 @@ std::string Logic::trimString(const std::string& str) {
 
 /*-- generic print functions --*/
 const char* Logic::itemTypeString(CBE::item_t itemType) {
-  static const struct ItemTypeTuple {
+  static const struct ItemTypeValue {
     CBE::item_t itemType;
     const char* str;
-  } itemTypeTuples[] {
+  } ItemTypeValues[] {
       { CBE::ItemType::Unapplicable , "Unapplicable"  },
       { CBE::ItemType::Unknown      , "Unknown"       },
       { CBE::ItemType::Object       , "Object"        },
@@ -347,12 +347,12 @@ const char* Logic::itemTypeString(CBE::item_t itemType) {
       { CBE::ItemType::Tag          , "Tag"           },
       { CBE::ItemType::Group        , "Group"         }
 };
-  const auto it = std::find_if(std::begin(itemTypeTuples) /* first */,
-                               std::end(itemTypeTuples)   /* last */,
-                               [itemType](const ItemTypeTuple& itemTypeTuple) {
-                                 return itemTypeTuple.itemType == itemType;
+  const auto it = std::find_if(std::begin(ItemTypeValues) /* first */,
+                               std::end(ItemTypeValues)   /* last */,
+                               [itemType](const ItemTypeValue& ItemTypeValue) {
+                                 return ItemTypeValue.itemType == itemType;
                                } /* p */);
-  return (it != std::end(itemTypeTuples))? it->str : "unknown-item-type";
+  return (it != std::end(ItemTypeValues))? it->str : "unknown-item-type";
 }
 
 void Logic::printItem(const CBE::Item& item, bool printParentId) {
