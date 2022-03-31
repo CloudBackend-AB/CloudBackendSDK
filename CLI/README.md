@@ -3,12 +3,20 @@
 
 For documentation see  https://cloudbackend.com/docs.html
 
-Copyright © CloudBackend AB 2021.
+Copyright © CloudBackend AB 2021-2022.
 ---------------------------------
 
+Release notes new_cli
+=====================
 
-Release notes
-=============
+Release 2022-03-11
+------------------
+* Version 1.0
+* New set of commands in line with the dashboard
+
+
+Release notes cbe_CLI
+=====================
 
 Release 2021-10-14
 ------------------
