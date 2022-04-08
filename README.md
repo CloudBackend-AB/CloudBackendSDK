@@ -62,7 +62,7 @@ Release notes:
 repackaged directory structure
 
 
-Release notes:
+SDK c++ version:
 1.4.6
 
 Release notes:
