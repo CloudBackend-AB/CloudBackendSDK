@@ -1,5 +1,5 @@
 # setupSolution.sh <excercise>
-# release 2020-10-20
+# release 2022-04-08
 
 PARENTSCRIPT_PATH="$(dirname "$0")"
 echo "$PARENTSCRIPT_PATH" 
@@ -18,8 +18,8 @@ case "$ARCH" in
     "x86_64")
     COMPILER_COMMAND="g++ -std=c++11 -pthread "
     echo $PWD
-    #libCBE="../../SDK/Linux_x86/libcb_sdk.so"
-    libCBE="../../SDK/Linux_x86/libcb_sdk.a"
+    #libCBE="../../lib/Linux_x86/libcb_sdk.so"
+    libCBE="../../lib/Linux_x86/libcb_sdk.a"
     CODE_PATH="./"
     echo $CODE_PATH
     ;;
