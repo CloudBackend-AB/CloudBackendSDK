@@ -56,6 +56,13 @@ The java and android wrappers are built on the c++ sdk version 1.3.5 this includ
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 
 current version SDK c++:
+1.4.6.2
+
+Release notes:
+repackaged directory structure
+
+
+SDK c++ version:
 1.4.6
 
 Release notes:
