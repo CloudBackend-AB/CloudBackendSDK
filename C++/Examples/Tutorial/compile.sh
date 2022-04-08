@@ -1,7 +1,7 @@
 #!/bin/sh
 # Copyright © CloudBackend AB 2022.
 # compile.sh #
-# version 2022-03-24
+# version 2022-04-08
 # This compiler script has sections corresponding to
 # the different exercises in the Tutorial # on the website. 
 # Submit the number of the Exercise to compile.
@@ -19,8 +19,8 @@ case "$ARCH" in
     "x86_64")
     COMPILER_COMMAND="g++ -std=c++17 -pthread "
     # your path to the copy of the SDK binary lib
-    # libCBE="../../SDK/Linux_x86/libcb_sdk.so"    # export LD_LIBRARY_PATH="../../SDK/Linux_x86/"
-    libCBE="../../SDK/Linux_x86/libcb_sdk.a"
+    # libCBE="../../lib/Linux_x86/libcb_sdk.so"    # export LD_LIBRARY_PATH="../../lib/Linux_x86/"
+    libCBE="../../lib/Linux_x86/libcb_sdk.a"
     WARNINGS="-Wpedantic -Wall -Wextra -Weffc++ -Wsuggest-override -Wno-unused-parameter"
     ;;
 
