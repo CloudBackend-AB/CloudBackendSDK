@@ -1,1 +1,1 @@
-CloudBackend 2021.
+# Copyright © CloudBackend AB 2022.
