@@ -75,7 +75,7 @@ int main(void) {
 
   std::cout << "about to log in" << std::endl;
   auto accountDelegate = std::make_shared<AccountEventProtocol>();
-  CBE::CloudBackend::logIn("githubtester2", "gitHubTester2password", "cbe_githubtesters",
+  CBE::CloudBackend::logIn("githubtester1", "gitHubTester1password", "cbe_githubtesters",
                            accountDelegate);
   auto cloudBackend = accountDelegate->wait();
   if (!cloudBackend) {
@@ -182,7 +182,7 @@ int main(void) {
       [&objectMap, &processContainer, &cloudBackend](CBE::ItemPtr  itemPtr,
                                       Container*    parentContainer) {
     if (itemPtr->type() == CBE::ItemType::Container) {
-      auto childCbeContainer = cloudBackend->castContainer(itemPtr);
+      auto childCbeContainer = CBE::CloudBackend::castContainer(itemPtr);
       processContainer(childCbeContainer, parentContainer);
     } else if (itemPtr->type() == CBE::ItemType::Object) {
       objectMap.emplace(itemPtr->id() /* key */,
