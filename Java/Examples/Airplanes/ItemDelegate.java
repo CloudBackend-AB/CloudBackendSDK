@@ -25,7 +25,7 @@ public class ItemDelegate extends ItemEventProtocol {
     
     @Override
     public void onObjectRemoved(long objectId, String name) {
-        System.out.println("Object Removed: " + name + " \t(" + objectId + ")");
+        System.out.println("Object Removed: " + name + "\t(" + objectId + ")");
         this.finished = true;
     }
     
@@ -61,7 +61,7 @@ public class ItemDelegate extends ItemEventProtocol {
     
     @Override
     public void onContainerRemoved(long containerId, String name) {  
-        System.out.println("Container Removed: " + name + " \t(" + containerId + ")" );
+        System.out.println("Container Removed: " + name + "\t(" + containerId + ")" );
         this.finished = true;
     }
     
