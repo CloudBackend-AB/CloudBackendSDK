@@ -583,7 +583,7 @@ void CBEExample::onQueryLoaded(CBE::QueryResultPtr qr) {
       std::cout << "comparing " << item->name() << " " << _queryName << std::endl;
     }
     if(item->name() == _queryName) {
-      container = cloudBackend->castContainer(item);
+      container = CBE::CloudBackend::castContainer(item);
     }
   }
   if(container != nullptr) {
