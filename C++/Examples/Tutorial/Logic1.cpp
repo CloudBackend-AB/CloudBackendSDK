@@ -197,7 +197,7 @@ const char* Logic::itemTypeString(CBE::item_t itemType) {
 }
 
 void Logic::printItem(const CBE::Item& item, bool printParentId) {
-  std::cout << std::left << std::setw(31) << item.name()
+  std::cout << std::left << std::setw(32) << item.name()
             << std::left << std::setw(10) << itemTypeString(item.type())
             << std::left << std::setw(3)  << "id:"
             << std::left << std::setw(16) << item.id();
