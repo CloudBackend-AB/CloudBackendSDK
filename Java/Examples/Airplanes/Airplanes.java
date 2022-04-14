@@ -481,7 +481,7 @@ public class Airplanes {
       System.out.print("\tpid(" + item.parentId());
       System.out.println(") ts: " + item.updated());
       if(item.type() == 4) {
-        com.cbe.Object obj = cbobj.castObject(item);
+        com.cbe.Object obj = com.cbe.CloudBackend.castObject(item);
         if(obj.keyValues().size() != 0) {
           // System.out.println("Key/Value data:");
           System.out.println("---------------------------------------------------");
@@ -524,7 +524,7 @@ public class Airplanes {
       System.out.print("\tpid(" + item.parentId());
       System.out.println(") ts: " + item.updated());
       if(item.type() == 4) {
-        com.cbe.Object obj = cbobj.castObject(item);
+        com.cbe.Object obj = com.cbe.CloudBackend.castObject(item);
         if(obj.keyValues().size() != 0) {
           // System.out.println("Key/Value data:");
           System.out.println("---------------------------------------------------");

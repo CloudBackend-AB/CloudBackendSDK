@@ -180,7 +180,7 @@ int main(void) {
     auto queryResult = query(cbeContainer);
     for (auto& itemPtr : queryResult->getItemsSnapshot()) {
       if (itemPtr->type() == CBE::ItemType::Container) {
-        auto childCbeContainer = cloudBackend->castContainer(itemPtr);
+        auto childCbeContainer = CBE::CloudBackend::castContainer(itemPtr);
         processContainer(childCbeContainer,
                          currentContainer /* parentContainer */);
       }
@@ -200,7 +200,7 @@ int main(void) {
               << ", " << itemPtr->ownerId()
               << "."  << std::endl;
     if (itemPtr->type() == CBE::ItemType::Container) {
-      auto shareContainer = cloudBackend->castContainer(itemPtr);
+      auto shareContainer = CBE::CloudBackend::castContainer(itemPtr);
       processContainer(shareContainer, nullptr /* parentContainer */);
     }
   }

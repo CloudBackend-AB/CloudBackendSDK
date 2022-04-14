@@ -117,7 +117,7 @@ int main(void) {
     auto queryResult = query(container);
     for (auto& itemPtr : queryResult->getItemsSnapshot()) {
       if (itemPtr->type() == CBE::ItemType::Container) {
-        auto container = cloudBackend->castContainer(itemPtr);
+        auto container = CBE::CloudBackend::castContainer(itemPtr);
         auto path = parentPath + container->name() + '/';
         auto id = container->id();
         std::cout << std::setw(16) << id

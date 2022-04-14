@@ -197,7 +197,7 @@ int main(void) {
       [&objectMap, &processContainer, &cloudBackend](CBE::ItemPtr  itemPtr,
                                       Container*    parentContainer) {
     if (itemPtr->type() == CBE::ItemType::Container) {
-      auto childCbeContainer = cloudBackend->castContainer(itemPtr);
+      auto childCbeContainer = CBE::CloudBackend::castContainer(itemPtr);
       processContainer(childCbeContainer, parentContainer);
     } else if (itemPtr->type() == CBE::ItemType::Object) {
       objectMap.emplace(itemPtr->id() /* key */,
