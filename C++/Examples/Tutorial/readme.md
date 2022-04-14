@@ -8,10 +8,10 @@ Copyright © CloudBackend AB 2021-2022.
 Release notes
 =============
 
-Release 2022-03-24
+Release 2022-04-14
 ------------------
 * added example cmake file with corresponding read-me file
-* 
+
 Release 2022-03-24
 ------------------
 * The code has been updated to the current version of the SDK C++.
