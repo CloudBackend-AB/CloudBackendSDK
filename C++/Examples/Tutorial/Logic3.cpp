@@ -81,7 +81,7 @@ void Logic::printObjects(CBE::QueryResultPtr q) {
   for (const auto& itemPtr : q->getItemsSnapshot()) {
     if(itemPtr->type() == CBE::ItemType::Object) {
       printItem(*itemPtr);
-      tempObject = cloudBackend->castObject(itemPtr);
+      tempObject = CBE::CloudBackend::castObject(itemPtr);
       const auto keyValues = tempObject->keyValues();
       if(!keyValues.empty()) {
         for (const auto& keyValue : keyValues) {
@@ -109,7 +109,7 @@ CBE::ContainerPtr Logic::selectContainer(const std::string& prompt) {
       inquireString(prompt);
     for (const auto& item : items) {
       if(item->name() == containerName) {
-        return cloudBackend->castContainer(item);
+        return CBE::CloudBackend::castContainer(item);
       }
     }
     std::cout << "Error: the container you asked for, \"" << containerName
@@ -123,6 +123,7 @@ CBE::ContainerPtr Logic::selectContainer(const std::string& prompt) {
 
 CBE::ObjectPtr Logic::createObject(CBE::ContainerPtr inContainer) {
   std::cout << "Create Object" << std::endl;
+  const std::string name = inquireString("Set name for Object");
   const int numOftags =
                       inquireInt("Set the number of Key/Value pairs you want");
   CBE::metadata_type keyValues;
@@ -136,7 +137,6 @@ CBE::ObjectPtr Logic::createObject(CBE::ContainerPtr inContainer) {
                                    true /* defaultVal */);
     keyValues[tag] = std::pair<std::string, bool>(value, indexed);
   }
-  const std::string name = inquireString("Set name for Object");
   CBE::ItemDelegatePtr itemDelegate = std::make_shared<ItemEventProtocol>(this);
   if (numOftags > 0) {
     return inContainer->createObject(name, itemDelegate, keyValues);
