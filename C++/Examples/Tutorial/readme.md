@@ -10,6 +10,10 @@ Release notes
 
 Release 2022-03-24
 ------------------
+* added example cmake file with corresponding read-me file
+* 
+Release 2022-03-24
+------------------
 * The code has been updated to the current version of the SDK C++.
 
 Release 2021-06-04
