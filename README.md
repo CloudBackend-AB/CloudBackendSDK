@@ -31,7 +31,7 @@ Change the user account for the sample program in user_credentials.cpp
 Notes: This SDK has been built and tested on Ubuntu
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
-
+# Android
 current version Android SDK:
 1.3.5
 
@@ -39,12 +39,17 @@ Release notes:
 built on c++ version 1.3.5 of the SDK.
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
-
+# Java
 current version Java wrapper SDK:
+1.4.6.3
+
+Release Notes:
+Minor bug fixes.
+
+SDK Java version:
 1.4.6
 
 Release Notes:
-
 Built on c++ version 1.4.6 of the SDK.
 
 SDK Java version:
@@ -54,13 +59,18 @@ Release notes JAVA/Android:
 The java and android wrappers are built on the c++ sdk version 1.3.5 this includes share actions but not group actions.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------
-
+# C++
 current version SDK c++:
+1.4.6.3
+
+Release notes:
+Minor bug fixes.
+
+SDK c++ version:
 1.4.6.2
 
 Release notes:
 repackaged directory structure
-
 
 SDK c++ version:
 1.4.6
