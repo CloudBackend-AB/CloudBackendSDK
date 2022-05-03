@@ -1,555 +1,429 @@
-import com.cbe.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.AbstractMap;
 import java.util.Properties;
+import java.util.Random;
 
+import com.cbe.ACL_Map;
+import com.cbe.Account;
+import com.cbe.CloudBackend;
+import com.cbe.Container;
+import com.cbe.Filter;
+import com.cbe.Item;
+import com.cbe.Obj_KV_Map;
+import com.cbe.Obj_VI_Pair;
+import com.cbe.QueryResult;
 
 public class Airplanes {
 
-  public CloudBackend login(String credentials) {
-    CloudBackend tempObj = null;
-    try (InputStream input = new FileInputStream("../../resources/config.properties")) {
+  private final CloudBackend  cloudBackend;
+  public Account              account;
 
-      Properties prop = new Properties();
+  public Airplanes(String credentials) {
+    try (final InputStream inputStream =
+                     new FileInputStream("../../resources/config.properties")) {
+      final var prop = new Properties();
 
       // load a properties file
-      prop.load(input);
+      prop.load(inputStream);
 
       // get the property value and set the login credentials
-      String username = prop.getProperty(credentials + ".username");
-      String password = prop.getProperty(credentials + ".password");
-      String tenant = prop.getProperty(credentials + ".tenant");
+      final var username = prop.getProperty(credentials + ".username");
+      final var password = prop.getProperty(credentials + ".password");
+      final var tenant = prop.getProperty(credentials + ".tenant");
 
-      AccountDelegate delegate = new AccountDelegate();
-      tempObj = CloudBackend.logIn(username, password, tenant, delegate);
-      while (!delegate.finished) {
-        try
-        {
-            Thread.sleep(10);
-        }
-        catch(Exception e)
-        {
-             System.out.println(e);
-        }
-      }   
-     
+      final var accountDelegate = new AccountDelegate();
+      CloudBackend.logIn(username, password, tenant, accountDelegate);
+      cloudBackend = accountDelegate.waitForRsp();
+      if (cloudBackend == null) {
+        throw new RuntimeException("Login failed. Exit program.");
+      }
+      account = cloudBackend.account();
     } catch (IOException ex) {
-    ex.printStackTrace();
+      // Soften the IOException
+      throw new RuntimeException("Failed to open resource file", ex);
     }
-    // If login happened then return the cloudbackend object.
-    return tempObj;
+    
   }
   
-  public QueryResult queryR(CloudBackend obj, Filter filter, long containerId) {
-    ItemDelegate delegate = new ItemDelegate();
-    // obj.account().rootContainer().query(delegate);
-    obj.query(containerId, filter, delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return delegate.qR;
+  public QueryResult query(Filter filter, long containerId) {
+    QueryDelegate delegate = new QueryDelegate();
+    cloudBackend.query(containerId, filter, delegate);
+    return delegate.waitForRsp();
   }
 
-  public QueryResult query(Container container) {
-    ItemDelegate delegate = new ItemDelegate();
-    container.query(delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return delegate.qR;
-  }
-
-  public Container createContainer(Container container) {
-    ItemDelegate delegate = new ItemDelegate();
-    Container tempCont = container.create("javaAirports", delegate);
-    System.out.println("tempContainer id" + tempCont.id());
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return tempCont;
-  }
-
-  public Container createContainer2(Container container, String name) {
-    ItemDelegate delegate = new ItemDelegate();
-    Container tempCont = container.create(name, delegate);
-    System.out.println("tempContainer id" + tempCont.id());
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return tempCont;
-  }
-
-  public com.cbe.Object uploadBinary(Container container) throws IOException {
+  private static class QueryDelegate extends com.cbe.ItemEventProtocol {
+    private QueryResult queryResult; /* null */
+    private String      errorInfo;
+    private boolean     finished;  /* false */
     
-    com.cbe.Object tempObj = null;
-
-    try (InputStream input = new FileInputStream("../../resources/config.properties")) {
-      Properties prop = new Properties();
+    @Override
+    synchronized public void onQueryLoaded(QueryResult dir) {
+      queryResult = dir;
+      finished = true;
+      notify();
+    }
+    @Override
+    synchronized public void onLoadError(Filter filter, long operation,
+                                         long code,
+                                         String reason, String message) {
+      errorInfo = "LoadError: code=" + code + ", reson=\"" + reason +
+                  "\", message=\"" + message + "\"";
+      finished = true;
+      notify();
+    }
+    synchronized public QueryResult waitForRsp() {
+      while (!finished) {
+        try {
+          wait();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+      if (queryResult == null) {
+        throw new RuntimeException(errorInfo);
+      }
+      return queryResult; 
+    }
+  } // class QueryDelegate
+  
+  public Container createContainer(Container parentContainer, String name) {
+    class CreateContainerDelegate extends com.cbe.ItemEventProtocol {
+      Container       container;
+      private String  errorInfo;
+      private boolean finished = false;
       
-      // load a properties file
-      prop.load(input);
-
-      TransferDelegate delegate = new TransferDelegate();
-      byte[] data = Files.readAllBytes(Paths.get(prop.getProperty("binaryPath")));
-      tempObj = container.uploadBinary(prop.getProperty("binaryFileName"), data, delegate);
-      System.out.println("tempObject id" + tempObj.id());
-
-
-      while (!delegate.finished) {
-        try
-        {
-            Thread.sleep(10);
+      @Override
+      synchronized public void onContainerAdded(Container container) {
+        this.container = container;
+        finished = true;
+        notify();
+      }
+      @Override
+    synchronized public void onItemError(Item parentContainer, int type,
+                                         long operation, long failedAtState,
+                                         long code, String reason,
+                                         String message) {
+        errorInfo = "Error: Failed to create sub container in \"" +
+                    parentContainer.name() + "\": " +
+                    "type="           + type +
+                    ",operation="     + operation +
+                    ",failedAtState=" + failedAtState +
+                    "\",code="        + code +
+                    ",reason=\""      + reason +
+                    "\",message=\""   + message + "\"";
+        finished = true;
+        notify();
+      }
+      synchronized public Container waitForRsp() {
+        while (!finished) {
+          try {
+            wait();
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
         }
-        catch(Exception e)
-        {
-             System.out.println(e);
+        if (container == null) {
+          throw new RuntimeException(errorInfo);
         }
-      }   
-     
-    } catch (IOException ex) {
-    ex.printStackTrace();
-    }
-    
-    return tempObj;
-  }
+        return container; 
+      }
+    } // class CreateContainerDelegate
 
-  public com.cbe.Object uploadObject(Container container) {
-    
-    com.cbe.Object tempObj = null;
+    final var delegate = new CreateContainerDelegate();
+    parentContainer.create(name, delegate);
+    final var container = delegate.waitForRsp();
+    // System.out.println("Created with id " + container.id());
+    return container;
+  } // createContainer()
 
-    try (InputStream input = new FileInputStream("../../resources/config.properties")) {
-      Properties prop = new Properties();
+  public com.cbe.Object createObject2(Container parentContainer, Obj_KV_Map metadata, String name) {
+    class CreateObjectDelegate extends com.cbe.ItemEventProtocol {
+      com.cbe.Object  object;
+      private String  errorInfo;
+      private boolean finished = false;
       
-      // load a properties file
-      prop.load(input);
-
-      TransferDelegate delegate = new TransferDelegate();
-      tempObj = container.upload(prop.getProperty("filename"), prop.getProperty("path") , delegate);
-      System.out.println("tempObject id" + tempObj.id());    
-
-      while (!delegate.finished) {
-        try
-        {
-          Thread.sleep(10);
+      @Override
+      synchronized public void onObjectAdded(com.cbe.Object object) {
+        this.object = object;
+        finished = true;
+        notify();
+      }
+      @Override
+      synchronized public void onItemError(Item parentContainer, int type,
+                                           long operation, long failedAtState,
+                                           long code, String reason,
+                                           String message) {
+        errorInfo = "Error: Failed to create sub container in \"" +
+                    parentContainer.name() + "\": " +
+                    "type="           + type +
+                    ",operation="     + operation +
+                    ",failedAtState=" + failedAtState +
+                    "\",code="        + code +
+                    ",reason=\""      + reason +
+                    "\",message=\""   + message + "\"";
+        finished = true;
+        notify();
+      }
+      synchronized public com.cbe.Object waitForRsp() {
+        while (!finished) {
+          try {
+            wait();
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
         }
-        catch(Exception e)
-        {
-          System.out.println(e);
+        if (object == null) {
+          throw new RuntimeException(errorInfo);
         }
+        return object; 
       }
-    } catch (IOException ex) {
-      ex.printStackTrace();
-    }
+    } // class CreateObjectDelegate
 
-    return tempObj;
-  }
-
-  public com.cbe.Object createObject(Container container) {
-    ItemDelegate delegate = new ItemDelegate();
-    Obj_VI_Pair metaDataValue = new Obj_VI_Pair("testMetadata", true);
-
-    Obj_KV_Map metadata = new Obj_KV_Map();
-    metadata.put("testKey", metaDataValue);
-
-    com.cbe.Object tempObj = container.createObject("JavaTestObject", delegate, metadata);
-
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return tempObj;
-  }
-
-  public com.cbe.Object createObject2(Container container, Obj_KV_Map metadata, String name) {
-    ItemDelegate delegate = new ItemDelegate();
-    // Obj_VI_Pair metaDataValue = new Obj_VI_Pair("testMetadata", true);
-
-    // Obj_KV_Map metadata = new Obj_KV_Map();
-    // metadata.put("testKey", metaDataValue);
     metadata.forEach((K,V)->{
       System.out.printf("%14s, ", V.getFirst());
     });
     System.out.print("\t");
-    com.cbe.Object tempObj = container.createObject(name, delegate, metadata);
-
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return tempObj;
+    
+    final var delegate = new CreateObjectDelegate();
+    parentContainer.createObject(name, delegate, metadata);
+    final var object = delegate.waitForRsp();
+    System.out.println("Created object \"" + object.name() + "\" with id " +
+                       object.id());
+    return object;
   }
 
   public void removeContainer(Container container) {
-    ItemDelegate delegate = new ItemDelegate();
+    class RemoveContainerDelegate extends com.cbe.ItemEventProtocol {
+      private String  errorInfo;
+      private boolean finished = false;
+      private String name;
+      
+      @Override
+      synchronized public void onContainerRemoved(long    containerId,
+                                                  String  name) {
+        this.name = name;
+        finished = true;
+        notify();
+      }
+      @Override
+      synchronized public void onItemError(Item parentContainer, int type,
+                                           long operation, long failedAtState,
+                                           long code, String reason,
+                                           String message) {
+        errorInfo = "Error: Failed to remove container \"" +
+                    container.name() + "\": " +
+                    "type="           + type +
+                    ",operation="     + operation +
+                    ",failedAtState=" + failedAtState +
+                    "\",code="        + code +
+                    ",reason=\""      + reason +
+                    "\",message=\""   + message + "\"";
+        finished = true;
+        notify();
+      }
+      synchronized public String waitForRsp() {
+        while (!finished) {
+          try {
+            wait();
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+        }
+        if (name == null) {
+          throw new RuntimeException(errorInfo);
+        }
+        return name; 
+      }
+    } // class RemoveContainerDelegate
+
+    final var delegate = new RemoveContainerDelegate();
     container.remove(delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return;
-  }
-
-  public void setContainerACL(Container container , ACL_Map permissionsMap) {
-    ShareDelegate delegate = new ShareDelegate();
-    container.setACL(permissionsMap, delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return;
-  }
-
-  public AbstractMap<Long,Integer> getContainerACL(Container container) {
-    ShareDelegate delegate = new ShareDelegate();
-    container.getACL(delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return delegate.permissionsMap;
-
-  }
-
-  public long share(long userGroupId, Container container) {
-    ShareDelegate delegate = new ShareDelegate();
-    container.share(userGroupId, "javaShare", delegate);
-
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return delegate.shareId;
-  }
-
-  public QueryResult listAvailableShares(com.cbe.CloudBackend cloudbackend) {
-    ShareDelegate delegate = new ShareDelegate();
-    cloudbackend.shareManager().listAvailableShares(delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return delegate._qr;
-  }
-
-  public void unshareContainer(long shareId, Container container) {
-    ShareDelegate delegate = new ShareDelegate();
-    container.unShare(shareId, delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
+    delegate.waitForRsp();
   }
 
   public static void main(String[] argv) {
     System.out.println("Airplanes program start");
-    Airplanes inst = new Airplanes();
-    CloudBackend cbobj = inst.login("cr1");
-    if (cbobj.account().userId()>0) {
-      System.out.println("Login: " + cbobj.account().username() + " " + cbobj.account().firstName() + " " + cbobj.account().lastName());
-    } else {
-      System.out.println("Login failed. Exit program.");
-      return;
-    }
+    final var airplaines = new Airplanes("cr1" /* credentials */);
+    final var account = airplaines.account;
+    System.out.println("Login: " + account.username() + " " +
+                       account.firstName() + " " +
+                       account.lastName());
 
-    Filter filter = new Filter();
-    filter.setAscending(true);
+    final var rootContainer = account.rootContainer();
+    final var ascendingFilter = new Filter();
+    ascendingFilter.setAscending(true);
     
-    QueryResult qR = inst.queryR(cbobj, filter, cbobj.account().rootContainer().id());
-    
-    if(qR == null) {
-      System.out.println("Query failed null. ");
-    } else {
-      AbstractList<Item> items = qR.getItemsSnapshot();
-      for(Item item : items) {
-        System.out.println("Item: " + item.name());
-      }
-    }
-
-    Container testContainer = inst.createContainer(cbobj.account().rootContainer());
-    if (!testContainer.idLoaded()) {
-      System.out.println("Container creation failed!");
-      return;
-    } else {
-      System.out.println("Container created id: " + testContainer.id());
-    }
-
-
-    AbstractList<Item> items = qR.getItemsSnapshot();
-      for(Item item : items) {
-        System.out.println("Item: " + item.name());
-      }
-    
-    com.cbe.Object object = inst.uploadObject(testContainer);
-    if (!object.idLoaded()) {
-      System.out.println("Object creation failed!");
-      return;
-    } else {
-      System.out.println("Object created id: " + object.id());
-    }
-    
-    qR = inst.query(testContainer);
-    items = qR.getItemsSnapshot();
-    for(Item item : items) {
+    final var queryResult = airplaines.query(ascendingFilter,
+                                             rootContainer.id());
+    for(Item item : queryResult.getItemsSnapshot()) {
       System.out.println("Item: " + item.name());
     }
-
-    try {
-      com.cbe.Object binaryObject = inst.uploadBinary(testContainer);
-    }
-    catch(IOException e) {
-      e.printStackTrace();
-    }
-    
-    items = qR.getItemsSnapshot();
-    for(Item item : items) {
-      System.out.println("Item: " + item.name());
-    }
-
-    long _parentId_ = testContainer.id();
+    final var rand = new Random();
+    final var startContainer = "AirSimulation" + Integer.toString(rand.nextInt((1000000)));
+    final var subContainer = airplaines.createContainer(rootContainer, startContainer);
+    System.out.println("Created container " + subContainer.name() + " with id: " + subContainer.id());
 
     // Testing to create some data points for 2 different containers Airports and Planes.
 
-    System.out.print("\nLoad airports\t");
-    Container airports = inst.createContainer2(cbobj.account().rootContainer(), "Airports");
+    System.out.println("\nLoad airports");
+    Container airports = airplaines.createContainer(subContainer, "Airports");
 
-    for(int k = 1; k <= 22; k++) {
-      final List<String> countries        = Collections.unmodifiableList(Arrays.asList("France", "Spain", "UK" , "Netherlands", "Denmark", "Norway", "Finland", "Estonia", "Lithuania", "Latvia", "Iceland", "Luxemburg", "Belgium", "Germany", "Poland", "Italy", "Czech Rebulic", "Slovakia", "Austria", "Switzerland", "Slovenia", "Greece", "Irland"));
-      final List<String> airportLocations = Collections.unmodifiableList(Arrays.asList("Paris", "Madrid", "London", "Amsterdam", "Copenhagen", "Oslo", "Helsinki", "Tallin", "Vilnius", "Riga", "Reijkavik", "Luxemburg", "Antwerpen", "Berlin", "Warsaw", "Rome", "Praha", "Bratislava", "Wien", "Bern", "Ljubljana", "Athens", "Dublin"));
-    
-     Obj_KV_Map mdata = new Obj_KV_Map();
-     mdata.put("Country", new Obj_VI_Pair(countries.get(k), true));
-     mdata.put("Name", new Obj_VI_Pair(airportLocations.get(k), true));
-     inst.createObject2(airports, mdata, airportLocations.get(k));
-    }
-  
-    for(int n = 0; n <= 6; n++) {
-      final List<String> airportLocations = Collections.unmodifiableList(Arrays.asList("Gothenburg", "Sundsvall", "Linköping", "Örebro", "Norrköping", "Stockholm", "Malmö"));
-
-      Obj_KV_Map mdata = new Obj_KV_Map();
-      mdata.put("Country", new Obj_VI_Pair("Sweden", true));
-      mdata.put("Name", new Obj_VI_Pair(airportLocations.get(n), true));
-      inst.createObject2(airports, mdata, airportLocations.get(n));
-    }
-
-
-    System.out.print("\nLoad planes\t");
-    Container planes = inst.createContainer2(cbobj.account().rootContainer(), "Planes");
-
-    for(int j=100; j<=200; j++) {
+    class Entry {
+      final String country;
+      final String airportLocation;
       
-      if((j%20) == 0) {
-        final List<String> airportLocations = Collections.unmodifiableList(Arrays.asList("Gothenburg", "Sundsvall", "Linköping", "Örebro", "Norrköping", "Stockholm", "Malmö"));
-        final List<String> airplaneType = Collections.unmodifiableList(Arrays.asList("Boeing_737", "Airbus_A350", "Boeing_747", "Airbus_A220", "Boeing_777", "Boeing_787", "Airbus_A320"));
-        final List<String> airLine = Collections.unmodifiableList(Arrays.asList("AY", "DY", "SK"));
-        
-        Obj_KV_Map mdata = new Obj_KV_Map();
-
-        Random rand = new Random();
-        mdata.put("Location", new Obj_VI_Pair(airportLocations.get(rand.nextInt((7))), true));
-        mdata.put("Model", new Obj_VI_Pair(airplaneType.get(rand.nextInt((7))), true));
-        mdata.put("APID", new Obj_VI_Pair(Integer.toString(rand.nextInt((10000))), true));
-        final String name = airLine.get(rand.nextInt((3))) + Integer.toString(j);
-        inst.createObject2(planes, mdata, name);
-      
-      } else {
-        final List<String> airportLocations = Collections.unmodifiableList(Arrays.asList("Paris", "Madrid", "London", "Amsterdam", "Copenhagen", "Oslo", "Helsinki", "Tallin", "Vilnius", "Riga", "Reijkavik", "Luxemburg", "Antwerpen", "Berlin", "Warsaw", "Rome", "Praha", "Bratislava", "Wien", "Bern", "Ljubljana", "Athens", "Dublin"));
-        final List<String> airplaneType = Collections.unmodifiableList(Arrays.asList("Boeing_737", "Airbus_A350", "Boeing_747", "Airbus_A220", "Boeing_777", "Boeing_787", "Airbus_A320"));
-        final List<String> airLine = Collections.unmodifiableList(Arrays.asList("AF", "AY", "AZ", "BA", "DY", "KL", "LH", "LX", "SK", "TP", "UX"));
-
-        Obj_KV_Map mdata = new Obj_KV_Map();
-
-        Random rand = new Random();
-        mdata.put("Location", new Obj_VI_Pair(airportLocations.get(rand.nextInt((22))), true));
-        mdata.put("Model", new Obj_VI_Pair(airplaneType.get(rand.nextInt((7))), true));
-        mdata.put("APID", new Obj_VI_Pair(Integer.toString(rand.nextInt((10000))), true));
-        final String name = airLine.get(rand.nextInt((11))) + Integer.toString(j);
-        inst.createObject2(planes, mdata, name);
+      Entry(String country, String airportLocation) {
+        this.country = country;
+        this.airportLocation = airportLocation;
       }
+      
+      
+    }
+    final Entry entries[] = { new Entry("France"       , "Paris"),
+                              new Entry("Spain"        , "Madrid"),
+                              new Entry("UK"           , "London"    ),
+                              new Entry("Netherlands"  , "Amsterdam" ),
+                              new Entry("Denmark"      , "Copenhagen"),
+                              new Entry("Norway"       , "Oslo"      ),
+                              new Entry("Finland"      , "Helsinki"  ),
+                              new Entry("Estonia"      , "Tallin"    ),
+                              new Entry("Lithuania"    , "Vilnius"   ),
+                              new Entry("Latvia"       , "Riga"      ),
+                              new Entry("Iceland"      , "Reijkavik" ),
+                              new Entry("Luxemburg"    , "Luxemburg" ),
+                              new Entry("Belgium"      , "Antwerpen" ),
+                              new Entry("Germany"      , "Berlin"    ),
+                              new Entry("Poland"       , "Warsaw"    ),
+                              new Entry("Italy"        , "Rome"      ),
+                              new Entry("Czech Repulic", "Praha"     ),
+                              new Entry("Slovakia"     , "Bratislava"),
+                              new Entry("Austria"      , "Wien"      ),
+                              new Entry("Switzerland"  , "Bern"      ),
+                              new Entry("Slovenia"     , "Ljubljana" ),
+                              new Entry("Greece"       , "Athens"    ),
+                              new Entry("Irland"       , "Dublin"    ),
+                      };
+
+    final var metadata = new Obj_KV_Map();
+    for (final var entry : entries) {
+      metadata.put("Country", new Obj_VI_Pair(entry.country,
+                                              true /* indexed */));
+      metadata.put("Name", new Obj_VI_Pair(entry.airportLocation, true));
+      airplaines.createObject2(airports, metadata, entry.airportLocation);
+      metadata.clear();
+    }
+
+    final String swedishAirports[] = { "Gothenburg", "Sundsvall", "Linköping",
+                                       "Örebro", "Norrköping", "Stockholm",
+                                       "Malmö", "Luleå", "Kiruna" };
+    
+    metadata.put("Country", new Obj_VI_Pair("Sweden", true));
+    for(final var swedishAirport : swedishAirports) {
+      metadata.put("Name", new Obj_VI_Pair(swedishAirport, true));
+      airplaines.createObject2(airports, metadata, swedishAirport);
+    }
+    metadata.clear();
+
+
+    System.out.println("\nLoad planes");
+    Container planes = airplaines.createContainer(subContainer, "Planes");
+
+    final String aircraftModels[] = { "Boeing_737", "Airbus_A220", 
+                                      "Boeing_747", "Airbus_A320", 
+                                      "Boeing_777", "Airbus_A340",
+                                      "Boeing_787", "Airbus_A350" };
+    final String airLines[] = { "AF", "AY", "AZ", "BA", "DY", "IB", 
+                                "KL", "LH", "LX", "SK", "TP", "UX" };
+    for(int index=100; index<=160 /* !!! */; index++) {
+      if((index%20) == 0) {
+        metadata.put("Location",
+                     new Obj_VI_Pair(
+                       swedishAirports[rand.nextInt(swedishAirports.length)],
+                       true));
+      } else {
+        metadata.put("Location",
+                      new Obj_VI_Pair(
+                        entries[rand.nextInt(entries.length)].airportLocation,
+                        true));
+      }
+      metadata.put("Model",
+                   new Obj_VI_Pair(aircraftModels[
+                                     rand.nextInt(aircraftModels.length)],
+                                   true));
+      final var aircraftId = Integer.toString(rand.nextInt(9000)+1000);
+      metadata.put("ACID", new Obj_VI_Pair(aircraftId, true));
+      final var flight = airLines[rand.nextInt(airLines.length)] +
+                                  Integer.toString(index);
+      airplaines.createObject2(planes, metadata, flight);
     }
     
     // testing query.join for Airports with Planes.
 
-    Filter f1 = new Filter();
-    f1.setQuery("Country:Sweden");
-    f1.setDataType(4);    // ItemType::Object
-    Filter f2 = new Filter();
-    f2.setQuery("Model:Boeing*");
-    f2.setDataType(4);    // ItemType::Object
+    final var countryFilter = new Filter();
+    countryFilter.setQuery("Country:Sweden");
+    countryFilter.setDataType(4);    // ItemType::Object
+    final var modelFilter = new Filter();
+    modelFilter.setQuery("Model:Boeing*");
+    modelFilter.setDataType(4);    // ItemType::Object
   
-    System.out.println("\nFilter " + f1.getQuery() + " and " + f2.getQuery());
-    ItemDelegate delegate = new ItemDelegate();
-    delegate.finished = false;
-    airports.query(f1, delegate).join(planes, "Name", "Location", f2);  
+    System.out.println("\n\nFilter " + countryFilter.getQuery() + " and " +
+                       modelFilter.getQuery());
+    System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    final var flightsInCountryDelegate1 = new QueryDelegate();
+    airports.query(countryFilter,
+                   flightsInCountryDelegate1)
+            .join(planes,"Name" /* key1 */, "Location" /* key2 */, modelFilter);  
 
-    while(!delegate.finished) {
-      try
-      {
-          Thread.sleep(1000);
-      }
-      catch(InterruptedException ex)
-      {
-          Thread.currentThread().interrupt();
-      }
-    }
-    
-    items = delegate.qR.getItemsSnapshot();
-    System.out.println("\nResult count: " + items.size());
-    
-    for(Item item : items) {
-      System.out.print("Name: " + item.name());
-      System.out.print("\tpid(" + item.parentId());
-      System.out.println(") ts: " + item.updated());
-      if(item.type() == 4) {
-        com.cbe.Object obj = com.cbe.CloudBackend.castObject(item);
-        if(obj.keyValues().size() != 0) {
-          // System.out.println("Key/Value data:");
-          System.out.println("---------------------------------------------------");
-          AbstractMap<String, Obj_VI_Pair> meta = obj.keyValues();
-          meta.forEach((K,V)->{
-            if (V.getSecond()) {
-              System.out.printf("%10s = %-15s  (indexed) \n", K, V.getFirst());
-            } else {
-              System.out.printf("%10s = %-15s \n", K, V.getFirst());
-            }
-          });
-        }
-        System.out.println("===================================================");
-      }
-    }
+    printItems(flightsInCountryDelegate1.waitForRsp().getItemsSnapshot(),
+               "Boeing in Sweden");
 
-    f2.setQuery("Model:Airbus*");
-  
-    System.out.println("\nFilter " + f1.getQuery() + " and " + f2.getQuery());
-    ItemDelegate delegate1 = new ItemDelegate();
-    delegate.finished = false;
-    airports.query(f1, delegate1).join(planes, "Name", "Location", f2);  
+    modelFilter.setQuery("Model:Airbus*");
+    System.out.println("\n\nFilter " + countryFilter.getQuery() + " and "
+                       + modelFilter.getQuery());
+    System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    final var flightsInCountryDelegate2 = new QueryDelegate();
+    airports.query(countryFilter, flightsInCountryDelegate2)
+            .join(planes, "Name", "Location", modelFilter);  
+    printItems(flightsInCountryDelegate2.waitForRsp().getItemsSnapshot(),
+               "Airbus in Sweden");
 
-    while(!delegate1.finished) {
-      try
-      {
-          Thread.sleep(1000);
-      }
-      catch(InterruptedException ex)
-      {
-          Thread.currentThread().interrupt();
-      }
-    }
-    
-    items = delegate1.qR.getItemsSnapshot();
-    System.out.println("\nResult count: " + items.size());
-    
-    for(Item item : items) {
-      System.out.print("Name: " + item.name());
-      System.out.print("\tpid(" + item.parentId());
-      System.out.println(") ts: " + item.updated());
-      if(item.type() == 4) {
-        com.cbe.Object obj = com.cbe.CloudBackend.castObject(item);
-        if(obj.keyValues().size() != 0) {
-          // System.out.println("Key/Value data:");
-          System.out.println("---------------------------------------------------");
-          AbstractMap<String, Obj_VI_Pair> meta = obj.keyValues();
-          meta.forEach((K,V)->{
-            if (V.getSecond()) {
-              System.out.printf("%10s = %-15s  (indexed) \n", K, V.getFirst());
-            } else {
-              System.out.printf("%10s = %-15s \n", K, V.getFirst());
-            }
-            // System.out.println("Key: " + K);
-            // System.out.println("Value: " + V.getFirst() + " Indexed (true/false): " + V.getSecond());
-          });
-        }
-        System.out.println("===================================================");
-      }
-    }
-    
-
-    // cleanup.
-    inst.removeContainer(airports);
-    inst.removeContainer(planes);
-    inst.removeContainer(testContainer);
+    // cleanup
+    airplaines.removeContainer(subContainer);
+    System.out.println("\nRemoved " + subContainer.name());
+    Runtime.getRuntime().runFinalization();
     System.out.println("Airplanes program end.");
+    try {
+      Thread.sleep(100);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
   }
 
+  private static void printItems(com.cbe.Items_Vec items, String headline) {
+    System.out.printf("\n%s, count: %d\n", headline, items.size());
+    for(final var item : items) {
+      System.out.print("Name: " + item.name());
+      System.out.print(" pid(" + item.parentId());
+      System.out.println(") ts: " + item.updated());
+      if(item.type() == 4 /* ItemType::Object */) {
+        final var object = CloudBackend.castObject(item);
+        if(object.keyValues().size() != 0) {
+          System.out.println("-----------------------------------------------");
+          final var keyValues = object.keyValues();
+          keyValues.forEach((key, value)->{
+            System.out.printf("%10s = %-15s ", key, value.getFirst());
+            if (value.getSecond() /* indexed */) {
+              System.out.println("(indexed)");
+            } else {
+              System.out.println();
+            }
+          } /* action */);
+        }
+        System.out.println("===============================================");
+      }
+    }
+  }
 }
 

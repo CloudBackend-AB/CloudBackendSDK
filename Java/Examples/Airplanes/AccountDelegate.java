@@ -1,20 +1,35 @@
-import com.cbe.*;
+import com.cbe.CloudBackend;
 
-public class AccountDelegate extends AccountEventProtocol {
+public class AccountDelegate extends com.cbe.AccountEventProtocol {
+    private CloudBackend cloudBackend = null;
+    private boolean finished = false;
 
-    public boolean finished = false;
+    @Override
+    synchronized public void onLogin(long atState, CloudBackend cloudBackend) {
+      this.cloudBackend = cloudBackend;
+      finished = true;
+      notify();
+    }
 
-    AccountDelegate() {}
+    @Override
+    synchronized public void onError(long failedAtState, long code,
+                                     String reason, String message) {
+      System.out.println("Login error: code=" + code +
+                         ", reason=\"" + reason +
+                         "\", message=\"" + message + "\"");
+      finished = true;
+      notify();
+    }
     
-    @Override
-    public void onLogin(long atState, CloudBackend cloudbackend) {
-        System.out.println("onlogin: " + cloudbackend.account().username() + " " + cloudbackend.account().rootContainer().id());
-        this.finished = true;
+    synchronized public CloudBackend waitForRsp() {
+      while (!finished) {
+        try {
+          wait();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+      return cloudBackend; 
     }
-
-    @Override
-    public void onError(long failedAtState, long code, String reason, String message) {
-        System.out.println("Login error: code=" + code + ", reson=\"" + reason + "\", message=\"" + message + "\"");
-        this.finished = true;
-    }
+    
 }
