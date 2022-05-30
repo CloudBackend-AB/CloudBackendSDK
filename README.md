@@ -45,6 +45,7 @@ current version Java wrapper SDK:
 
 Release Notes:
 Support for < and > in filter.
+Example/Airplanes updated
 
 SDK Java version:
 1.4.6.3
