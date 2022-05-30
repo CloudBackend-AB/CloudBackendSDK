@@ -3,7 +3,8 @@
 # Option -Djava.library.path=path/to/libraries can point to the SDK lib
 # if you want to have them somewhere else than the given path. 
 
-javac -cp '.:../../lib/com.cbe.jar' *.java
+mkdir -p xclass
+javac -cp '.:../../lib/com.cbe.jar' -d xclass/ *.java
 
 result=$?
 
@@ -13,4 +14,4 @@ then
     exit $result
 fi
 
-java -Djava.library.path=../../lib/ -cp '.:../../lib/com.cbe.jar' Airplanes
+# java -Djava.library.path=../../lib/ -cp 'xclass:../../lib/com.cbe.jar' Airplanes
