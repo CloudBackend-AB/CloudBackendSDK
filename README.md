@@ -1,4 +1,4 @@
-# CloudBackendSDK 1.4.6.3
+# CloudBackendSDK 1.4.6.4
 
 This repository contains the CloudBackend SDK.  The CloudBackend SDK is a tool for application developers that provides a simple way to store data in the cloud.  The repository currently contains a build for linux x86_64.
 
@@ -41,6 +41,12 @@ built on c++ version 1.3.5 of the SDK.
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 # Java
 current version Java wrapper SDK:
+1.4.6.4
+
+Release Notes:
+Support for < and > in filter.
+
+SDK Java version:
 1.4.6.3
 
 Release Notes:
@@ -61,6 +67,12 @@ The java and android wrappers are built on the c++ sdk version 1.3.5 this includ
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 # C++
 current version SDK c++:
+1.4.6.4
+
+Release notes:
+Support for < and > in filter.
+
+SDK c++ version:
 1.4.6.3
 
 Release notes:
