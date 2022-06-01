@@ -41,6 +41,12 @@ built on c++ version 1.3.5 of the SDK.
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 # Java
 current version Java wrapper SDK:
+1.4.6.7
+
+Release Notes:
+Due to a wrapper missmatch in callbacks TransferEventProtocol does not exists anymore (was a combined class of the protocols TransferUploadEvent and TransferDownloadEvent). Now the two protocols are added and used instead seperatly.
+
+SDK Java version:
 1.4.6.4
 
 Release Notes:
