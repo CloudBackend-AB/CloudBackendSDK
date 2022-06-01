@@ -122,7 +122,7 @@ public class RunMe {
       // load a properties file
       prop.load(input);
 
-      TransferDelegate delegate = new TransferDelegate();
+      TransferUploadDelegate delegate = new TransferUploadDelegate();
       byte[] data = Files.readAllBytes(Paths.get(prop.getProperty("binaryPath")));
       tempObj = container.uploadBinary(prop.getProperty("binaryFileName"), data, delegate);
       System.out.println("tempObject id" + tempObj.id());
@@ -156,7 +156,7 @@ public class RunMe {
       // load a properties file
       prop.load(input);
 
-      TransferDelegate delegate = new TransferDelegate();
+      TransferUploadDelegate delegate = new TransferUploadDelegate();
       tempObj = container.upload(prop.getProperty("filename"), prop.getProperty("path") , delegate);
       System.out.println("tempObject id" + tempObj.id());    
 
