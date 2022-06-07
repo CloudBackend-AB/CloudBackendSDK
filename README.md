@@ -44,7 +44,8 @@ current version Java wrapper SDK:
 1.4.6.7
 
 Release Notes:
-Due to a wrapper missmatch in callbacks, TransferEventProtocol does not exists anymore. TransferEventProtocol was a combined class of the protocols TransferUploadEvent and TransferDownloadEvent. Now the two protocols mentioned are instead used seperatly.
+Due to a wrapper missmatch in callbacks, TransferEventProtocol does not exists anymore. TransferEventProtocol was a combined class of the protocols TransferUploadEvent and TransferDownloadEvent. Now the two protocols mentioned are instead used seperatly. 
+Example Simple added download of files.
 
 SDK Java version:
 1.4.6.4
