@@ -112,6 +112,23 @@ public class RunMe {
     return tempCont;
   }
 
+  public void downloadObject(com.cbe.Object object, String path) {
+    TransferDownloadDelegate delegate = new TransferDownloadDelegate();
+    object.download(path , delegate);
+    System.out.println("called download to " + path);    
+    while (!delegate.finished) {
+      try
+      {
+        Thread.sleep(10);
+      }
+      catch(Exception e)
+      {
+        System.out.println(e);
+      }
+    }
+    return;
+  }
+
   public com.cbe.Object uploadBinary(Container container) throws IOException {
     
     com.cbe.Object tempObj = null;
@@ -126,7 +143,6 @@ public class RunMe {
       byte[] data = Files.readAllBytes(Paths.get(prop.getProperty("binaryPath")));
       tempObj = container.uploadBinary(prop.getProperty("binaryFileName"), data, delegate);
       System.out.println("tempObject id" + tempObj.id());
-
 
       while (!delegate.finished) {
         try
@@ -360,12 +376,12 @@ public class RunMe {
         System.out.println("Item: " + item.name());
       }
     
-    com.cbe.Object object = inst.uploadObject(testContainer);
-    if (!object.idLoaded()) {
+    com.cbe.Object object1 = inst.uploadObject(testContainer);
+    if (!object1.idLoaded()) {
       System.out.println("Object creation failed!");
       return;
     } else {
-      System.out.println("Object created id: " + object.id());
+      System.out.println("Object created id: " + object1.id());
     }
     
     qR = inst.query(testContainer);
@@ -374,8 +390,9 @@ public class RunMe {
       System.out.println("Item: " + item.name());
     }
 
+    com.cbe.Object object2 = null;
     try {
-      com.cbe.Object binaryObject = inst.uploadBinary(testContainer);
+      object2 = inst.uploadBinary(testContainer);
     }
     catch(IOException e) {
       e.printStackTrace();
@@ -384,6 +401,23 @@ public class RunMe {
     items = qR.getItemsSnapshot();
     for(Item item : items) {
       System.out.println("Item: " + item.name());
+    }
+
+    String dPath = "/tmp/";
+    inst.downloadObject(object1, dPath);
+    if (!object1.idLoaded()) {
+      System.out.println("Object download failed!");
+      return;
+    } else {
+      System.out.println("1'st Object downloaded: " + object1.name() + " to " + dPath);
+    }
+
+    inst.downloadObject(object2, dPath);
+    if (!object2.idLoaded()) {
+      System.out.println("Object download failed!");
+      return;
+    } else {
+      System.out.println("2'nd Object downloaded: " + object2.name() + " to " + dPath);
     }
 
     long _parentId_ = testContainer.id();
@@ -427,7 +461,6 @@ public class RunMe {
     cont = cbobj2.castContainer(tempItem);
     com.cbe.Object cObj = inst2.createObject(cont);
    
-
     AbstractMap<String, Obj_VI_Pair> metadata = cObj.keyValues();
     metadata.forEach((K,V)->{
       if (V.getSecond()) {
@@ -441,6 +474,8 @@ public class RunMe {
 
     inst2.removeContainer(testContainer);
     
+    System.out.println("Java SDK version " + cbobj.version());
+    Runtime.getRuntime().runFinalization();
     System.out.println("RunMe program end.");
   }
 
