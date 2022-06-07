@@ -3,4 +3,4 @@
 # Option -Djava.library.path=path/to/libraries can point to the SDK lib
 # if you want to have them somewhere else than the given path. 
 
-java -Djava.library.path=../../lib/ -cp '.:../../lib/com.cbe.jar' Airplanes
+java -Djava.library.path=../../lib/ -cp 'xclass:../../lib/com.cbe.jar' Airplanes

@@ -6,4 +6,4 @@
 # if you want to have them somewhere else than the standard path. 
 
 # run
-java -Djava.library.path=../../lib/ -cp '.:../../lib/com.cbe.jar' LoadTable $*
+java -Djava.library.path=../../lib/ -cp 'xclass:../../lib/com.cbe.jar' LoadTable $*
