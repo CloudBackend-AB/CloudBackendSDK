@@ -17,4 +17,6 @@ linked with the Ubuntu version, so please do use the latest LTS Ubuntu version a
 This issue might be solved in the future, by being statically linked into the sdk:s .so
 (however not the poco and openSSL libraries).
 
-The CloudBackend Java SDK has been tested with openjdk 11.
+This program requires open jdk version 17.
+
+sudo apt-get install openjdk-17-jdk
