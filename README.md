@@ -33,6 +33,12 @@ Notes: This SDK has been built and tested on Ubuntu
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 # Android
 current version Android SDK:
+1.4.7.0
+
+Release notes:
+built on c++ with java wrappers version 1.4.7.0. New features are restRequest(...) and saopRequest(...) which bypasses the SDK to call any API on our service. the response comes back as a String which the user can parse to a XML/DOM object. 
+
+SDK Android version:
 1.3.5
 
 Release notes:
