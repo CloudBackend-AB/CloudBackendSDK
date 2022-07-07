@@ -135,3 +135,55 @@ Bug fixes, listGroups on groupManager added. CreateAccount added.
 New CLI with new extended Readme. 
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
+# Installation
+
+For: x86_64 Ubuntu 20.04 LTS
+
+```
+sudo apt install g++
+cd                                          # the home directory or equivalent
+mkdir cbe                                   # if not already created
+cd cbe                                      # replace with your project directory
+unzip ~/Downloads/CloudBackendSDK-main.zip  # replace with the zip file name previously downloaded
+mv CloudBackendSDK-main 1.4.6.7             # release number or another name of your choice
+ln -s 1.4.6.7 current                       # create symbolic link to the current version of the SDK
+cd current                                  # the name previously given this release's directory
+cd tools                                    # cli
+unzip new_cli.zip                           # unpack the new_cli
+./new_cli –uc gh1                           # start new_cli with user credentials of githubtester1
+help
+set
+logout
+```
+
+---
+Java
+```
+javac --version                             # check that javac is installed
+sudo apt-get install openjdk-17-jdk         # if not already installed
+cd ~/cbe/current                            # the directory of this release
+cd Java/lib                                 # SDK Java
+bash install.sh                             # install the SDK Java lib
+cd ..
+cd Examples/Simple
+bash compile.sh                             # compile and run the installation test program
+```
+
+---
+C++
+```
+cd                                          # the home directory
+cd cbe/current                              # the name previously given this release's directory
+cd C++/lib/Linux_x86/                       # SDK C++ lib
+unzip libcb_sdk.zip                         # unpack the libcb_sdk.a
+cd ../../Examples                           # Example Code directory
+cd Simple                                   # Simple code example directory
+sh compile.sh                               # compile the test program
+sh run.sh                                   # run the installation test program and then enter name
+
+Name for a new Company Container: Adam
+.
+New container created: Adam
+.
+program complete
+```
