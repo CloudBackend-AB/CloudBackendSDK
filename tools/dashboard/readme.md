@@ -8,7 +8,7 @@ app1 - app4 are started by looking up the applications and doing a double click 
 app2 - app3 will the read the content of a single file and map the points:
 home://POI/stations.xml
 
-app3 & app4 will the read the content of a single file and map the shortest path between points:
+app3 & app4 will the read the content of a single file and map the straight path along the points:
 home://POI/track.xml
 
 app5 & app6 will read the key/value metadata of multiple objects and should be started from the dashboard cli:
