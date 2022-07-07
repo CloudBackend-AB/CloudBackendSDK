@@ -1,17 +1,16 @@
 # CloudBackendSDK 1.4.6.7
-This repository contains the CloudBackend SDK.
+This repository contains the CloudBackend SDK  a build for Linux x86_64 Ubuntu 20 LTS.
 The CloudBackend SDK is a tool for application developers that provides a simple way to store data in the cloud.
-The repository currently contains a build for linux x86_64.
 
 To learn more about the SDK, see documentation at:
 https://cloudbackend.com/docs.html
 
 ### SDK Content
-language: contains lib and example code
+languages: contains lib and example code.
 
-tools: cli, dashboard example files and test data files
+tools: cli, dashboard example files and test data files.
 
-UI: XIOS/3 partner browser User Interface bundle 
+UI: XIOS/3 partner browser User Interface bundle extension for login to CloudBackend.
 
 ### Dashboard
 Login to the dashboard at
@@ -41,9 +40,9 @@ Notes: This SDK has been built and tested on x86_64 Ubuntu 20 LTS
 ## x86_64 Ubuntu 20.04 LTS
 
 ```
-sudo apt install g++
+sudo apt install g++                        # if not already installed
 cd                                          # the home directory or equivalent
-mkdir cbe                                   # if not already created
+mkdir -p cbe                                # if not already created
 cd cbe                                      # replace with your project directory
 unzip ~/Downloads/CloudBackendSDK-main.zip  # replace with the zip file name previously downloaded
 mv CloudBackendSDK-main 1.4.6.7             # release number or another name of your choice
@@ -80,7 +79,7 @@ unzip libcb_sdk.zip                         # unpack the libcb_sdk.a
 cd ../../Examples                           # Example Code directory
 cd Simple                                   # Simple code example directory
 sh compile.sh                               # compile the test program
-sh run.sh                                   # run the installation test program and then enter name
+sh run.sh                                   # run the installation test program and then enter name e.g.
 
 Name for a new Company Container: Adam
 .
