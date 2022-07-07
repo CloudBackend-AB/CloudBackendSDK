@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <row>
+    <PID>P0001</PID>
+    <Text>Stockholm Central</Text>
+    <Latitude>59.329968</Latitude>
+    <Longitude>18.057683</Longitude>
+  </row>
+  <row>
+    <PID>P0002</PID>
+    <Text>Göteborg Central</Text>
+    <Latitude>57.708538</Latitude>
+    <Longitude>11.973295</Longitude>
+  </row>
+  <row>
+    <PID>P0003</PID>
+    <Text>Malmö Central</Text>
+    <Latitude>55.608827</Latitude>
+    <Longitude>12.999272</Longitude>
+  </row>
+  <row>
+    <PID>P0004</PID>
+    <Text>Kristianstad Central</Text>
+    <Latitude>56.031581</Latitude>
+    <Longitude>14.151678</Longitude>
+  </row>
+  <row>
+    <PID>P0005</PID>
+    <Text>Örnsköldsvik Central</Text>
+    <Latitude>63.287900</Latitude>
+    <Longitude>18.705337</Longitude>
+  </row>
+  <row>
+    <PID>P0006</PID>
+    <Text>Luleå Central</Text>
+    <Latitude>65.584091</Latitude>
+    <Longitude>22.165289</Longitude>
+  </row>
+  <row>
+    <PID>P0007</PID>
+    <Text>Östersund Central</Text>
+    <Latitude>63.170334</Latitude>
+    <Longitude>14.638317</Longitude>
+  </row>
+  <row>
+    <PID>P0008</PID>
+    <Text>Linköping Central</Text>
+    <Latitude>58.416172</Latitude>
+    <Longitude>15.625788</Longitude>
+  </row>
+  <row>
+    <PID>P0009</PID>
+    <Text>Kalmar Central</Text>
+    <Latitude>56.661518</Latitude>
+    <Longitude>16.360203</Longitude>
+  </row>
+  <row>
+    <PID>P0010</PID>
+    <Text>Gävle Central</Text>
+    <Latitude>60.675759</Latitude>
+    <Longitude>17.150989</Longitude>
+  </row>
+  <row>
+    <PID>P0011</PID>
+    <Text>Örebro Central</Text>
+    <Latitude>59.278556</Latitude>
+    <Longitude>15.211842</Longitude>
+  </row>
+  <row>
+    <PID>P0012</PID>
+    <Text>Karlstad Central</Text>
+    <Latitude>59.378194</Latitude>
+    <Longitude>13.499319</Longitude>
+  </row>
+  <row>
+    <PID>P0013</PID>
+    <Text>Växjö station</Text>
+    <Latitude>56.876883</Latitude>
+    <Longitude>14.806792</Longitude>
+  </row>
+  <row>
+    <PID>P0014</PID>
+    <Text>Kiruna station</Text>
+    <Latitude>67.854970</Latitude>
+    <Longitude>20.215720</Longitude>
+  </row>
+  <row>
+    <PID>P0015</PID>
+    <Text>Jönköping Central</Text>
+    <Latitude>57.784359</Latitude>
+    <Longitude>14.162923</Longitude>
+  </row>
+  <row>
+    <PID>P0016</PID>
+    <Text>Sundsvall Central</Text>
+    <Latitude>62.386913</Latitude>
+    <Longitude>17.316882</Longitude>
+  </row>
+  <row>
+    <PID>P0017</PID>
+    <Text>Umeå Central</Text>
+    <Latitude>63.829921</Latitude>
+    <Longitude>20.266843</Longitude>
+  </row>
+  <row>
+    <PID>P0018</PID>
+    <Text>Storuman station</Text>
+    <Latitude>65.096611</Latitude>
+    <Longitude>17.111946</Longitude>
+  </row>
+  <row>
+    <PID>P0019</PID>
+    <Text>Gällivare Central</Text>
+    <Latitude>67.133655</Latitude>
+    <Longitude>20.651805</Longitude>
+  </row>
+  <row>
+    <PID>P0020</PID>
+    <Text>Haparanda station</Text>
+    <Latitude>65.828389</Latitude>
+    <Longitude>24.131858</Longitude>
+  </row>
+  <row>
+    <PID>P0021</PID>
+    <Text>Helsingborg Central</Text>
+    <Latitude>56.044147</Latitude>
+    <Longitude>12.69443</Longitude>
+  </row>
+  <row>
+    <PID>P0022</PID>
+    <Text>Borlänge Central</Text>
+    <Latitude>60.482891</Latitude>
+    <Longitude>15.42635</Longitude>
+  </row>
+  <row>
+    <PID>P0023</PID>
+    <Text>Åre station</Text>
+    <Latitude>63.399666</Latitude>
+    <Longitude>13.074657</Longitude>
+  </row>
+  <row>
+    <PID>P0024</PID>
+    <Text>Riksgränsen station</Text>
+    <Latitude>68.427032</Latitude>
+    <Longitude>18.119223</Longitude>
+  </row>
+  <row>
+    <PID>P0025</PID>
+    <Text>Strömstad station</Text>
+    <Latitude>58.936481</Latitude>
+    <Longitude>11.173407</Longitude>
+  </row>
+</root>
