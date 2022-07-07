@@ -1,0 +1,29 @@
+<application name="Plot WP app" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://xcerion.com/directory.xsd" xmlns:fs="http://xcerion.com/folders.xsd" xmlns:ni="http://xcerion.com/noindex.xsd">
+  <about publisher="CloudBackend"/>
+  <view name="plotWP" title="WP map" icon="icon://network/earth_location">
+    <panel>
+      <map name="mapComp" controls="false" position="fast">
+        <rule match="atom:feed/atom:entry">
+          <marker lat="{ni:Lat}" lng="{ni:Long}" title="{ni:Name}"/>
+        </rule>
+      </map>
+    </panel>
+  </view>
+  <process name="plotWP process">
+    <trigger view="plotWP" event="Loaded" step="init"/>
+	<step id="1">
+	  <!-- ! = read -d parameter from shell -->
+      <alias name="dataDoc" value="!"/>
+    </step>
+    <step id="init">
+      <operation name="channel">
+        <name>xios</name>
+        <title>CloudBackend</title>
+        <protocol>XMLFS</protocol>
+      </operation>
+      <operation name="bind" value="$dataDoc">
+        <component name="mapComp" view="plotWP" />
+      </operation>
+    </step>
+  </process>
+</application>    
