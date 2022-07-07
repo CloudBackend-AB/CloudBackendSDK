@@ -18,9 +18,11 @@ UI: XIOS/3 partner browser User Interface bundle
 Accounts: 
 The following are Test accounts that can be used to login to CloudBackend:
 
-githubtester1 : gitHubTester1password || 
-githubtester2 : gitHubTester2password || 
-githubtester3 : gitHubTester3password 
+| username | password | tenant |
+| -------- | -------- | ------ |
+| githubtester1 | gitHubTester1password | cbe_githubtesters | 
+| githubtester2 | gitHubTester2password | cbe_githubtesters | 
+| githubtester3 | gitHubTester3password | cbe_githubtesters | 
 
 Tenant / Signup source: cbe_githubtesters
 
@@ -31,7 +33,7 @@ Change the user account for the sample program in user_credentials.cpp
 Notes: This SDK has been built and tested on Ubuntu
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
-# Android
+## Android
 current version Android SDK:
 1.4.7.0
 
@@ -45,7 +47,7 @@ Release notes:
 built on c++ version 1.3.5 of the SDK.
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
-# Java
+## Java
 current version Java wrapper SDK:
 1.4.6.7
 
@@ -80,7 +82,7 @@ Release notes JAVA/Android:
 The java and android wrappers are built on the c++ sdk version 1.3.5 this includes share actions but not group actions.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------
-# C++
+## C++
 current version SDK c++:
 1.4.6.4
 
@@ -135,9 +137,10 @@ Bug fixes, listGroups on groupManager added. CreateAccount added.
 New CLI with new extended Readme. 
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
+
 # Installation
 
-For: x86_64 Ubuntu 20.04 LTS
+## x86_64 Ubuntu 20.04 LTS
 
 ```
 sudo apt install g++
@@ -157,7 +160,7 @@ logout
 ```
 
 ---
-Java
+## Java
 ```
 javac --version                             # check that javac is installed
 sudo apt-get install openjdk-17-jdk         # if not already installed
@@ -170,7 +173,7 @@ bash compile.sh                             # compile and run the installation t
 ```
 
 ---
-C++
+## C++
 ```
 cd                                          # the home directory
 cd cbe/current                              # the name previously given this release's directory
