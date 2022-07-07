@@ -64,4 +64,3 @@ Release 2021-05-05
 Release 2021-03-25
 ------------------
 * First relase, version 1.0
-
