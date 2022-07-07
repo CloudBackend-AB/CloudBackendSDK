@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <row>
+    <PID>S0001</PID>
+    <Text>Linköping Centralstation</Text>
+    <körtid>00:00</körtid>
+    <SWEREFX>6475215</SWEREFX>
+    <SWEREFY>536559</SWEREFY>
+    <Latitude>58.416172</Latitude>
+    <Longitude>15.625788</Longitude>
+  </row>
+  <row>
+    <PID>S0002</PID>
+    <Text>Tannefors station</Text>
+    <körtid>00:03</körtid>
+    <SWEREFX>6473478</SWEREFX>
+    <SWEREFY>538553</SWEREFY>
+    <Latitude>58.400396</Latitude>
+    <Longitude>15.659616</Longitude>
+  </row>
+  <row>
+    <PID>S0003</PID>
+    <Text>Rimforsa station</Text>
+    <körtid>00:44</körtid>
+    <SWEREFX>6443999</SWEREFX>
+    <SWEREFY>540150</SWEREFY>
+    <Latitude>58.135502</Latitude>
+    <Longitude>15.681835</Longitude>
+  </row>
+  <row>
+    <PID>S0004</PID>
+    <Text>Kisa station</Text>
+    <körtid>00:57</körtid>
+    <SWEREFX>6427260</SWEREFX>
+    <SWEREFY>537480</SWEREFY>
+    <Latitude>57.985400</Latitude>
+    <Longitude>15.633824</Longitude>
+  </row>
+  <row>
+    <PID>S0005</PID>
+    <Text>Astrid Lindgrens värld station</Text>
+    <körtid>01:22</körtid>
+    <SWEREFX>6392708</SWEREFX>
+    <SWEREFY>550066</SWEREFY>
+    <Latitude>57.673834</Latitude>
+    <Longitude>15.839410</Longitude>
+  </row>
+  <row>
+    <PID>S0006</PID>
+    <Text>Vimmerby station</Text>
+    <körtid>01:25</körtid>
+    <SWEREFX>6391532</SWEREFX>
+    <SWEREFY>551199</SWEREFY>
+    <Latitude>57.663144</Latitude>
+    <Longitude>15.858153</Longitude>
+  </row>
+  <row>
+    <PID>S0007</PID>
+    <Text>Hultsfred station</Text>
+    <körtid>01:39</körtid>
+    <SWEREFX>6371871</SWEREFX>
+    <SWEREFY>550758</SWEREFY>
+    <Latitude>57.486603</Latitude>
+    <Longitude>15.846641</Longitude>
+  </row>
+  <row>
+    <PID>S0008</PID>
+    <Text>Berga station</Text>
+    <körtid>02:08</körtid>
+    <SWEREFX>6341955</SWEREFX>
+    <SWEREFY>562358</SWEREFY>
+    <Latitude>57.216466</Latitude>
+    <Longitude>16.032529</Longitude>
+  </row>
+  <row>
+    <PID>S0009</PID>
+    <Text>Högsby station</Text>
+    <körtid>02:19</körtid>
+    <SWEREFX>6336299</SWEREFX>
+    <SWEREFY>562149</SWEREFY>
+    <Latitude>57.165698</Latitude>
+    <Longitude>16.027658</Longitude>
+  </row>
+  <row>
+    <PID>S0010</PID>
+    <Text>Blomstermåla station</Text>
+    <körtid>02:39</körtid>
+    <SWEREFX>6316058</SWEREFX>
+    <SWEREFY>580893</SWEREFY>
+    <Latitude>56.980993</Latitude>
+    <Longitude>16.330994</Longitude>
+  </row>
+  <row>
+    <PID>S0011</PID>
+    <Text>Kalmar Centralstation</Text>
+    <körtid>03:12</körtid>
+    <SWEREFX>6280510</SWEREFX>
+    <SWEREFY>583375</SWEREFY>
+    <Latitude>56.661286</Latitude>
+    <Longitude>16.360188</Longitude>
+  </row>
+</root>
