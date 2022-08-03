@@ -91,6 +91,12 @@ program complete
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 ## Android
 current version Android SDK:
+1.4.8.0
+
+Release notes:
+Added features for using subscribe and publish container/objects when published users can subscribe to these Items and follow updates/notifications.
+
+SDK Android version:
 1.4.7.0
 
 Release notes:
