@@ -45,8 +45,8 @@ cd                                          # the home directory or equivalent
 mkdir -p cbe                                # if not already created
 cd cbe                                      # replace with your project directory
 unzip ~/Downloads/CloudBackendSDK-main.zip  # replace with the zip file name previously downloaded
-mv CloudBackendSDK-main 1.4.6.7             # release number or another name of your choice
-ln -s 1.4.6.7 current                       # create symbolic link to the current version of the SDK
+mv CloudBackendSDK-main 1.4.8.0             # release number or another name of your choice
+ln -s 1.4.8.0 current                       # create symbolic link to the current version of the SDK
 cd current                                  # the name previously given this release's directory
 cd tools                                    # cli
 unzip new_cli.zip                           # unpack the new_cli
