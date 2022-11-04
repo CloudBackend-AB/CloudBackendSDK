@@ -1,9 +1,12 @@
+#include "cbe/Account.h"
+#include "cbe/CloudBackend.h"
+#include "cbe/QueryChain.h"
+#include "cbe/ShareManager.h"
 
-#include "CBE/Account.h"
-#include "CBE/CloudBackend.h"
-#include "CBE/Protocols/ItemEventProtocol.h"
-#include "CBE/Protocols/AccountEventProtocol.h"
-#include "CBE/Protocols/ShareEventProtocol.h"
+#include "cbe/delegate/ListSharesDelegate.h"
+// #include "CBE/Protocols/ItemEventProtocol.h"
+// #include "CBE/Protocols/AccountEventProtocol.h"
+// #include "CBE/Protocols/ShareEventProtocol.h"
 
 #include <cassert>
 #include <chrono>
@@ -16,139 +19,166 @@
 #include <sstream>            // std::ostringstream
 #include <thread>
 
+// - - - - - - - - - - - - - - - - - DELEGATES - - - - - - - - - - - - - - - - -
+class LogInDelegate :  public cbe::delegate::LogInDelegate
+{
+  std::mutex              mutex{};
+  std::condition_variable conditionVariable{};
 
-template <typename ResultT>
-class Sync {
-    std::mutex                mutex{};
-    std::condition_variable   conditionVariable{};
-    bool                      responseReceived = false;
+  bool                    called = false;
 
-    using ResultPtr = std::shared_ptr<ResultT>;
-    ResultPtr                 resultPtr{};
+  void onLogInSuccess(cbe::CloudBackend&& cloudBackend) override {
+     {
+      std::lock_guard<std::mutex> lock(mutex);
+      this->cloudBackend = std::move(cloudBackend); 
+      called = true;
+     }
+     conditionVariable.notify_one();
+
+   }
+   void onLogInError(cbe::delegate::Error&& error, 
+                     cbe::util::Context&& context) override {
+     {
+      std::lock_guard<std::mutex> lock(mutex);
+      errorInfo = ErrorInfo{std::move(context), std::move(error)};
+      called = true;
+     }
+     conditionVariable.notify_one();
+   }
+public:
+  /*implementation of delegates */
+  cbe::CloudBackend cloudBackend{cbe::DefaultCtor{}};
+  ErrorInfo errorInfo{};
+
+  void wait() {
+    std::unique_lock<std::mutex> lock(mutex);
+    std::cout << "Waiting, to be logged in" << std::endl;
+    conditionVariable.wait(lock, [this] { return called; });
+    std::cout << "Now we have waited: " << called << std::endl;
+  }
+
+}; // class LogInDelegate
+
+class QueryDelegate :  public cbe::delegate::QueryDelegate
+{
+  std::mutex              mutex{};
+  std::condition_variable conditionVariable{};
+  bool                    called = false;
+
+  /**
+   * Called upon successful query.
+   * @param queryResult Instance of a QueryResult containing the result set.
+   */
+  void onQuerySuccess(cbe::QueryResult&& queryResult) override {
+    {      
+      std::lock_guard<std::mutex> lock(mutex);
+      this->queryResult = std::move(queryResult); 
+      called = true;
+    }           
+    conditionVariable.notify_one();
+  };
+
+  /**
+   * Called upon a failed query() or join() call.
+   * @param error   Error information passed from %CloudBackend SDK.
+   * @param context Additional context information about the original service
+   *                call that has failed.
+   */
+  void onQueryError(cbe::delegate::QueryError&& error,
+                    cbe::util::Context&&        context) override {
+    {
+      std::lock_guard<std::mutex> lock(mutex);
+      errorInfo = ErrorInfo{std::move(context), std::move(error)};
+      called = true;
+    }
+    conditionVariable.notify_one();
+  };
+
+public:
+  /*implementation of delegates */
+  cbe::QueryResult queryResult{cbe::DefaultCtor{}};
+  ErrorInfo errorInfo{};
+
+  void wait() {
+    std::unique_lock<std::mutex> lock(mutex);
+    // std::cout << "Waiting, for query" << std::endl;
+    conditionVariable.wait(lock, [this] { return called; });
+    // std::cout << "Now we have waited: " << called << std::endl;
+  }
+}; // class QueryDelegate
+
+class ListSharesDelegate :  public cbe::delegate::ListSharesDelegate 
+{
+  std::mutex              mutex{};
+  std::condition_variable conditionVariable{};
+  bool                    called = false;
+  
+  void onListSharesSuccess(cbe::QueryResult&& qResult) override {
+    {    
+      std::lock_guard<std::mutex> lock(mutex);
+      this->shares = std::move(qResult); 
+      called = true;
+    } 
+    conditionVariable.notify_one(); 
+  }
+
+  void onListSharesError(cbe::delegate::Error&& error, 
+                          cbe::util::Context&& context) override {
+    {
+      std::lock_guard<std::mutex> lock(mutex);
+      errorInfo = ErrorInfo{std::move(context), std::move(error)};
+      called = true;
+    }
+    conditionVariable.notify_one(); 
+  }
+
   public:
-    void onSuccess(ResultPtr resultPtr) {
-      {
-        std::lock_guard<std::mutex> lock(mutex);
-        this->resultPtr = resultPtr;
-        responseReceived = true;
-      }
-      conditionVariable.notify_one();
-    }
-    void onError() {
-      {
-        std::lock_guard<std::mutex> lock(mutex);
-        responseReceived = true;
-      }
-      conditionVariable.notify_one();
-    }
-    ResultPtr wait() {
+    cbe::QueryResult shares{cbe::DefaultCtor{}};
+    ErrorInfo errorInfo{};
+
+    void wait() {
       std::unique_lock<std::mutex> lock(mutex);
-      conditionVariable.wait(lock, [this]{ return responseReceived; } );
-      return resultPtr;
+      std::cout << "Waiting, loading shares" << std::endl;
+      conditionVariable.wait(lock, [this] { return called; });
+      std::cout << "Now we have waited: " << called << std::endl;
     }
-}; // class Sync template
+}; // class ListSharesDelegate
 
 
+// - - - - - - - - - - - - - - - - - - MAIN  - - - - - - - - - - - - - - - - - - 
 int main(void) {
   std::set_terminate([]() {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
   });
 
-  class AccountEventProtocol : public CBE::AccountEventProtocol {
-    Sync<CBE::CloudBackend> sync{};
-    public:
-      void onLogin(uint32_t atState, CBE::CloudBackendPtr cloudbackend) final {
-        std::cout << "Account Login complete"
-                  << " - name: "<< cloudbackend->account()->username()
-                  << " - id: "  << cloudbackend->account()->userId() 
-                  << std::endl;
-        sync.onSuccess(cloudbackend);
-      }
-      void onError(CBE::persistence_t failedAtState, uint32_t code,
-                                      std::string reason,
-                                      std::string message) final {
-        std::cerr << "Account Event Error: Login failed" << '\n' ;
-        sync.onError();
-      }
-      CBE::CloudBackendPtr wait() {
-        return sync.wait();
-      }
-  }; // class AccountEventProtocol
-
   std::cout << "about to log in" << std::endl;
-  auto accountDelegate = std::make_shared<AccountEventProtocol>();
-  CBE::CloudBackend::logIn("githubtester2", "gitHubTester2password", "cbe_githubtesters",
-                           accountDelegate);
-  auto cloudBackend = accountDelegate->wait();
+  // auto accountDelegate = std::make_shared<AccountEventProtocol>();
+  std::shared_ptr<LogInDelegate> logInDelegate = 
+                                              std::make_shared<LogInDelegate>();
+  cbe::CloudBackend::logIn("githubtester2", "gitHubTester2password", 
+                           "cbe_githubtesters", logInDelegate);
+  logInDelegate->wait();
+  auto cloudBackend = logInDelegate->cloudBackend; 
   if (!cloudBackend) {
     std::cerr << "Failed to login" << std::endl;
     return -1;
   }
-  auto account = cloudBackend->account();
-  std::cout << "firstName=\"" << account->firstName()
-            << "\", lastName=\"" << account->lastName() << "\"" 
-            << "\troot=" << account->rootContainer()->id()
+  auto account = cloudBackend.account();
+  std::cout << "firstName=\"" << account.firstName()
+            << "\", lastName=\"" << account.lastName() << "\"" 
+            << "\troot=" << account.rootContainer().id()
             << std::endl;
 
-  class ItemEventProtocol : public CBE::ItemEventProtocol {
-    CBE::ContainerPtr       container{};
-    Sync<CBE::QueryResult>  sync{};
-    public:
-      ItemEventProtocol(CBE::ContainerPtr container) : container{container} {}
-      CBE::QueryResultPtr  wait() {
-        return sync.wait();
-      }
-    private:
-      void onQueryLoaded(CBE::QueryResultPtr dir) final {
-        sync.onSuccess(dir);
-      }
-
-      void onLoadError(CBE::Filter filter, uint32_t operation, uint32_t code,
-                      std::string reason, std::string message) final {
-        std::cerr << "Failed to query container \""
-                  << container->path() << container->name() <<'\n' ;
-        sync.onError();
-      }
-  }; // class ItemEventProtocol
-
-  auto query = [](CBE::ContainerPtr container) {
-    auto itemDelegate = std::make_shared<ItemEventProtocol>(container);
-    container->query(itemDelegate);
-    return itemDelegate->wait();
+  auto query = [](cbe::Container container) {
+    std::shared_ptr<QueryDelegate> queryDelegate = 
+                                              std::make_shared<QueryDelegate>();
+    container.query(queryDelegate);
+    queryDelegate->wait();
+    return queryDelegate->queryResult;
   };
 
-  class ShareEventProtocol : public CBE::ShareEventProtocol {
-    CBE::ContainerPtr       container{};
-    Sync<CBE::QueryResult>  sync{};
-    public:
-      ShareEventProtocol(CBE::ContainerPtr container) : container{container} {}
-      CBE::QueryResultPtr  wait() {
-        return sync.wait();
-      }
-    private:
-      void onListAvailableShares(CBE::QueryResultPtr result) final {
-        sync.onSuccess(result);
-      }
-
-      void onShareError(CBE::item_t type, CBE::persistence_t operation,
-                        uint32_t code,
-                        std::string reason, std::string message) final {
-        std::cerr << __PRETTY_FUNCTION__ << "\nFailed to query share \""
-                  << container->path() << container->name() <<'\n' ;
-        sync.onError();
-      }
-      void onACLError(CBE::item_t type, CBE::persistence_t operation,
-                      uint32_t code,
-                      std::string reason, std::string message) final {
-        std::cerr << __PRETTY_FUNCTION__ << "\nFailed to query share \""
-                  << container->path() << container->name() <<'\n' ;
-        sync.onError();
-    }
-  };  // class ShareEventProtocol
-
-
   struct Container {
-    CBE::ContainerPtr cbeContainer;
+    cbe::Container cbeContainer;
     Container* const  parentContainer;
 
     std::string path() const {
@@ -159,48 +189,52 @@ int main(void) {
             buildPath(*container.parentContainer);
             oss << '/';
           }
-          oss << container.cbeContainer->name();
+          oss << container.cbeContainer.name();
         }; // lambda buildPath
       buildPath(*this);
       return oss.str();
     }
   };  // struct Container
 
-  using Map = std::map<CBE::container_id_t, Container>;
+  using Map = std::map<cbe::ContainerId, Container>;
   Map map;
-  std::function<void(CBE::ContainerPtr,Container*)> processContainer =
+  std::function<void(cbe::Container, Container*)> processContainer =
     [&map, &processContainer, &query, &cloudBackend](
-        CBE::ContainerPtr cbeContainer,
+        cbe::Container    cbeContainer,
         Container*        parentContainer) {
     std::cout << '.' << std::flush;
-    auto p = map.emplace(cbeContainer->id() /* key */,
+    auto p = map.emplace(cbeContainer.id() /* key */,
                          Container{cbeContainer, parentContainer});
     assert(p.second); // entry inserted
     auto currentContainer = &p.first->second;
     auto queryResult = query(cbeContainer);
-    for (auto& itemPtr : queryResult->getItemsSnapshot()) {
-      if (itemPtr->type() == CBE::ItemType::Container) {
-        auto childCbeContainer = CBE::CloudBackend::castContainer(itemPtr);
+
+    for (auto& item : queryResult.getItemsSnapshot()) {
+      if (item.type() == cbe::ItemType::Container) {
+        auto childCbeContainer = cbe::CloudBackend::castContainer(item);
         processContainer(childCbeContainer,
                          currentContainer /* parentContainer */);
       }
     }
   };  // function processContainer
 
-  std::cout << "***** listing shares *****";
-  auto shareManager = cloudBackend->shareManager();
-  auto shareDelegate =
-      std::make_shared<ShareEventProtocol>(account->rootContainer());
-  shareManager->listAvailableShares(shareDelegate);
-  auto shares = shareDelegate->wait();
-  for (auto& itemPtr : shares->getItemsSnapshot()) {
+  std::cout << "***** listing shares *****" << std::endl;
+
+  cbe::ShareManager shareManager = cloudBackend.shareManager();
+  std::shared_ptr<ListSharesDelegate> listSharesDelegate = 
+                                         std::make_shared<ListSharesDelegate>();
+  shareManager.listAvailableShares(listSharesDelegate);
+  listSharesDelegate->wait();
+  auto shares = listSharesDelegate->shares; 
+  std::vector<cbe::Item> items = listSharesDelegate->shares.getItemsSnapshot();
+  for (auto& item : items) {
     std::cout << std::endl;
-    std::cout << itemPtr->name() << ", " << itemPtr->description()
-              << ",\t" << itemPtr->parentId() 
-              << ", " << itemPtr->ownerId()
+    std::cout << item.name() << ", " << item.description()
+              << ",\t" << item.parentId() 
+              << ", " << item.ownerId()
               << "."  << std::endl;
-    if (itemPtr->type() == CBE::ItemType::Container) {
-      auto shareContainer = CBE::CloudBackend::castContainer(itemPtr);
+    if (item.type() == cbe::ItemType::Container) {
+      auto shareContainer = cbe::CloudBackend::castContainer(item);
       processContainer(shareContainer, nullptr /* parentContainer */);
     }
   }
@@ -210,11 +244,11 @@ int main(void) {
   }
 
   std::cout << "\n***** traversing containers *****" << std::endl;
-  processContainer(account->rootContainer(), nullptr /* parentContainer */);
+  processContainer(account.rootContainer(), nullptr /* parentContainer */);
 
   std::cout << "\n***** Containers sorted id number *****\n";
   for (const auto& elem : map) {
     std::cout << elem.first << " " << elem.second.path() << '\n';
   }
-
+  cloudBackend.terminate();
 }  // main

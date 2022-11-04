@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright © CloudBackend AB 2022.
+# CloudBackend AB 2022.
 # compile.sh <excercise>
 # version 2022-04-08
 

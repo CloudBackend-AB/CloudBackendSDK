@@ -1,6 +1,6 @@
 # Traverse example code.
 
-Copyright © CloudBackend AB 2021-2022.
+CloudBackend AB 2021-2022.
 
 Release notes
 =============
