@@ -4,9 +4,9 @@
 
 In the SimpleEx.cpp you will find all the code for the test program built with CloudBackend AB:s Software Development Kit.
 
-You can follow the code in the main function in file SimpleEx.cpp together with comments to support how to use the library.
+You can follow the code in the main function in file **SimpleEx.cpp** together with comments to support how to use the library.
 
-In user_credentials.cpp you need to fill in, copy paste user info from within that file, the user credentials that you are going to use. 
+In **user_credentials.cpp** you need to fill in, copy paste user info from within that file, the user credentials that you are going to use. 
 There are three to choose from and you are free to choose any of them but remember 
 multiple people might use the same account at the same time. 
 
