@@ -56,7 +56,7 @@ public:
   cbe::CloudBackend cloudBackend{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     // std::cout << "Waiting, to be logged in" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -106,7 +106,7 @@ public:
   cbe::QueryResult queryResult{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     // std::cout << "Waiting, for query" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -158,7 +158,7 @@ public:
   cbe::Object object{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     // std::cout << "Waiting, for query" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -200,7 +200,7 @@ public:
   cbe::Container container{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     // std::cout << "Waiting, for query" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -237,7 +237,7 @@ public:
   /*implementation of delegates */
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     // std::cout << "Waiting, for deletion" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -274,7 +274,7 @@ int main(void) {
                                                          logInDelegate);
   /** Keeps the thread alive between API requests. */
   // Waiting for the cloud response
-  logInDelegate->wait();
+  logInDelegate->waitForRsp();
 
   // Check if login was without error
   if (!logInDelegate->errorInfo) {
@@ -315,7 +315,7 @@ int main(void) {
   std::getline(std::cin, containerName);
   logInDelegate->cloudBackend.query(container.id(), queryDelegate);
   // Waiting for the cloud response
-  queryDelegate->wait();
+  queryDelegate->waitForRsp();
 
   cbe::QueryResult::ItemsSnapshot resultset = 
                                   queryDelegate->queryResult.getItemsSnapshot();  
@@ -350,7 +350,7 @@ int main(void) {
   // provided
   container.createContainer(containerName, createContainerDelegate);
   // Waiting for the cloud response
-  createContainerDelegate->wait();
+  createContainerDelegate->waitForRsp();
 
   // Check if error
   if (createContainerDelegate->errorInfo) {
@@ -378,7 +378,7 @@ int main(void) {
   // Upload the file to the newly created container.
   newContainer.upload(fileName, filePath, uploadDelegate);
   // Waiting for the cloud response
-  uploadDelegate->wait();
+  uploadDelegate->waitForRsp();
 
   // Check if error
   if (uploadDelegate->errorInfo) {
@@ -411,7 +411,7 @@ int main(void) {
                                       std::make_shared<RemoveContainerDelegate>();
       
       newContainer.remove(removeContainerDelegate);
-      removeContainerDelegate->wait();
+      removeContainerDelegate->waitForRsp();
       std::cout << "Container was deleted successfully!" << std::endl;
       break;
     } else if (shouldBeDeleted == "n")

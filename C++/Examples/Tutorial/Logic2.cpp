@@ -55,7 +55,7 @@ public:
   ErrorInfo errorInfo{};
 
   // Wait function is called on the delegate when it is being used 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     std::cout << "Waiting, to be logged in" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -104,7 +104,7 @@ public:
   cbe::QueryResult  queryResult{cbe::DefaultCtor{}};
   ErrorInfo         errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     std::cout << "Waiting, for query" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -141,7 +141,7 @@ public:
   cbe::Container container{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     std::cout << "Waiting, for create container" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -179,7 +179,7 @@ public:
   cbe::Object object{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     std::cout << "Waiting, for create container" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -209,7 +209,7 @@ void Exercise::createContainer(cbe::Container parentContainer) {
   parentContainer.createContainer(name, createContainerDelegate);
   
   // Calling wait for the delegate to finish
-  createContainerDelegate->wait();
+  createContainerDelegate->waitForRsp();
 
   // Check if error, can also check if a container was constructed.
   if (createContainerDelegate->errorInfo){ 
@@ -244,7 +244,7 @@ void Exercise::loadContainerContents(cbe::Container container) {
   container.query(containerFilter, queryDelegate);
 
   // Wait for delegate to finish
-  queryDelegate->wait();
+  queryDelegate->waitForRsp();
   
   // Check if error 
   if (queryDelegate->errorInfo){ // Could also check if qResult was constructed
@@ -308,7 +308,7 @@ void Exercise::logic() {
                                                          logInDelegate);
 
   // Wait for delegate to finish
-  logInDelegate->wait();
+  logInDelegate->waitForRsp();
   
   // Check if error 
   if (logInDelegate->errorInfo){

@@ -53,7 +53,7 @@ public:
   ErrorInfo errorInfo{};
 
   // Wait function is called on the delegate when it is being used 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     std::cout << "Waiting, to be logged in" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -105,7 +105,7 @@ void Exercise::logic() {
                                                          logInDelegate);
 
   // Wait for delegate to finish
-  logInDelegate->wait();
+  logInDelegate->waitForRsp();
   
   // Check if error 
   if (logInDelegate->errorInfo){

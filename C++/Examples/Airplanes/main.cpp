@@ -159,17 +159,13 @@ int main() {
               << modelFilter.getQuery()
               << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 
-    // const auto flightsInCountryDelegate1 = std::make_shared<QueryDelegate>();
-
     cbe::Filter containerFilter;
     containerFilter.setDataType(cbe::ItemType::Object);
 
     std::shared_ptr<QueryDelegate> queryDelegate = 
                                               std::make_shared<QueryDelegate>();
     airports.query(containerFilter, queryDelegate);
-    queryDelegate->wait();
-
-    printItems(queryDelegate->queryResult.getItemsSnapshot(), "Boeing in Sweden"); // Ska bort
+    queryDelegate->waitForRsp();
 
     std::shared_ptr<QueryJoinDelegate> queryJoinDelegate = 
                                               std::make_shared<QueryJoinDelegate>();
@@ -177,11 +173,9 @@ int main() {
                                                           "Name", 
                                                           "Location", 
                                                           modelFilter);
-    queryJoinDelegate->wait();
+    queryJoinDelegate->waitForRsp();
     printItems(queryJoinDelegate->queryResult.getItemsSnapshot(), 
                "Boeing in Sweden");
-
-        
 
     modelFilter.setQuery("Model:Airbus*");
     std::cout << "\n\nFilter " << countryFilter.getQuery() << " and "
@@ -193,7 +187,7 @@ int main() {
                                                           "Name", 
                                                           "Location", 
                                                           modelFilter);
-    queryJoinDelegate->wait();
+    queryJoinDelegate->waitForRsp();
 
     printItems(queryJoinDelegate->queryResult.getItemsSnapshot(), "Airbus in Sweden");
   }
@@ -241,5 +235,3 @@ void printItems(Items&& items, const std::string& headline) {
 } // printItems
 
 } // Anonymous namespace
-
-// decltype(keyValues) == std::map<std::string, std::pair<std::string, bool>>

@@ -46,7 +46,7 @@ public:
   cbe::CloudBackend cloudBackend{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     std::cout << "Waiting, to be logged in" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -95,7 +95,7 @@ public:
   cbe::QueryResult queryResult{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     // std::cout << "Waiting, for query" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -116,7 +116,7 @@ int main(void) {
 
   cbe::CloudBackend::logIn("githubtester1", "gitHubTester1password", 
                            "cbe_githubtesters", logInDelegate);
-  logInDelegate->wait();
+  logInDelegate->waitForRsp();
   auto cloudBackend = logInDelegate->cloudBackend;
   
   if (!cloudBackend) {
@@ -138,7 +138,7 @@ int main(void) {
     std::shared_ptr<QueryDelegate> queryDelegate = 
                                               std::make_shared<QueryDelegate>();    
     container.query(queryDelegate);
-    queryDelegate->wait();
+    queryDelegate->waitForRsp();
     auto queryResult = queryDelegate->queryResult; 
     for (auto& item : queryResult.getItemsSnapshot()) {
       if (item.type() == cbe::ItemType::Container) {

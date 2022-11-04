@@ -27,7 +27,7 @@ Airplanes::Airplanes(const std::string& credentials) :
                                                          password, 
                                                          tenant, 
                                                          logInDelegate);
-  logInDelegate->wait();
+  logInDelegate->waitForRsp();
   cloudBackend = logInDelegate->cloudBackend;
   account = cloudBackend.account();
 } // Airplanes ctor
@@ -43,7 +43,7 @@ cbe::QueryResult Airplanes::query(cbe::Filter         filter,
   std::shared_ptr<QueryDelegate> queryDelegate = 
                                               std::make_shared<QueryDelegate>();
   cloudBackend.query(containerId, filter, queryDelegate);
-  queryDelegate->wait();
+  queryDelegate->waitForRsp();
 
   return queryDelegate->queryResult;
 }
@@ -59,7 +59,7 @@ cbe::Container Airplanes::createContainer(cbe::Container     parentContainer,
                                   std::make_shared<MyCreateContainerDelegate>();
 
   parentContainer.createContainer(name, createContainerDelegate);
-  createContainerDelegate->wait();
+  createContainerDelegate->waitForRsp();
   return createContainerDelegate->container; 
 } 
 
@@ -75,7 +75,7 @@ cbe::Object Airplanes::createObject(cbe::Container     parentContainer,
   std::shared_ptr<MyCreateObjectDelegate> createObjectDelegate = 
                                      std::make_shared<MyCreateObjectDelegate>();
   parentContainer.createObject(name, createObjectDelegate, keyValues);
-  createObjectDelegate->wait();
+  createObjectDelegate->waitForRsp();
 
   // std::cout << "Created object \"" << createObjectDelegate->object.name() 
   //           << "\" with id " << createObjectDelegate->object.id() << '\n';
@@ -85,5 +85,5 @@ void Airplanes::removeContainer(cbe::Container container) {
   std::shared_ptr<RemoveDelegate> removeDelegate = 
                                   std::make_shared<RemoveDelegate>();
   container.remove(removeDelegate);
-  removeDelegate->wait();
+  removeDelegate->waitForRsp();
 }

@@ -545,7 +545,7 @@ int main(int argc, char *argv[]) {
     std::cout << "About to login as: " << username << std::endl;
   }
   logInDelegate->cloudBackend = cbe::CloudBackend::logIn(username, password, tenant, logInDelegate);
-  logInDelegate->wait();
+  logInDelegate->waitForRsp();
   std::cout << "login as: " << logInDelegate->cloudBackend.account().username() << std::endl;
 
   cbe::Container parentContainer = 
@@ -568,7 +568,7 @@ void queryContainer(cbe::Container parentContainer, std::string name) {
                                               std::make_shared<QueryDelegate>();
   _queryName = name;
   parentContainer.query(queryDelegate);
-  queryDelegate->wait();
+  queryDelegate->waitForRsp();
   
   // Check if error
   if (queryDelegate->errorInfo) {
@@ -614,7 +614,7 @@ void uploadToContainer(std::string path, std::string name, cbe::Container contai
   }
   std::shared_ptr<UploadDelegate> uploadDelegate = std::make_shared<UploadDelegate>();
   container.upload(name, path, uploadDelegate);
-  uploadDelegate->wait();
+  uploadDelegate->waitForRsp();
 
   // Check if error
   if (uploadDelegate->errorInfo) {
@@ -630,7 +630,7 @@ cbe::Container createContainer(cbe::Container container, std::string name) {
   std::shared_ptr<CreateContainerDelegate> createContainerDelegate = 
                                     std::make_shared<CreateContainerDelegate>();
   container.createContainer(name, createContainerDelegate);
-  createContainerDelegate->wait();
+  createContainerDelegate->waitForRsp();
 
   // Check if error
   if (createContainerDelegate->errorInfo) {

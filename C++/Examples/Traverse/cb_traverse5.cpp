@@ -48,7 +48,7 @@ public:
   cbe::CloudBackend cloudBackend{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     std::cout << "Waiting, to be logged in" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -97,7 +97,7 @@ public:
   cbe::QueryResult queryResult{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     // std::cout << "Waiting, for query" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -134,7 +134,7 @@ class ListSharesDelegate :  public cbe::delegate::ListSharesDelegate
     cbe::QueryResult shares{cbe::DefaultCtor{}};
     ErrorInfo errorInfo{};
 
-    void wait() {
+    void waitForRsp() {
       std::unique_lock<std::mutex> lock(mutex);
       std::cout << "Waiting, loading shares" << std::endl;
       conditionVariable.wait(lock, [this] { return called; });
@@ -154,7 +154,7 @@ int main(void) {
                                               std::make_shared<LogInDelegate>();
   cbe::CloudBackend::logIn("githubtester2", "gitHubTester2password", 
                            "cbe_githubtesters", logInDelegate);
-  logInDelegate->wait();
+  logInDelegate->waitForRsp();
 
   auto cloudBackend = logInDelegate->cloudBackend;
   if (!cloudBackend) {
@@ -171,7 +171,7 @@ int main(void) {
   std::shared_ptr<QueryDelegate> queryDelegate = 
                                               std::make_shared<QueryDelegate>();
     container.query(queryDelegate);
-    queryDelegate->wait();
+    queryDelegate->waitForRsp();
     return queryDelegate->queryResult; 
   };
 
@@ -240,7 +240,7 @@ int main(void) {
   std::shared_ptr<ListSharesDelegate> listSharesDelegate = 
                                          std::make_shared<ListSharesDelegate>();
   shareManager.listAvailableShares(listSharesDelegate);
-  listSharesDelegate->wait();
+  listSharesDelegate->waitForRsp();
   auto shares = listSharesDelegate->shares; 
   for (auto& item : shares.getItemsSnapshot()) {
     std::cout << std::endl;

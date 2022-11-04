@@ -55,7 +55,7 @@ public:
   ErrorInfo errorInfo{};
 
   // Wait function is called on the delegate when it is being used 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     std::cout << "Waiting, to be logged in" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -104,7 +104,7 @@ public:
   cbe::QueryResult  queryResult{cbe::DefaultCtor{}};
   ErrorInfo         errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     std::cout << "Waiting, for query" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -141,7 +141,7 @@ public:
   cbe::Container container{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     std::cout << "Waiting, for create container" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -151,7 +151,6 @@ public:
 
 class MyCreateObjectDelegate :  public cbe::delegate::CreateObjectDelegate
 {
-
   std::mutex              mutex{};
   std::condition_variable conditionVariable{};
 
@@ -179,7 +178,7 @@ public:
   cbe::Object object{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     std::cout << "Waiting, for create container" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -209,7 +208,7 @@ void Exercise::createContainer(cbe::Container parentContainer) {
   parentContainer.createContainer(name, createContainerDelegate);
   
   // Calling wait for the delegate to finish
-  createContainerDelegate->wait();
+  createContainerDelegate->waitForRsp();
 
   // Check if error, can also check if a container was constructed.
   if (createContainerDelegate->errorInfo){ 
@@ -244,7 +243,7 @@ void Exercise::loadContainerContents(cbe::Container container) {
   container.query(containerFilter, queryDelegate);
 
   // Wait for delegate to finish
-  queryDelegate->wait();
+  queryDelegate->waitForRsp();
   
   // Check if error 
   if (queryDelegate->errorInfo){ // Could also check if qResult was constructed
@@ -294,7 +293,7 @@ void Exercise::loadContainerObjects(cbe::Container container) {
   container.query(objectFilter, queryDelegate);
 
   // Wait for delegate to finish
-  queryDelegate->wait();
+  queryDelegate->waitForRsp();
    // Check if error 
   if (queryDelegate->errorInfo){ // Can check if qResult was constructed.
     std::cout << "Error!" << std::endl;
@@ -424,48 +423,29 @@ cbe::Object Exercise::createObject(cbe::Container inContainer) {
   
   // Check if user has created any key/values
   if (numOftags > 0) {
-    
     // Create object with name, delegate and key/values
     inContainer.createObject(name, createObjectDelegate, keyValues);
-
-    // Wait for delegate to finish
-    createObjectDelegate->wait();
-
-    // Check if error 
-    if (createObjectDelegate->errorInfo){ 
-      std::cout << "Error!" << std::endl;
-      std::cout << "Could not create object." << std::endl;
-
-      // Print info about error
-      std::cout << createObjectDelegate->errorInfo << std::endl;
-
-      // Exit program with unique code 
-      exitProgram(31);
-    }
-    // Return object from delegate
-    return createObjectDelegate->object;
-  } 
-  else {
+  } else {
     // Create object without key/values
     inContainer.createObject(name, createObjectDelegate);
-
-    // Wait for delegate to finish
-    createObjectDelegate->wait();
-
-    // Check if error 
-    if (createObjectDelegate->errorInfo){ 
-      std::cout << "Error!" << std::endl;
-      std::cout << "Could not create object." << std::endl;
-
-      // Print info about error
-      std::cout << createObjectDelegate->errorInfo << std::endl;
-
-      // Exit with unique code
-      exitProgram(32);
-    }
-    // Return object from delegate
-    return createObjectDelegate->object;    
   }
+  
+  // Wait for delegate to finish
+  createObjectDelegate->waitForRsp();
+  
+  // Check if error 
+  if (createObjectDelegate->errorInfo){ 
+    std::cout << "Error!" << std::endl;
+    std::cout << "Could not create object." << std::endl;
+
+    // Print info about error
+    std::cout << createObjectDelegate->errorInfo << std::endl;
+
+    // Exit with unique code
+    exitProgram(31);
+  }
+  // Return object from delegate
+  return createObjectDelegate->object;    
 }
 
 // - - - - - - - - - - - - - - LOGIC EXERCISE 1,2,3 - - - - - - - - - - - - - - 
@@ -497,7 +477,7 @@ void Exercise::logic() {
                                                          logInDelegate);
 
   // Wait for delegate to finish
-  logInDelegate->wait();
+  logInDelegate->waitForRsp();
   
   // Check if error 
   if (logInDelegate->errorInfo){

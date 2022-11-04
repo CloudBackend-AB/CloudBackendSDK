@@ -45,7 +45,7 @@ public:
   cbe::CloudBackend cloudBackend{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     // std::cout << "Waiting, to be logged in" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -94,7 +94,7 @@ public:
   cbe::QueryResult queryResult{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     // std::cout << "Waiting, for query" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -152,7 +152,7 @@ public:
   cbe::QueryResult queryResult{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     // std::cout << "Waiting, for query" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -199,7 +199,7 @@ public:
   cbe::Container container{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     // std::cout << "Waiting, for create container" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -237,7 +237,7 @@ public:
   cbe::Object object{cbe::DefaultCtor{}};
   ErrorInfo errorInfo{};
 
-  void wait() {
+  void waitForRsp() {
     std::unique_lock<std::mutex> lock(mutex);
     // std::cout << "Waiting, for create container" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
@@ -284,7 +284,7 @@ class RemoveDelegate : public cbe::delegate::container::RemoveDelegate
     /*implementation of delegates */
     ErrorInfo errorInfo{};
 
-    void wait() {
+    void waitForRsp() {
       std::unique_lock<std::mutex> lock(mutex);
       // std::cout << "Waiting, to be logged in" << std::endl;
       conditionVariable.wait(lock, [this] { return called; });
