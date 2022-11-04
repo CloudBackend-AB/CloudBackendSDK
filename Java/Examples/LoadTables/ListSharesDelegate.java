@@ -1,19 +1,20 @@
+import com.cbe.*;
 import com.cbe.delegate.*;
 
-public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
+public class ListSharesDelegate extends com.cbe.delegate.ListSharesDelegate {
 
-  ShareDelegate() {}
-  private boolean  finished = false;
-  private String   errorInfo;
-  private long     returnShareId;
+  ListSharesDelegate() {}
+  private boolean     finished = false;
+  private String     errorInfo;
+  private QueryResult qr;
 
-  /**
-   * Called upon successful share.<br>
-   * @param shareId Id of the share.
+   /**
+   * Called upon successful Share.<br>
+   * @param qResult Instance of cbe::QueryResult containing list of shares.
    */
   @Override
-  synchronized public void onShareSuccess(long shareId) {
-    returnShareId = shareId;
+  synchronized public void onListSharesSuccess(com.cbe.QueryResult qResult) {
+    qr = qResult;
     this.finished = true;
     // If delegate is reused, clear possibly error state
     errorInfo = null;
@@ -24,7 +25,7 @@ public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
    * Called if an error is encountered.
    */
   @Override
-  synchronized public void onShareError(com.cbe.delegate.Error error, com.cbe.util.Context context) {
+  synchronized public void onListSharesError(com.cbe.delegate.Error error, com.cbe.util.Context context) {
     errorInfo = "Login error: code=\"" + error.getErrorCode() + 
                 ", reason=\"" + error.getReason() +
                 "\", message=\"" + error.getMessage() + "\"";
@@ -32,7 +33,7 @@ public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
     notify();
   }
 
-  synchronized public long waitForRsp() {
+  synchronized public QueryResult waitForRsp() {
     while (!finished) {
       try {
         wait();
@@ -43,7 +44,6 @@ public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
     if (errorInfo != null) {
       throw new RuntimeException(errorInfo);
     }
-    return returnShareId; 
+    return qr; 
   }
-
 }

@@ -1,4 +1,4 @@
-# Copyright © CloudBackend AB 2022.
+# CloudBackend AB 2022.
 # Compile and Run Java CBE program.
 # Dependent on the libcbe.zip being installed,
 # which contains the .so library for the java sdk. 
@@ -6,4 +6,4 @@
 # if you want to have them somewhere else than the standard path. 
 
 # run
-java -Djava.library.path=../../lib/ -cp 'xclass:../../lib/com.cbe.jar' LoadTable $*
+java -Djava.library.path=../../lib/ -cp 'classes:../../lib/com.cbe.jar' LoadTable $*

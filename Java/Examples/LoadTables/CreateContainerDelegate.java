@@ -1,19 +1,22 @@
+import com.cbe.*;
+import com.cbe.util.*;
 import com.cbe.delegate.*;
 
-public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
+public class CreateContainerDelegate extends com.cbe.delegate.CreateContainerDelegate {
 
-  ShareDelegate() {}
-  private boolean  finished = false;
-  private String   errorInfo;
-  private long     returnShareId;
+  CreateContainerDelegate() {}
+  private boolean           finished = false;
+  private String            errorInfo;
+  private com.cbe.Container returnContainer;
+
 
   /**
-   * Called upon successful share.<br>
-   * @param shareId Id of the share.
+   * Called upon successful CreateContainer.<br>
+   * 
    */
   @Override
-  synchronized public void onShareSuccess(long shareId) {
-    returnShareId = shareId;
+  synchronized public void onCreateContainerSuccess(com.cbe.Container container) {
+    returnContainer = container;
     this.finished = true;
     // If delegate is reused, clear possibly error state
     errorInfo = null;
@@ -24,7 +27,7 @@ public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
    * Called if an error is encountered.
    */
   @Override
-  synchronized public void onShareError(com.cbe.delegate.Error error, com.cbe.util.Context context) {
+  synchronized public void onCreateContainerError(com.cbe.delegate.Error error, com.cbe.util.Context context) {
     errorInfo = "Login error: code=\"" + error.getErrorCode() + 
                 ", reason=\"" + error.getReason() +
                 "\", message=\"" + error.getMessage() + "\"";
@@ -32,7 +35,7 @@ public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
     notify();
   }
 
-  synchronized public long waitForRsp() {
+    synchronized public Container waitForRsp() {
     while (!finished) {
       try {
         wait();
@@ -43,7 +46,6 @@ public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
     if (errorInfo != null) {
       throw new RuntimeException(errorInfo);
     }
-    return returnShareId; 
+    return returnContainer; 
   }
-
 }

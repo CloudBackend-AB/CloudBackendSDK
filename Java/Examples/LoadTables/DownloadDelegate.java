@@ -1,19 +1,20 @@
 import com.cbe.delegate.*;
 
-public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
+public class DownloadDelegate extends com.cbe.delegate.DownloadDelegate {
 
-  ShareDelegate() {}
-  private boolean  finished = false;
-  private String   errorInfo;
-  private long     returnShareId;
+  DownloadDelegate() {}
+  private boolean        finished = false;
+  private String         errorInfo;
+  private com.cbe.Object returnObject;
+
 
   /**
-   * Called upon successful share.<br>
-   * @param shareId Id of the share.
+   * Called upon successful Download.<br>
+   * 
    */
   @Override
-  synchronized public void onShareSuccess(long shareId) {
-    returnShareId = shareId;
+  synchronized public void onDownloadSuccess(com.cbe.Object object, String path) {
+    returnObject = object;
     this.finished = true;
     // If delegate is reused, clear possibly error state
     errorInfo = null;
@@ -24,15 +25,14 @@ public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
    * Called if an error is encountered.
    */
   @Override
-  synchronized public void onShareError(com.cbe.delegate.Error error, com.cbe.util.Context context) {
+  synchronized public void onDownloadError(com.cbe.delegate.TransferError error, com.cbe.util.Context context) {
     errorInfo = "Login error: code=\"" + error.getErrorCode() + 
                 ", reason=\"" + error.getReason() +
                 "\", message=\"" + error.getMessage() + "\"";
     this.finished = true;
     notify();
   }
-
-  synchronized public long waitForRsp() {
+  synchronized public com.cbe.Object waitForRsp() {
     while (!finished) {
       try {
         wait();
@@ -43,7 +43,6 @@ public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
     if (errorInfo != null) {
       throw new RuntimeException(errorInfo);
     }
-    return returnShareId; 
+    return returnObject; 
   }
-
 }

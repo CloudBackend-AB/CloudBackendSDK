@@ -1,19 +1,21 @@
+import com.std.*;
+import com.cbe.*;
 import com.cbe.delegate.*;
 
-public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
+public class AclDelegate extends com.cbe.delegate.AclDelegate {
 
-  ShareDelegate() {}
+  AclDelegate() {}
   private boolean  finished = false;
   private String   errorInfo;
-  private long     returnShareId;
+  private Acl_Map  permissionsMap = new Acl_Map();
 
   /**
-   * Called upon successful share.<br>
-   * @param shareId Id of the share.
+   * Called upon successful Acl.<br>
+   * 
    */
   @Override
-  synchronized public void onShareSuccess(long shareId) {
-    returnShareId = shareId;
+  synchronized public void onAclSuccess(com.std.Acl_Map aclMap) {
+    permissionsMap = aclMap;
     this.finished = true;
     // If delegate is reused, clear possibly error state
     errorInfo = null;
@@ -24,7 +26,7 @@ public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
    * Called if an error is encountered.
    */
   @Override
-  synchronized public void onShareError(com.cbe.delegate.Error error, com.cbe.util.Context context) {
+  synchronized public void onAclError(com.cbe.delegate.Error error, com.cbe.util.Context context) {
     errorInfo = "Login error: code=\"" + error.getErrorCode() + 
                 ", reason=\"" + error.getReason() +
                 "\", message=\"" + error.getMessage() + "\"";
@@ -32,7 +34,8 @@ public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
     notify();
   }
 
-  synchronized public long waitForRsp() {
+
+  synchronized public com.std.Acl_Map waitForRsp() {
     while (!finished) {
       try {
         wait();
@@ -43,7 +46,6 @@ public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
     if (errorInfo != null) {
       throw new RuntimeException(errorInfo);
     }
-    return returnShareId; 
+    return permissionsMap; 
   }
-
 }
