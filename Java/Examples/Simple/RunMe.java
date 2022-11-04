@@ -1,4 +1,6 @@
 import com.cbe.*;
+import com.std.*;
+import com.cbe.util.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +14,7 @@ import java.util.Properties;
 public class RunMe {
 
   public CloudBackend login(String credentials) {
-    CloudBackend tempObj = null;
+    CloudBackend cloudBackend = null;
     try (InputStream input = new FileInputStream("../../resources/config.properties")) {
 
       Properties prop = new Properties();
@@ -23,340 +25,151 @@ public class RunMe {
       // get the property value and set the login credentials
       String username = prop.getProperty(credentials + ".username");
       String password = prop.getProperty(credentials + ".password");
-      String tenant = prop.getProperty(credentials + ".tenant");
-
-      AccountDelegate delegate = new AccountDelegate();
-      tempObj = CloudBackend.logIn(username, password, tenant, delegate);
-      while (!delegate.finished) {
-        try
-        {
-            Thread.sleep(10);
-        }
-        catch(Exception e)
-        {
-             System.out.println(e);
-        }
-      }   
-     
+      String tenant   = prop.getProperty(credentials + ".tenant");
+      MyLogInDelegate delegate = new MyLogInDelegate();
+      System.out.println("call CloudBackend.login");
+      cloudBackend = CloudBackend.logIn(username, password, tenant, delegate);
+      return delegate.waitForRsp();
     } catch (IOException ex) {
-    ex.printStackTrace();
+      throw new RuntimeException(ex);
     }
-    // If login happened then return the cloudbackend object.
-    return tempObj;
+    finally {
+      cloudBackend.terminate();
+    }
   }
   
-  public QueryResult queryR(CloudBackend obj, Filter filter, long containerId) {
-    ItemDelegate delegate = new ItemDelegate();
-    // obj.account().rootContainer().query(delegate);
-    obj.query(containerId, filter, delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return delegate.qR;
-  }
-
   public QueryResult query(Container container) {
-    ItemDelegate delegate = new ItemDelegate();
-    container.query(delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return delegate.qR;
+    MyQueryDelegate delegate = new MyQueryDelegate();
+    QueryChain chain = container.query(delegate);
+    return delegate.waitForRsp();
   }
 
   public Container createContainer(Container container) {
-    ItemDelegate delegate = new ItemDelegate();
-    Container tempCont = container.create("javaContainer", delegate);
-    System.out.println("tempContainer id" + tempCont.id());
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return tempCont;
-  }
-
-  public Container createContainer2(Container container, String name) {
-    ItemDelegate delegate = new ItemDelegate();
-    Container tempCont = container.create(name, delegate);
-    System.out.println("tempContainer id" + tempCont.id());
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return tempCont;
-  }
-
-  public void downloadObject(com.cbe.Object object, String path) {
-    TransferDownloadDelegate delegate = new TransferDownloadDelegate();
-    object.download(path , delegate);
-    System.out.println("called download to " + path);    
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return;
+    MyCreateContainerDelegate delegate = new MyCreateContainerDelegate();
+    Container tempCont = container.createContainer("javaContainer", delegate);
+    return delegate.waitForRsp();
   }
 
   public com.cbe.Object uploadBinary(Container container) throws IOException {
-    
-    com.cbe.Object tempObj = null;
-
     try (InputStream input = new FileInputStream("../../resources/config.properties")) {
       Properties prop = new Properties();
+      byte[] data;
+      String name;
       
       // load a properties file
       prop.load(input);
-
-      TransferUploadDelegate delegate = new TransferUploadDelegate();
-      byte[] data = Files.readAllBytes(Paths.get(prop.getProperty("binaryPath")));
-      tempObj = container.uploadBinary(prop.getProperty("binaryFileName"), data, delegate);
-      System.out.println("tempObject id" + tempObj.id());
-
-      while (!delegate.finished) {
-        try
-        {
-            Thread.sleep(10);
-        }
-        catch(Exception e)
-        {
-             System.out.println(e);
-        }
-      }   
-     
+      data = Files.readAllBytes(Paths.get(prop.getProperty("binaryPath")));
+      name = prop.getProperty("binaryFileName");    
+      MyUploadDelegate delegate = new MyUploadDelegate();
+      container.uploadBinary(name, data, delegate);
+      return delegate.waitForRsp();
     } catch (IOException ex) {
-    ex.printStackTrace();
+      throw new RuntimeException(ex);
     }
-    
-    return tempObj;
+  }
+
+  public void downloadObject(com.cbe.Object object, String path) {
+    MyDownloadDelegate delegate = new MyDownloadDelegate();
+    object.download(path , delegate);
   }
 
   public com.cbe.Object uploadObject(Container container) {
-    
-    com.cbe.Object tempObj = null;
-
     try (InputStream input = new FileInputStream("../../resources/config.properties")) {
       Properties prop = new Properties();
-      
+      String path;
+      String name;
+        
       // load a properties file
       prop.load(input);
-
-      TransferUploadDelegate delegate = new TransferUploadDelegate();
-      tempObj = container.upload(prop.getProperty("filename"), prop.getProperty("path") , delegate);
-      System.out.println("tempObject id" + tempObj.id());    
-
-      while (!delegate.finished) {
-        try
-        {
-          Thread.sleep(10);
-        }
-        catch(Exception e)
-        {
-          System.out.println(e);
-        }
-      }
+      path = prop.getProperty("path");
+      name = prop.getProperty("filename");
+      MyUploadDelegate delegate = new MyUploadDelegate();
+      container.upload(name, path, delegate);
+      return delegate.waitForRsp();
     } catch (IOException ex) {
-      ex.printStackTrace();
+      throw new RuntimeException(ex);
     }
-
-    return tempObj;
   }
 
+  // maybe only return the metadata key value map instead look at logic in main function.
   public com.cbe.Object createObject(Container container) {
-    ItemDelegate delegate = new ItemDelegate();
+    MyCreateObjectDelegate delegate = new MyCreateObjectDelegate();
     Obj_VI_Pair metaDataValue = new Obj_VI_Pair("testMetadata", true);
 
     Obj_KV_Map metadata = new Obj_KV_Map();
     metadata.put("testKey", metaDataValue);
 
     com.cbe.Object tempObj = container.createObject("JavaTestObject", delegate, metadata);
-
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
+    delegate.waitForRsp();
     return tempObj;
   }
 
-  public com.cbe.Object createObject2(Container container, Obj_KV_Map metadata, String name) {
-    ItemDelegate delegate = new ItemDelegate();
-    // Obj_VI_Pair metaDataValue = new Obj_VI_Pair("testMetadata", true);
-
-    // Obj_KV_Map metadata = new Obj_KV_Map();
-    // metadata.put("testKey", metaDataValue);
-    metadata.forEach((K,V)->{
-      System.out.printf("%14s, ", V.getFirst());
-    });
-    System.out.print("\t");
-    com.cbe.Object tempObj = container.createObject(name, delegate, metadata);
-
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return tempObj;
-  }
 
   public void removeContainer(Container container) {
-    ItemDelegate delegate = new ItemDelegate();
+    MyRemoveContainerDelegate delegate = new MyRemoveContainerDelegate();
     container.remove(delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
+    delegate.waitForRsp();
     return;
   }
 
-  public void setContainerACL(Container container , ACL_Map permissionsMap) {
-    ShareDelegate delegate = new ShareDelegate();
-    container.setACL(permissionsMap, delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
+  public void setContainerACL(Container container , com.std.Acl_Map permissionsMap) {
+    MyAclDelegate delegate = new MyAclDelegate();
+    container.setAcl(permissionsMap, delegate);
+    delegate.waitForRsp();
     return;
   }
 
-  public AbstractMap<Long,Integer> getContainerACL(Container container) {
-    ShareDelegate delegate = new ShareDelegate();
-    container.getACL(delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return delegate.permissionsMap;
-
+  public AbstractMap<Long,com.cbe.Permissions> getContainerACL(Container container) {
+    MyAclDelegate delegate = new MyAclDelegate();
+    container.getAcl(delegate);
+    return delegate.waitForRsp();
   }
 
   public long share(long userGroupId, Container container) {
-    ShareDelegate delegate = new ShareDelegate();
+    MyShareDelegate delegate = new MyShareDelegate();
     container.share(userGroupId, "javaShare", delegate);
-
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return delegate.shareId;
+    return delegate.waitForRsp();
   }
 
   public QueryResult listAvailableShares(com.cbe.CloudBackend cloudbackend) {
-    ShareDelegate delegate = new ShareDelegate();
+    MyListSharesDelegate delegate = new MyListSharesDelegate();
     cloudbackend.shareManager().listAvailableShares(delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return delegate._qr;
+    return delegate.waitForRsp();
   }
 
   public void unshareContainer(long shareId, Container container) {
-    ShareDelegate delegate = new ShareDelegate();
+    MyUnShareDelegate delegate = new MyUnShareDelegate();
     container.unShare(shareId, delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
+    delegate.waitForRsp();
   }
 
   public static void main(String[] argv) {
     System.out.println("RunMe program start");
     RunMe inst = new RunMe();
     CloudBackend cbobj = inst.login("cr1");
+    Account a = cbobj.account();
+
+    System.out.println("Main Java container.uname: " + a.username());
     if (cbobj.account().userId()>0) {
       System.out.println("Login: " + cbobj.account().username() + " " + cbobj.account().firstName() + " " + cbobj.account().lastName());
     } else {
-      System.out.println("Login failed. Exit program.");
+      System.out.println("Login failed.");
+      cbobj.terminate();
+      System.out.println("RunMe program end.");
       return;
     }
 
     Filter filter = new Filter();
     filter.setAscending(true);
-    
-    QueryResult qR = inst.queryR(cbobj, filter, cbobj.account().rootContainer().id());
-    
+    System.out.println("RunMe::query ");   
+    QueryResult qR = inst.query(cbobj.account().rootContainer());
+    List<Item> items = qR.getItemsSnapshot();
     if(qR == null) {
       System.out.println("Query failed null. ");
     } else {
-      AbstractList<Item> items = qR.getItemsSnapshot();
+      System.out.println("RunMe::Loop 1 ");
+      items = qR.getItemsSnapshot();
+      System.out.println("RunMe::Loop 2 ");
       for(Item item : items) {
         System.out.println("Item: " + item.name());
       }
@@ -370,112 +183,48 @@ public class RunMe {
       System.out.println("Container created id: " + testContainer.id());
     }
 
-
-    AbstractList<Item> items = qR.getItemsSnapshot();
-      for(Item item : items) {
-        System.out.println("Item: " + item.name());
-      }
-    
-    com.cbe.Object object1 = inst.uploadObject(testContainer);
-    if (!object1.idLoaded()) {
+    com.cbe.Object object = inst.uploadObject(testContainer);
+    if (!object.idLoaded()) {
       System.out.println("Object creation failed!");
       return;
     } else {
-      System.out.println("Object created id: " + object1.id());
+      System.out.println("Object created id: " + object.id());
+    }
+
+    String dPath = "/tmp/";
+    inst.downloadObject(object, dPath);
+    if (!object.idLoaded()) {
+      System.out.println("Object download failed!");
+      return;
+    } else {
+      System.out.println("1'st Object downloaded: " + object.name() + " to " + dPath);
     }
     
     qR = inst.query(testContainer);
-    items = qR.getItemsSnapshot();
-    for(Item item : items) {
+    List<Item> items2 = qR.getItemsSnapshot();
+    for(Item item : items2) {
       System.out.println("Item: " + item.name());
     }
 
-    com.cbe.Object object2 = null;
+    com.cbe.Object binaryObject = null;
     try {
-      object2 = inst.uploadBinary(testContainer);
+      binaryObject = inst.uploadBinary(testContainer);
     }
     catch(IOException e) {
       e.printStackTrace();
     }
-    
-    items = qR.getItemsSnapshot();
-    for(Item item : items) {
-      System.out.println("Item: " + item.name());
-    }
 
-    String dPath = "/tmp/";
-    inst.downloadObject(object1, dPath);
-    if (!object1.idLoaded()) {
-      System.out.println("Object download failed!");
+    inst.downloadObject(binaryObject, dPath);
+    if (!object.idLoaded()) {
+      System.out.println("Binary Object download failed!");
       return;
     } else {
-      System.out.println("1'st Object downloaded: " + object1.name() + " to " + dPath);
+      System.out.println("Binary Object downloaded: " + binaryObject.name()  + " to " + dPath);
     }
-
-    inst.downloadObject(object2, dPath);
-    if (!object2.idLoaded()) {
-      System.out.println("Object download failed!");
-      return;
-    } else {
-      System.out.println("2'nd Object downloaded: " + object2.name() + " to " + dPath);
-    }
-
-    long _parentId_ = testContainer.id();
-    RunMe inst2 = new RunMe();
-
-    CloudBackend cbobj2 = inst2.login("cr2");
-    if (cbobj2.account().userId() > 0) {
-      System.out.println("Login: " + cbobj.account().username() + " " + cbobj.account().firstName() + " " + cbobj.account().lastName());
-    } else {
-      System.out.println("Login failed. Exit program.");
-      return;
-    }
-
-    ACL_Map permissions = new ACL_Map();
-    permissions.put(cbobj2.account().userId(), 7);
-
-    inst.setContainerACL(testContainer, permissions);
-
-    long sId = inst.share(cbobj2.account().userId(), testContainer);
-
-    AbstractMap<Long, Integer> queriedPermissionsMap = inst2.getContainerACL(testContainer);
-
-    queriedPermissionsMap.forEach( (k,v) -> System.out.println("User Id: " + k + ": Permission: " + v));
-
-    QueryResult shareQr = inst2.listAvailableShares(cbobj2);
-    // To see if user2 has the permissions correct we test by query the testContainer with user2
-    // and create an Object in the test container.
-    Container cont = null;
-    int i = 0;
-    int get = 0;
-    items = shareQr.getItemsSnapshot();
-    for(Item item : items) {
-      System.out.println("share: " + item.name());
-      if(item.name() == "javaContainer") {
-        get = i;
-      }
-      i++;
-    }
-    Item tempItem = items.get(get);
-
-    cont = cbobj2.castContainer(tempItem);
-    com.cbe.Object cObj = inst2.createObject(cont);
-   
-    AbstractMap<String, Obj_VI_Pair> metadata = cObj.keyValues();
-    metadata.forEach((K,V)->{
-      if (V.getSecond()) {
-        System.out.println(K + "=" + V.getFirst() + " \t(indexed)");
-      } else {
-        System.out.println(K + "=" + V.getFirst());
-      }
-    });
     
-    inst.unshareContainer(sId, testContainer);
+    inst.removeContainer(testContainer);
 
-    inst2.removeContainer(testContainer);
-    
-    System.out.println("Java SDK version " + cbobj.version());
-    Runtime.getRuntime().runFinalization();
+    cbobj.terminate();
     System.out.println("RunMe program end.");
   }
 
