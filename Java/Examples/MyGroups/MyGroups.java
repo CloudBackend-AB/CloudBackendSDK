@@ -7,127 +7,166 @@ import com.cbe.Container;
 import com.cbe.Filter;
 import com.cbe.Group;
 import com.cbe.GroupManager;
-import com.cbe.Groups_Vec;
 import com.cbe.Item;
 import com.cbe.Member;
-import com.cbe.Members_Vec;
-import com.cbe.Obj_KV_Map;
-import com.cbe.Obj_VI_Pair;
 import com.cbe.Object;
 import com.cbe.QueryResult;
 
+import com.std.Groups_Vec;
+import com.std.Members_Vec;
+import com.std.Obj_KV_Map;
+import com.std.Obj_VI_Pair;
 
-class AccountEventDelegate extends com.cbe.AccountEventProtocol {
-  boolean finished = false;
+
+class LogInDelegate extends com.cbe.delegate.LogInDelegate {
+  public boolean       finished;     /* false */
+
   @Override
-  public synchronized void onLogin(long atState, CloudBackend cloudbackend) {
-    // System.out.println("Login success");
+  public synchronized void onLogInSuccess(CloudBackend cloudBackend) {
     finished = true;
     notify();
   }
 
   @Override
-  public synchronized void onError(long failedAtState, long code, String reason,
-                                   String message) {
+  public synchronized void onLogInError(com.cbe.delegate.Error error, 
+                                          com.cbe.util.Context context) {
+
     System.out.println("Login failed:");
-    System.out.println("failedAtState: " + failedAtState);
-    System.out.println("         code: " + code);
-    System.out.println("       reason: " + reason);
-    System.out.println("      message: " + message);
+    System.out.println("         code: " + error.getErrorCode());
+    System.out.println("       reason: " + error.getReason());
+    System.out.println("      message: " + error.getMessage()); 
+
     finished = true;
     notify();
-  }  
-} // class AccountEventDelegate -----------------------------------------------
+  }
+  
+} // class LogInDelegate
 
-class GroupEventDelegate extends com.cbe.GroupEventProtocol {
+class ListMyGroupsDelegate extends com.cbe.delegate.ListGroupsDelegate {
   private boolean finished = false;
   private Groups_Vec myGroupsVec = null;
-  private Members_Vec myMembersVec = null;
-  private long newPersistenceState = 0;
-
+    /**
+   * Called upon successful listGroup<br>
+   * @param groups Ref to vector of cbe::Group holding the joined groups.
+   */
   @Override
-  public synchronized void onListGroups​(Groups_Vec groups) {
-    // System.out.println("on List Group");
+  public synchronized void onListGroupsSuccess(com.std.Groups_Vec groups) {
     this.myGroupsVec = groups;
     finished = true;
     notify();
   }
 
-  public synchronized com.cbe.Groups_Vec waitListGroups() {
+ public synchronized com.std.Groups_Vec waitListGroups() {
     while (!finished) {
       try {
         wait();
-      } catch (Exception e) {
+      } catch (InterruptedException e) {
         System.out.println(e);
       }
     }
     return myGroupsVec;
   }
 
+  /**
+   * Called if an error is encountered.
+   */
   @Override
-  public synchronized void onListMembers​(long newPersistenceState, Members_Vec members) {
-    // System.out.println("on List Members");
-    this.myMembersVec = members;
-    this.newPersistenceState = newPersistenceState;
+  public synchronized void onListGroupsError(com.cbe.delegate.Error error, com.cbe.util.Context context) {
+    System.out.println("ListMyGroups failed:");
+    System.out.println("         code: " + error.getErrorCode());
+    System.out.println("       reason: " + error.getReason());
+    System.out.println("      message: " + error.getMessage());
     finished = true;
     notify();
   }
 
-  public synchronized com.cbe.Members_Vec waitListMembers() {
+} // class ListMyGroupsDelegate
+
+class ListMyMembersDelegate extends com.cbe.delegate.ListMembersDelegate {
+  private boolean finished = false;
+  private Members_Vec myMembersVec = null;
+  /**
+   * Called upon successful ListMembers.<br>
+   * @param members Vector of cbe::Member holding the members<br>
+   * of a group.
+   */
+  @Override
+  public synchronized void onListMembersSuccess(com.std.Members_Vec members) {
+    this.myMembersVec = members;
+    finished = true;
+    notify();
+  }
+
+  public synchronized com.std.Members_Vec waitListMembers() {
     while (!finished) {
       try {
         wait();
-      } catch (Exception e) {
+      } catch (InterruptedException e) {
         System.out.println(e);
       }
     }
     return myMembersVec;
   }
 
+  /**
+   * Called if an error is encountered.
+   */
   @Override
-  public synchronized void onGroupError​(long operationId, long operation, 
-                                        long failedAtState, long code, 
-                                        java.lang.String reason, java.lang.String message) {
-    System.out.println("Group failed:");
-    System.out.println("  operationId: " + operationId);
-    System.out.println("    operation: " + operation);
-    System.out.println("failedAtState: " + failedAtState);
-    System.out.println("         code: " + code);
-    System.out.println("       reason: " + reason);
-    System.out.println("      message: " + message);
-    finished = true;
-    notify();
-  }  
-
-} // class GroupEventDelegate -----------------------------------------------
-
-class ItemEventDelegate extends com.cbe.ItemEventProtocol {
-  private boolean           finished = false;
-  private QueryResult       resultSet = null;
-  private com.cbe.Container container = null;
-  private com.cbe.Object    object = null;
-
-  @Override
-  public synchronized  void onQueryLoaded(QueryResult resultSet) {
-    this.resultSet = resultSet;
+  public synchronized void onListMembersError(com.cbe.delegate.Error error, com.cbe.util.Context context) {
+    System.out.println("ListMyMembers failed:");
+    System.out.println("         code: " + error.getErrorCode());
+    System.out.println("       reason: " + error.getReason());
+    System.out.println("      message: " + error.getMessage());
     finished = true;
     notify();
   }
+} // ListMyMembersDelegate
+
+
+class MyQueryDelegate extends com.cbe.delegate.QueryDelegate {
+  private QueryResult queryResult; /* null */
+  private String      errorInfo;
+  private boolean     finished;  /* false */
   
+  @Override
+  public synchronized void onQuerySuccess(com.cbe.QueryResult qR) {
+    queryResult = qR;
+    finished = true;
+    notify();
+  }
+
   public synchronized  QueryResult waitResult() {
     while (!finished) {
       try {
         wait();
-      } catch (Exception e) {
+      } catch (InterruptedException e) {
         System.out.println(e);
       }
     }
-    return resultSet;
+    return queryResult;
   }
+
+  @Override
+  public synchronized void onQueryError(com.cbe.delegate.QueryError error, 
+                                              com.cbe.util.Context context) {
+    errorInfo = "LoadError: code=" + error.getErrorCode() + 
+                ", reason=\"" + error.getReason() +
+                "\", message=\"" + error.getMessage() + "\"";
+    finished = true;
+    notify();
+  }
+} // class MyQueryDelegate
+
+
+class CreateContainerDelegate 
+                          extends com.cbe.delegate.CreateContainerDelegate {
+  private Container   container;
+  private String      errorInfo;
+  private boolean     finished;  /* false */
   
   @Override
-  public synchronized void onContainerAdded(Container container) {
-    this.container = container;
+  public synchronized void onCreateContainerSuccess(Container _container) {
+    container = _container;
     finished = true;
     notify();
   }
@@ -136,7 +175,7 @@ class ItemEventDelegate extends com.cbe.ItemEventProtocol {
     while (!finished) {
       try {
         wait();
-      } catch (Exception e) {
+      } catch (InterruptedException e) {
         System.out.println(e);
       }
     }
@@ -144,8 +183,24 @@ class ItemEventDelegate extends com.cbe.ItemEventProtocol {
   }
 
   @Override
-  public synchronized void onObjectAdded(com.cbe.Object object) {
-    this.object = object;
+  public synchronized void onCreateContainerError(com.cbe.delegate.Error error, 
+                                                  com.cbe.util.Context context) {
+    errorInfo = "CreateContainerError: code=" + error.getErrorCode() + 
+                ", reason=\"" + error.getReason() +
+                "\", message=\"" + error.getMessage() + "\"";
+    finished = true;
+    notify();
+  }
+} // CreateContainerDelegate
+  
+class CreateObjectDelegate extends com.cbe.delegate.CreateObjectDelegate {
+  private com.cbe.Object  object;     /* null */
+  private String          errorInfo;
+  private boolean         finished;  /* false */
+  
+  @Override
+  public synchronized void onCreateObjectSuccess(com.cbe.Object _object) {
+    object = _object;
     finished = true;
     notify();
   }
@@ -154,7 +209,7 @@ class ItemEventDelegate extends com.cbe.ItemEventProtocol {
     while (!finished) {
       try {
         wait();
-      } catch (Exception e) {
+      } catch (InterruptedException e) {
         System.out.println(e);
       }
     }
@@ -162,62 +217,46 @@ class ItemEventDelegate extends com.cbe.ItemEventProtocol {
   }
 
   @Override
-  public synchronized  void onLoadError(Filter filter, long operation,
-                                        long code, String reason,
-                                        String message) {
-    System.out.println("onLoadError(...,\"" + reason + "\", \"" + message + "\"");
+  public synchronized void onCreateObjectError(com.cbe.delegate.Error error, 
+                                                com.cbe.util.Context context) {
+    errorInfo = "CreateObjectError: code=" + error.getErrorCode() + 
+                ", reason=\"" + error.getReason() +
+                "\", message=\"" + error.getMessage() + "\"";
     finished = true;
     notify();
   }
-
-  @Override
-  public synchronized void onItemError(Item container, int type,
-                                       long operation, long failedAtState,
-                                       long code, String reason,
-                                       String message) {
-    System.out.println("onItemError(...,\"" + reason + "\", \"" + message + "\"");
-    finished = true;
-    notify();
-  }
-
-} // class ItemEventDelegate --------------------------------------------------
+}  // CreateObjectDelegate
 
 public class MyGroups {
   static  final Inquiry inquiry = new Inquiry();
 
   public static void main(String[] args) {
-    System.out.println("Program main start.");
-    AccountEventDelegate accountDelegate = new AccountEventDelegate();
+    System.out.println("Program MyGroups start.");
+    LogInDelegate loginDelegate = new LogInDelegate();
     // System.out.println("About to log in");
     CloudBackend cloudBackend = CloudBackend.logIn("gitHubTester1",
-                                          "gitHubTester1password",
-                                          "cbe_girhubtesters",
-                                          accountDelegate);
-    synchronized (accountDelegate) {
-      while (!accountDelegate.finished) {
+                                                   "gitHubTester1password",
+                                                   "cbe_girhubtesters",
+                                                   loginDelegate);
+    synchronized (loginDelegate) {
+      while (!loginDelegate.finished) {
         try {
-          accountDelegate.wait();
-        } catch (Exception e) {
+          loginDelegate.wait();
+        } catch (InterruptedException e) {
           System.out.println(e);
         }
       }
     }
     if (cloudBackend.account().userId()>0) {
-      System.out.println("Login: " + cloudBackend.account().username() + " " +
+      System.out.println("Login: " + 
+                         cloudBackend.account().username()  + " " +
                          cloudBackend.account().firstName() + " " +
                          cloudBackend.account().lastName());
     } else {
-      accountDelegate.delete();
-      System.out.println("Check the credentials.");
-      try {
-        Thread.sleep(100); // tidy gc clean up
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-      System.out.println("Program end after failing to login.");
+      System.out.println("Program stops after failing to login.");
+      cloudBackend.terminate();
       return;
     }
-    // step 4
     
     System.out.println("List my groups with their respective members:");
     GroupManager groupManager = cloudBackend.groupManager();
@@ -238,39 +277,31 @@ public class MyGroups {
         if (resultSet != null) {
           printContainerContents(resultSet);
         }
-    
       }
     }
     System.out.println();
-
-
-    System.out.println("Terminating SDK " + cloudBackend.version());
-    Runtime.getRuntime().runFinalization();
-    try {
-      Thread.sleep(100); // tidy gc clean up
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-    System.out.println("Program main end.");
+    System.out.println("SDK " + cloudBackend.version());
+    cloudBackend.terminate();
+    System.out.println("Program MyGroups end.");
   } // main()
   
   static QueryResult loadContainerContents(CloudBackend cloudBackend,
                                            com.cbe.Container container) {
     System.out.println("Getting sub-containers in container \"" +
                         container.name() + "\"");
-    ItemEventDelegate itemDelegate = new ItemEventDelegate();
+    MyQueryDelegate queryDelegate = new MyQueryDelegate();
     com.cbe.Filter filter1 = new com.cbe.Filter();
-    filter1.setDataType(8 /* i.e., container */);
-    cloudBackend.query(container.id(), filter1, itemDelegate);
-    final QueryResult resultSet = itemDelegate.waitResult();
-    itemDelegate.delete();
+    filter1.setDataType(com.cbe.ItemType.Container);
+    cloudBackend.query(container.id(), filter1, queryDelegate);
+    final QueryResult resultSet = queryDelegate.waitResult();
+    queryDelegate.delete();
     return resultSet;
   }
   
   static void printContainerContents(QueryResult resultSet) {
     for (final com.cbe.Item item : resultSet.getItemsSnapshot()) {
       // item is container?
-      if (item.type() == 8) {
+      if (item.type() == com.cbe.ItemType.Container) {
         System.out.println("  " + item.name());
       }
     }
@@ -278,9 +309,9 @@ public class MyGroups {
   
   static com.cbe.Container createContainer(String             name,
                                            com.cbe.Container  parentContainer) {
-    ItemEventDelegate itemDelegate = new ItemEventDelegate();
-    parentContainer.create(name, itemDelegate);
-    return itemDelegate.waitContainerAdded();
+    CreateContainerDelegate createContainerDelegate = new CreateContainerDelegate();
+    parentContainer.createContainer(name, createContainerDelegate);
+    return createContainerDelegate.waitContainerAdded();
   }
   
   static com.cbe.Container
@@ -288,7 +319,7 @@ public class MyGroups {
                                String               prompt,
                                com.cbe.CloudBackend cloudBackend) {
     System.out.println("Select Container");
-    final com.cbe.Items_Vec items = resultSet.getItemsSnapshot();
+    final com.std.Items_Vec items = resultSet.getItemsSnapshot();
     while (true) {
       final String containerName = inquiry.inquireString(prompt);
       for (final com.cbe.Item item : items) {
@@ -309,7 +340,7 @@ public class MyGroups {
     final String name = inquiry.inquireString("Set name for Object");
     final int numOftags =
         inquiry.inquireInt("Set the number of Key/Value pairs you want");
-    final com.cbe.Obj_KV_Map keyValues = new com.cbe.Obj_KV_Map();
+    final com.std.Obj_KV_Map keyValues = new com.std.Obj_KV_Map();
     for(int i = 1; i <= numOftags; i++) {
       final String tag = inquiry.inquireString("Name of Key #" + i);
       final String value =
@@ -318,34 +349,34 @@ public class MyGroups {
           inquiry.inquireBool("Make KeyValue pair #" + i +
                               " indexed or not (y indexed, n not indexed",
                               true /* defaultVal */);
-      keyValues.put(tag, new com.cbe.Obj_VI_Pair(value, indexed));
+      keyValues.put(tag, new com.std.Obj_VI_Pair(value, indexed));
     }
-    ItemEventDelegate itemDelegate = new ItemEventDelegate();
+    CreateObjectDelegate createObjectDelegate = new CreateObjectDelegate();
     if (numOftags > 0) {
-      inContainer.createObject(name, itemDelegate, keyValues);
+      inContainer.createObject(name, createObjectDelegate, keyValues);
     } else {
-      inContainer.createObject(name, itemDelegate);
+      inContainer.createObject(name, createObjectDelegate);
     }
-    return itemDelegate.waitObjectAdded();
+    return createObjectDelegate.waitObjectAdded();
   }
   
   static QueryResult loadContainerObjects(com.cbe.Container container) {
     System.out.println("Getting objects in container \"" + container.name() + "\"");
-    ItemEventDelegate itemDelegate = new ItemEventDelegate();
+    MyQueryDelegate queryDelegate = new MyQueryDelegate();
     com.cbe.Filter filter2 = new com.cbe.Filter();
-    filter2.setDataType(4 /* i.e., object */);
-    container.query(filter2, itemDelegate);
-    return itemDelegate.waitResult();
+    filter2.setDataType(com.cbe.ItemType.Object);
+    container.query(filter2, queryDelegate);
+    return queryDelegate.waitResult();
   }
 
   static void printObjects(com.cbe.QueryResult resultSet) {
     com.cbe.Object tempObject = null; // nullptr;
     System.out.println("Printing Objects from query result:");
     for (final com.cbe.Item item : resultSet.getItemsSnapshot()) {
-      if(item.type() == 4 /* object */) {
+      if(item.type() == com.cbe.ItemType.Object) {
         System.out.println(item.name());
         tempObject = com.cbe.CloudBackend.castObject(item);
-        final com.cbe.Obj_KV_Map keyValues = tempObject.keyValues();
+        final com.std.Obj_KV_Map keyValues = tempObject.keyValues();
         if(!keyValues.isEmpty()) {
           for (final java.util.Map.Entry<String, Obj_VI_Pair> entry :
                  keyValues.entrySet()) {
@@ -364,16 +395,16 @@ public class MyGroups {
     }
   }
 
-  static com.cbe.Groups_Vec listMyGroups(com.cbe.GroupManager theGroupManager) {
-    GroupEventDelegate groupDelegate = new GroupEventDelegate();
-    theGroupManager.listGroups(groupDelegate);
-    return groupDelegate.waitListGroups();
+  static com.std.Groups_Vec listMyGroups(com.cbe.GroupManager theGroupManager) {
+    ListMyGroupsDelegate listGroupsDelegate = new ListMyGroupsDelegate();
+    theGroupManager.listGroups(listGroupsDelegate);
+    return listGroupsDelegate.waitListGroups();
   }
 
-  static com.cbe.Members_Vec listMyMembers(com.cbe.Group theGroup) {
-    GroupEventDelegate groupDelegate = new GroupEventDelegate();
-    theGroup.listMembers(groupDelegate);
-    return groupDelegate.waitListMembers();
+  static com.std.Members_Vec listMyMembers(com.cbe.Group theGroup) {
+    ListMyMembersDelegate listMembersDelegate = new ListMyMembersDelegate();
+    theGroup.listMembers(listMembersDelegate);
+    return listMembersDelegate.waitListMembers();
   }
 
 
