@@ -1,4 +1,4 @@
-Copyright © CloudBackend AB 2020.
+ CloudBackend AB 2020.
 
 This is a simple Example for a test program.
 
