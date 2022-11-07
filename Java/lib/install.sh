@@ -1,6 +1,14 @@
 #!/usr/bin/bash
-unzip libcbeJava.zip 
-echo
-echo "To ease finding the SDK, you may set it in an environment variable, e.g.:"
-echo export 'CBE_JAVA_SDK='`pwd`
-echo 'echo ${CBE_JAVA_SDK}'
+# unpack the compressed lib
+
+unzip libcbeJava.zip
+
+exit
+
+# optional:
+# Run the install script below to get all libs installed at 
+# a system path that JVM can find, in this case [usr/lib].
+
+jar xf libcbe.jar 
+
+sudo cp lib* /usr/lib 

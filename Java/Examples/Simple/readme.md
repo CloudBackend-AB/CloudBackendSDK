@@ -1,21 +1,13 @@
-Copyright © CloudBackend AB 2021-2022.
+### Example Simple
 
-To test the code make sure the com.cbe.jar is in the same folder as this test.
+creates a container and uploads file.
 
-Compile: javac -cp '.:com.cbe.jar' *.java
-run: java -cp '.:com.cbe.jar' RunMe 
+Use to test the installation.
 
-The com.cbe.jar contains a class that automatically loads the libcb_sdk_shared_wrapper.so
-with all its dependencies so there is no need to write a load function.
+To test the code:
 
-As soon as the com.cbe.jar is loaded in the correct way
-and java.library.path can find the .so:s,
-the com.cbe classes can be used.
+- Compile: `bash compile.sh`
+- Run it : `bash run.sh`
 
-The .so is built with Ubuntu 20.04 and might have some dependencies regarding core libraries
-linked with the Ubuntu version, so please do use the latest LTS Ubuntu version and have it updated before you test.
-This issue might be solved in the future, by being statically linked into the sdk:s .so
-(however not the poco and openSSL libraries).
-
-The CloudBackend Java SDK has been tested with openjdk 11.
-
+----
+#### Copyright © CloudBackend AB 2022.

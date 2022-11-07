@@ -9,14 +9,14 @@ import com.cbe.CloudBackend;
 import com.cbe.Container;
 import com.cbe.Filter;
 import com.cbe.Item;
-import com.cbe.Obj_KV_Map;
-import com.cbe.Obj_VI_Pair;
 import com.cbe.QueryResult;
+import com.std.Obj_KV_Map;
+import com.std.Obj_VI_Pair;
 
 public class Airplanes {
-  private final CloudBackend  cloudBackend;
-  public  final Account       account;
-  static  final Inquiry       inquiry = new Inquiry();
+  private CloudBackend   cloudBackend = null;
+  public  final Account  account;
+  static  final Inquiry  inquiry = new Inquiry();
 
   public Airplanes(String credentials) {
     try (final InputStream inputStream =
@@ -31,26 +31,26 @@ public class Airplanes {
       final var password = prop.getProperty(credentials + ".password");
       final var tenant   = prop.getProperty(credentials + ".tenant");
 
-      class AccountDelegate extends com.cbe.AccountEventProtocol {
+      class LogInDelegate extends com.cbe.delegate.LogInDelegate {
         private CloudBackend  cloudBackend; /* null */
         private String        errorInfo;    /* null */
         private boolean       finished;     /* false */
 
         @Override
-        synchronized public void onLogin(long         atState,
-                                         CloudBackend cloudBackend) {
+        synchronized public void onLogInSuccess(CloudBackend cloudBackend) {
           this.cloudBackend = cloudBackend;
           finished = true;
+          // If delegate is reused, clear possibly error state
+          errorInfo = null;
           notify();
         }
 
         @Override
-        synchronized public void onError(long failedAtState, long code,
-                                         String reason, String message) {
-          errorInfo = "Login error: failedAtState=\"" + failedAtState + 
-                      "\"code=" + code + 
-                      ", reason=\"" + reason +
-                      "\", message=\"" + message + "\"";
+        synchronized public void onLogInError(com.cbe.delegate.Error error, 
+                                                com.cbe.util.Context context) {
+          errorInfo = "Login error: code=\"" + error.getErrorCode() + 
+                      ", reason=\"" + error.getReason() +
+                      "\", message=\"" + error.getMessage() + "\"";
           finished = true;
           notify();
         }
@@ -68,15 +68,20 @@ public class Airplanes {
           }
           return cloudBackend; 
         }
-      } // class AccountDelegate
+      } // class LogInDelegate
 
-      final var accountDelegate = new AccountDelegate();
-      CloudBackend.logIn(username, password, tenant, accountDelegate);
-      cloudBackend = accountDelegate.waitForRsp();
+      final var loginDelegate = new LogInDelegate();
+      cloudBackend = CloudBackend.logIn(username, password, tenant, loginDelegate);
+      loginDelegate.waitForRsp();
       account = cloudBackend.account();
+
     } catch (IOException ex) {
       // Soften the IOException
       throw new RuntimeException("Failed to open resource file", ex);
+    }
+    finally {
+      cloudBackend.terminate();
+      System.out.println("Airplanes program stop:");
     }
   }
   
@@ -86,25 +91,25 @@ public class Airplanes {
     return delegate.waitForRsp();
   }
 
-  private static class QueryDelegate extends com.cbe.ItemEventProtocol {
+  private static class QueryDelegate extends com.cbe.delegate.QueryDelegate {
     private QueryResult queryResult; /* null */
     private String      errorInfo;
     private boolean     finished;  /* false */
     
     @Override
-    synchronized public void onQueryLoaded(QueryResult dir) {
-      queryResult = dir;
+    synchronized public void onQuerySuccess(com.cbe.QueryResult qR) {
+      queryResult = qR;
       finished = true;
+      // If delegate is reused, clear possibly error state
+      errorInfo = null;
       notify();
     }
     @Override
-    synchronized public void onLoadError(Filter filter, long operation,
-                                         long code,
-                                         String reason, String message) {
-      errorInfo = "LoadError: code=" + code + 
-                  ", operation=" + operation +
-                  ", reason=\"" + reason +
-                  "\", message=\"" + message + "\"";
+    synchronized public void onQueryError(com.cbe.delegate.QueryError error, 
+                                                com.cbe.util.Context context) {
+      errorInfo = "LoadError: code=" + error.getErrorCode() + 
+                  ", reason=\"" + error.getReason() +
+                  "\", message=\"" + error.getMessage() + "\"";
       finished = true;
       notify();
     }
@@ -123,43 +128,35 @@ public class Airplanes {
     }
   } // class QueryDelegate
 
-  private abstract class DelegateWithItemError<R>
-                     extends com.cbe.ItemEventProtocol {
-    private final String  context;
-    private R             result;
-    private String        errorInfo;
-    private boolean       finished;
-    
-    public DelegateWithItemError(String  context) {
-      this.context = context;
-    }
+
+    private static class CreateContainerDelegate 
+                            extends com.cbe.delegate.CreateContainerDelegate {
+    // private QueryResult queryResult; /* null */
+    private Container   container;
+    private String      errorInfo;
+    private boolean     finished;  /* false */
     
     @Override
-    synchronized public void onItemError(Item container, int type,
-                                         long operation, long failedAtState,
-                                         long code, String reason,
-                                         String message) {
-      errorInfo = "Error: Operation '" + context + "' failed on container \"" +
-                  container.name() + "\": " +
-                  "type="           + type +
-                  ",operation="     + operation +
-                  ",failedAtState=" + failedAtState +
-                  "\",code="        + code +
-                  ",reason=\""      + reason +
-                  "\",message=\""   + message + "\"";
+    synchronized public void onCreateContainerSuccess(Container _container) {
+      container = _container;
+      finished = true;
+      // If delegate is reused, clear possibly error state
+      errorInfo = null;
+      notify();
+    }
+    @Override
+    synchronized public void onCreateContainerError(com.cbe.delegate.Error error, 
+                                                    com.cbe.util.Context context) {
+      errorInfo = "CreateContainerError: code=" + error.getErrorCode() + 
+                  ", reason=\"" + error.getReason() +
+                  "\", message=\"" + error.getMessage() + "\"";
       finished = true;
       notify();
     }
-    synchronized protected void onSuccess(R result) {
-      this.result = result;
-      finished = true;
-      notify();
-    }
-    
-    synchronized public R waitForRsp() {
+    synchronized public Container waitForRsp() {
       while (!finished) {
         try {
-         wait();
+          wait();
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
@@ -167,34 +164,98 @@ public class Airplanes {
       if (errorInfo != null) {
         throw new RuntimeException(errorInfo);
       }
-      return result; 
+      return container; 
     }
+  }
+  
+    private static class CreateObjectDelegate extends com.cbe.delegate.CreateObjectDelegate {
+    private com.cbe.Object  object;     /* null */
+    private String          errorInfo;
+    private boolean         finished;  /* false */
     
-  } // class DelegateWithItemError
+    @Override
+    synchronized public void onCreateObjectSuccess(com.cbe.Object _object) {
+      object = _object;
+      finished = true;
+      // If delegate is reused, clear possibly error state
+      errorInfo = null;
+      notify();
+    }
+    @Override
+    synchronized public void onCreateObjectError(com.cbe.delegate.Error error, 
+                                                 com.cbe.util.Context context) {
+      errorInfo = "CreateObjectError: code=" + error.getErrorCode() + 
+                  ", reason=\"" + error.getReason() +
+                  "\", message=\"" + error.getMessage() + "\"";
+      finished = true;
+      notify();
+    }
+    synchronized public com.cbe.Object waitForRsp() {
+      while (!finished) {
+        try {
+          wait();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+      if (errorInfo != null) {
+        throw new RuntimeException(errorInfo);
+      }
+      return object; 
+    }
+  }
+
+  private static class RemoveContainerDelegate 
+                            extends com.cbe.delegate.container.RemoveDelegate {
+
+    private com.cbe.delegate.container.RemoveSuccess success = 
+                                new com.cbe.delegate.container.RemoveSuccess();
+    private String      errorInfo;
+    private boolean     finished;  /* false */
+    
+    @Override
+    synchronized public void onRemoveSuccess(long containerId, String name) {
+      success.setContainerId(containerId);
+      success.setName(name);
+      finished = true;
+      // If delegate is reused, clear possibly error state
+      errorInfo = null;
+      notify();
+    }
+    @Override
+    synchronized public void onRemoveError(com.cbe.delegate.Error error, 
+                                                com.cbe.util.Context context) {
+      errorInfo = "RemoveContainerError: code=" + error.getErrorCode() + 
+                  ", reason=\"" + error.getReason() +
+                  "\", message=\"" + error.getMessage() + "\"";
+      finished = true;
+      notify();
+    }
+    synchronized public com.cbe.delegate.container.RemoveSuccess waitForRsp() {
+      while (!finished) {
+        try {
+          wait();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+      if (errorInfo != null) {
+        throw new RuntimeException(errorInfo);
+      }
+      return success; 
+    }
+  }
   
   public Container createContainer(Container parentContainer, String name) {
     // Delegate using anonymous class
-    final var delegate =
-        new DelegateWithItemError<Container>("create container" /* context */) {
-      @Override
-      public void onContainerAdded(Container container) {
-        onSuccess(container /* result */);
-      }
-    }; // anonymous class new DelegateWithItemError<Container>    
-
-    parentContainer.create(name, delegate);
+    final var delegate = new CreateContainerDelegate();
+    parentContainer.createContainer(name, delegate);
     return delegate.waitForRsp();
   } // createContainer()
 
   public com.cbe.Object createObject(Container parentContainer, String name,
                                      Obj_KV_Map metadata) {
-    final var delegate =  new DelegateWithItemError<com.cbe.Object>(
-                                                "create object" /* context */) {
-      @Override
-      public void onObjectAdded(com.cbe.Object object) {
-        onSuccess(object /* result */);
-      }
-    }; // anonymous class    
+    final var delegate =  new CreateObjectDelegate();   
 
     metadata.forEach((K,V)->{
       System.out.printf("%-14s ", V.getFirst());
@@ -209,25 +270,19 @@ public class Airplanes {
   }
 
   public void removeContainer(Container container) {
-    final var delegate =
-        new DelegateWithItemError<String>("remove container" /* context */) {
-      @Override
-      public void onContainerRemoved(long    containerId, String  name) {
-        onSuccess(name /* result */);
-      }
-    }; // anonymous class
+    final var delegate = new RemoveContainerDelegate();
 
     container.remove(delegate);
     delegate.waitForRsp();
   }
 
-  private static void printItems(com.cbe.Items_Vec items, String headline) {
+  private static void printItems(com.std.Items_Vec items, String headline) {
     System.out.printf("%s, count: %d\n", headline, items.size());
     for(final var item : items) {
       System.out.print("Name: " + item.name());
       System.out.print(" pid(" + item.parentId());
       System.out.println(") ts: " + item.updated());
-      if(item.type() == 4 /* ItemType::Object */) {
+      if(item.type() == com.cbe.ItemType.Object) {
         final var object = CloudBackend.castObject(item);
         final var keyValues = object.keyValues();
         if(!keyValues.isEmpty()) {
@@ -248,7 +303,8 @@ public class Airplanes {
     System.out.println("Airplanes program start");
     final var airplanes = new Airplanes("cr1" /* credentials */);
     final var account = airplanes.account;
-    System.out.println("Login: " + account.username() + " " +
+    System.out.println("Login: " + 
+                       account.username() + " " +
                        account.firstName() + " " +
                        account.lastName());
     boolean foundPlanes = false;
@@ -259,7 +315,7 @@ public class Airplanes {
     final var rand = new Random();
     final var rootContainer = account.rootContainer();
     final var containerFilter = new Filter();
-    containerFilter.setDataType(8);    // ItemType::Container
+    containerFilter.setDataType(com.cbe.ItemType.Container);
     
 
     record Entry(String country, String airportLocation) {}
@@ -408,20 +464,21 @@ public class Airplanes {
       final var countryText = inquiry.inquireString("Country", "Sweden");
       countryFilter.setQuery("Country:" + countryText);
       // countryFilter.setQuery("Country:Spain");
-      countryFilter.setDataType(4);    // ItemType::Object
+      countryFilter.setDataType(com.cbe.ItemType.Object);
       final var modelFilter = new Filter();
       modelFilter.setQuery("Model:Boeing*");
-      modelFilter.setDataType(4);    // ItemType::Object
+      modelFilter.setDataType(com.cbe.ItemType.Object);
     
       System.out.println("\n\nFind planes on airports of a specific country.");
       System.out.println("\nFilter " + countryFilter.getQuery() + " and " +
                           modelFilter.getQuery());
       System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
       final var flightsInCountryDelegate1 = new QueryDelegate();
+      final var queryJoinDelegate = new com.cbe.delegate.JoinDelegate();
       airports.query(countryFilter,
                      flightsInCountryDelegate1)
               .join(planes,"Name" /* key1 */, "Location" /* key2 */,
-                    modelFilter);  
+                    modelFilter, queryJoinDelegate);  
   
       printItems(flightsInCountryDelegate1.waitForRsp().getItemsSnapshot(),
                  "Boeing in the country");
@@ -432,7 +489,7 @@ public class Airplanes {
       System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
       final var flightsInCountryDelegate2 = new QueryDelegate();
       airports.query(countryFilter, flightsInCountryDelegate2)
-              .join(planes, "Name", "Location", modelFilter);  
+              .join(planes, "Name", "Location", modelFilter, queryJoinDelegate);  
       printItems(flightsInCountryDelegate2.waitForRsp().getItemsSnapshot(),
                  "Airbus in the country");
     }
@@ -443,14 +500,13 @@ public class Airplanes {
         System.out.println("Removed " + planes.name());
       }
     }
-    Runtime.getRuntime().runFinalization();
-    try {
-      Thread.sleep(100);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+    System.out.println();
+    airplanes.cloudBackend.terminate();
     System.out.println("Airplanes program end.");
   }  //  main
+
+
+  // -----------------------  Generic functions  -------------------------------
 
   static class Inquiry {
     private final java.util.Scanner scanner = new java.util.Scanner(System.in);
@@ -543,4 +599,3 @@ public class Airplanes {
   }  //  Inquiry
 
 }  //  Airplanes
-

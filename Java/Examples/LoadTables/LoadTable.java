@@ -15,270 +15,140 @@ import java.util.Scanner;
 import java.util.*;
 import java.math.*;
 import com.cbe.*;
+import com.std.*;
+
 
 
 public class LoadTable {
 
   public CloudBackend login(String credentials) {
-    CloudBackend tempObj = null;
+    CloudBackend cloudBackend = null;
     try (InputStream input = new FileInputStream("../../resources/config.properties")) {
-
+      String username ;
+      String password;
+      String tenant;
       Properties prop = new Properties();
-
       // load a properties file
       prop.load(input);
-
       // get the property value and set the login credentials
-      String username = prop.getProperty(credentials + ".username");
-      String password = prop.getProperty(credentials + ".password");
-      String tenant   = prop.getProperty(credentials + ".tenant");
-      // System.out.println("u: " + username + " t: " + tenant);
-
-      AccountDelegate delegate = new AccountDelegate();
-      tempObj = CloudBackend.logIn(username, password, tenant, delegate);
-      while (!delegate.finished) {
-        try
-        {
-            Thread.sleep(10);
-        }
-        catch(Exception e)
-        {
-             System.out.println(e);
-        }
-      }   
+      username = prop.getProperty(credentials + ".username");
+      password = prop.getProperty(credentials + ".password");
+      tenant   = prop.getProperty(credentials + ".tenant");
+      LogInDelegate delegate = new LogInDelegate();
+      cloudBackend = CloudBackend.logIn(username, password, tenant, delegate);
+      cloudBackend = delegate.waitForRsp();
+      return cloudBackend;
+      // If login happened then return the cloudbackend object.
     } catch (IOException ex) {
-    ex.printStackTrace();
+      throw new RuntimeException(ex);
     }
-    // If login happened then return the cloudbackend object.
-    return tempObj;
+    finally {
+      cloudBackend.terminate();
+    }
   }
  
   public QueryResult queryR(CloudBackend obj, Filter filter, long containerId) {
-    ItemDelegate delegate = new ItemDelegate();
-    // obj.account().rootContainer().query(delegate);
-    obj.query(containerId, filter, delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return delegate.qR;
+    QueryDelegate delegate = new QueryDelegate();
+    QueryChain QC=obj.query(containerId, filter, delegate);
+    return delegate.waitForRsp();
   }
 
   public QueryResult query(Container container) {
-    ItemDelegate delegate = new ItemDelegate();
+    QueryDelegate delegate = new QueryDelegate();
     container.query(delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return delegate.qR;
+    return delegate.waitForRsp();
   }
 
   public Container createContainer(Container container, String containerName) {
-    ItemDelegate delegate = new ItemDelegate();
-    Container tempCont = container.create(containerName, delegate);
-    // System.out.println("tempContainer id:" + tempCont.id());
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return tempCont;
+    CreateContainerDelegate delegate = new CreateContainerDelegate();
+    container.createContainer(containerName, delegate);
+    return delegate.waitForRsp();
   }
 
 
   public com.cbe.Object uploadBinary(Container container) throws IOException {
-    
-    com.cbe.Object tempObj = null;
-
-    try (InputStream input = new FileInputStream("../resources/config.properties")) {
+    // Try fetch from relative path
+      UploadDelegate delegate = new UploadDelegate();
+    try (InputStream input = new FileInputStream("../../resources/config.properties")) {
+      byte[] data;
+      String name = "";
       Properties prop = new Properties();
-      
       // load a properties file
       prop.load(input);
 
-      TransferUploadDelegate delegate = new TransferUploadDelegate();
-      byte[] data = Files.readAllBytes(Paths.get(prop.getProperty("binaryPath")));
-      tempObj = container.uploadBinary(prop.getProperty("binaryFileName"), data, delegate);
-      System.out.println("tempObject id:" + tempObj.id());
-
-
-      while (!delegate.finished) {
-        try
-        {
-            Thread.sleep(10);
-        }
-        catch(Exception e)
-        {
-             System.out.println(e);
-        }
-      }   
-     
+      data = Files.readAllBytes(Paths.get(prop.getProperty("binaryPath")));
+      name = prop.getProperty("binaryFileName");
+      container.uploadBinary(name, data, delegate);
     } catch (IOException ex) {
-    ex.printStackTrace();
+      throw new RuntimeException(ex);
     }
-    
-    return tempObj;
+    return delegate.waitForRsp();
   }
 
   public com.cbe.Object uploadObject(Container container) {
-    com.cbe.Object tempObj = null;
-
-    try (InputStream input = new FileInputStream("../resources/config.properties")) {
+    String name = "";
+    String path = "";
+    try (InputStream input = new FileInputStream("../../resources/config.properties")) {
       Properties prop = new Properties();
       
       // load a properties file
       prop.load(input);
+      name = prop.getProperty("filename");
+      path = prop.getProperty("path");
 
-      TransferUploadDelegate delegate = new TransferUploadDelegate();
-      tempObj = container.upload(prop.getProperty("filename"), prop.getProperty("path") , delegate);
-      System.out.println("tempObject id:" + tempObj.id());    
-
-      while (!delegate.finished) {
-        try
-        {
-          Thread.sleep(10);
-        }
-        catch(Exception e)
-        {
-          System.out.println(e);
-        }
-      }
     } catch (IOException ex) {
       ex.printStackTrace();
     }
 
-    return tempObj;
+    UploadDelegate delegate = new UploadDelegate();
+    container.upload(name, path, delegate);
+
+    return delegate.waitForRsp();
   }
 
   public com.cbe.Object createObject(Container container, String title, Obj_KV_Map metadata) {
-    ItemDelegate delegate = new ItemDelegate();
-    com.cbe.Object tempObj = container.createObject(title, delegate, metadata);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return tempObj;
+    CreateObjectDelegate delegate = new CreateObjectDelegate();
+    container.createObject(title, delegate, metadata);
+    return delegate.waitForRsp();
   }
 
   public void removeContainer(Container container) {
-    ItemDelegate delegate = new ItemDelegate();
+    RemoveContainerDelegate delegate = new RemoveContainerDelegate();
     container.remove(delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
+    delegate.waitForRsp();
     return;
   }
 
-  public void setContainerACL(Container container , ACL_Map permissionsMap) {
-    ShareDelegate delegate = new ShareDelegate();
-    container.setACL(permissionsMap, delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
+  public void setContainerAcl(Container container, com.std.Acl_Map permissionsMap) {
+    AclDelegate delegate = new AclDelegate();
+    container.setAcl(permissionsMap, delegate);
+    delegate.waitForRsp();
     return;
   }
 
-  public AbstractMap<Long,Integer> getContainerACL(Container container) {
-    ShareDelegate delegate = new ShareDelegate();
-    container.getACL(delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return delegate.permissionsMap;
+  public com.std.Acl_Map getContainerAcl(Container container) {
+    AclDelegate delegate = new AclDelegate();
+    container.getAcl(delegate);
+    return delegate.waitForRsp();
 
   }
 
   public long share(long userGroupId, Container container) {
     ShareDelegate delegate = new ShareDelegate();
     container.share(userGroupId, "javaShare", delegate);
-
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return delegate.shareId;
+    return delegate.waitForRsp();
   }
 
   public QueryResult listAvailableShares(com.cbe.CloudBackend cloudbackend) {
-    ShareDelegate delegate = new ShareDelegate();
+    ListSharesDelegate delegate = new ListSharesDelegate();
     cloudbackend.shareManager().listAvailableShares(delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
-    return delegate._qr;
+    return delegate.waitForRsp();
   }
 
   public void unshareContainer(long shareId, Container container) {
-    ShareDelegate delegate = new ShareDelegate();
+    UnShareDelegate delegate = new UnShareDelegate();
     container.unShare(shareId, delegate);
-    while (!delegate.finished) {
-      try
-      {
-        Thread.sleep(10);
-      }
-      catch(Exception e)
-      {
-        System.out.println(e);
-      }
-    }
+    delegate.waitForRsp();
   }
 
 
@@ -303,7 +173,7 @@ public class LoadTable {
   // subtables and described as           /level1/level2/primarykey e.g. /unit1001/2022-01-19/1642609149
   // author: Anders Weister
   // company: CloudBackend AB
-  // date: 2022-02-18
+  // date: 2022-02-18, 2022-11-02
   
   public static void main(String[] argv) {
     System.out.println("LoadTable program start");
@@ -354,15 +224,15 @@ public class LoadTable {
     
     // CloudBackend Container filter
     Filter filterC = new Filter();
-    filterC.setDataType(8);     // 4=Object, 8=Container, 12=Item
+    filterC.setDataType(com.cbe.ItemType.Container);
     Filter filterCA = new Filter();
-    filterC.setAscending(true); // sorting name
-    filterC.setDataType(8);     // 4=Object, 8=Container, 12=Item
+    filterCA.setAscending(true); // sorting name
+    filterCA.setDataType(com.cbe.ItemType.Container);
 
     // CloudBackend Object filter
     Filter filterO = new Filter();
     filterO.setAscending(true); // sorting name
-    filterO.setDataType(4);     // 4=Object, 8=Container, 12=Item
+    filterO.setDataType(com.cbe.ItemType.Object);
 
     // for (i = 0; i < argv.length; i++) {
     //   System.out.println("argv[" + i + "]: " + argv[i]);
@@ -390,7 +260,7 @@ public class LoadTable {
     Container level1Container=cbobj.account().rootContainer();
     Container level2Container=cbobj.account().rootContainer();
     QueryResult qR = inst.queryR(cbobj, filterC, cbobj.account().rootContainer().id());
-    AbstractList<Item> items = qR.getItemsSnapshot();
+    List<Item> items = qR.getItemsSnapshot();
 
     try   
     {  
@@ -531,28 +401,15 @@ public class LoadTable {
       e.printStackTrace();  
     }  
   
-    // System.out.println("Level1 container: /" + level1);
-    // qR = inst.query(level1Container);
-    // items = qR.getItemsSnapshot();
-    // for(Item item : items) {
-    //   System.out.printf(format,"subtable: " + item.name(), "(" + item.id() + ")");
-    // }
-    // System.out.println("Level2 container: /" + level1 + "/" + level2);
-    // qR = inst.query(level2Container);
-    // items = qR.getItemsSnapshot();
-    // for(Item item : items) {
-    //   System.out.printf(format,"record: " + item.name(), "(" + item.id() + ")");
-    // }
-    
     timestamp2 = Instant.now().getEpochSecond();
     tempString = Long.toString(timestamp2);
-    // System.out.println("Timestamp:" + tempString);
-
     date = new Date(timestamp2 * 1000L);
     DateTimeformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     DateTimeformat.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
     tempString2 = DateTimeformat.format(date);
     tempString = Long.toString(timestamp2-timestamp1);
     System.out.println("Run completed in: " + tempString + " s  @ " + tempString2 );
-  }
+    cbobj.terminate();
+    System.out.println("LoadTable program end");
+  }  // main
 }

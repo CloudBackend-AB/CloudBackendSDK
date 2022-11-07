@@ -18,7 +18,7 @@ case "$ARCH" in
     "x86_64")
     COMPILER_COMMAND="g++ -std=c++11 -pthread "
     echo $PWD
-    #libCBE="../../lib/Linux_x86/libcb_sdk.so"
+    # libCBE="../../lib/Linux_x86/libcb_sdk.so"
     libCBE="../../lib/Linux_x86/libcb_sdk.a"
     CODE_PATH="./"
     echo $CODE_PATH
@@ -45,7 +45,7 @@ case "$exercise" in
   "1")
   # Section 1:
     echo "compile example code."
-     ${COMPILER_COMMAND} -o "airplanes" "${CODE_PATH}main.cpp" "${CODE_PATH}Airplanes.cpp" "${CODE_PATH}QueryDelegate.cpp" ${libCBE} -I "../../include/"
+     ${COMPILER_COMMAND} -o "airplanes" "${CODE_PATH}main.cpp" "${CODE_PATH}Airplanes.cpp" ${libCBE} -I "../../include"
     if [ $? -eq 0 ]
     then
         echo "to run use: sh run.sh"

@@ -1,7 +1,7 @@
 #!/bin/sh
-# Copyright © CloudBackend AB 2022.
+# CloudBackend AB 2022.
 # compile.sh #
-# version 2022-04-08
+# version 2022-10-24
 # This compiler script has sections corresponding to
 # the different exercises in the Tutorial # on the website. 
 # Submit the number of the Exercise to compile.
@@ -18,10 +18,10 @@ echo "identified computer architechture:" ${ARCH}
 case "$ARCH" in
     "x86_64")
     COMPILER_COMMAND="g++ -std=c++17 -pthread "
+    WARNINGS="-Wpedantic -Wall -Wextra -Weffc++ -Wsuggest-override -Wno-unused-parameter"
     # your path to the copy of the SDK binary lib
     # libCBE="../../lib/Linux_x86/libcb_sdk.so"    # export LD_LIBRARY_PATH="../../lib/Linux_x86/"
     libCBE="../../lib/Linux_x86/libcb_sdk.a"
-    WARNINGS="-Wpedantic -Wall -Wextra -Weffc++ -Wsuggest-override -Wno-unused-parameter"
     ;;
 
     *)
@@ -32,15 +32,9 @@ esac
 
 echo "about to compile exercise:" ${exe}
 case "${exe}" in
-    1)
-    # Tutorial exercise 1:
-    ${COMPILER_COMMAND} ${WARNINGS} -o tut${exe} Main.cpp Logic${exe}.cpp AccountEventProtocol.cpp ${libCBE} -I "../../include"
-    command_result=$?
-    ;;
-    
-    2|3)
-    # Tutorial exercise:
-    ${COMPILER_COMMAND} ${WARNINGS} -o tut${exe} Main.cpp Logic${exe}.cpp AccountEventProtocol.cpp ItemEventProtocol.cpp ${libCBE} -I "../../include"
+    1|2|3)
+    # Tutorial exercise 1, 2, 3:
+    ${COMPILER_COMMAND} ${WARNINGS} -o tut${exe} Main.cpp Logic${exe}.cpp ${libCBE} -I "../../include"
     command_result=$?
     ;;
     

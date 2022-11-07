@@ -1,7 +1,11 @@
-#include "partition_large_csv_file.h"
 /*
-    CloudBackend AB 2021.
+    CloudBackend AB 2022.
 */
+
+#include "partition_large_csv_file.h"
+
+#include "cbe/QueryChain.h"
+
 #include <chrono>
 #include <cstring>
 #include <ctime>
@@ -24,7 +28,7 @@ int data_add  = 100000000;  // addition to representing the data set
 int data_mult = 1000000;    // multiplier representing the data set
 int data_set  = 0;          // csv file can contain multiple data sets where the row label numbers starts over
 int row_begin = 0;          // csv row number after the header to start uploading, first is 0
-int row_count = 1;          // number of rows to upload
+int row_count = 999999;    // number of rows to upload
 int objects_written = 0;    // count of number of objects written
 int object_number;          // calculate numeric title of object
 int chunk_size = 50000;     // number of lines per object to write data
@@ -48,14 +52,12 @@ std::string object_col_head = "+";   // title prefix to name of the column heade
 std::string cbe_container   = "";
 std::string csv_file        = "./test.csv"; // input file
 std::string uc_dir          = ".cbe/";      // user credentials file in .cbe
-std::string uc_file         = "bdt";        // user credentials file in .cbe
+std::string uc_file         = "gh1";        // user credentials file in .cbe
 std::string local_temp_dir  = "/tmp/"; // directory for temporary files to be uploaded, must end with /
 std::string filename;       // local file name with extension .csv
 std::string recent_file;    // next file to delete
 std::string path_filename;  // full filename with path
 std::string stemp;          // string for temporary manipulation
-
-
 
 void waitUntilUploaded() {
   while (!upload_done)
@@ -76,9 +78,6 @@ void programFinished() {
   finished = true;
 }
 
-
-
-
 /* Functions */
 void this_login() {
   std::string line;
@@ -94,9 +93,9 @@ void this_login() {
   if (uc_file > " ") ucfile.open(uc_temp);
   if (ucfile.is_open()) {
     while (getline(ucfile, line)) {
-//      if (debug_this) {
-//        std::cout << "line: " << line << '\n';
-//      }
+    //  if (debug_this) {
+    //    std::cout << "line: " << line << '\n';
+    //  }
       found=line.find("username");
       if (found!=std::string::npos) {
         pos1=line.find('"');
@@ -119,7 +118,7 @@ void this_login() {
         uc_found = true;
         if (debug_this) {
           std::cout << "password: ***" << '\n';
-//        std::cout << "password: " << temp_password << '\n';
+      //  std::cout << "password: " << temp_password << '\n';
         }
       }
       found=line.find("tenant");
@@ -137,12 +136,13 @@ void this_login() {
     }
     ucfile.close();
   } else {
-      if (uc_file > " ") std::cout << "can not find the uc file: " << uc_temp << std::endl;
+      if (uc_file > " ") std::cout << "can not find the uc file: " 
+                                   << uc_temp << std::endl;
   }
   if (debug_this) {
     std::cout << "uc: " << uc_temp << "\t"
               << "u: "  << temp_username  << "\t"
-//            << "p: "  << temp_password  << "\t"
+          //  << "p: "  << temp_password  << "\t"
               << "t: "  << temp_tenant    << "\t"
               << std::endl;
   }
@@ -181,8 +181,7 @@ void this_login() {
 
 }
 
-
-void CBEExample::read_csv(CBE::ContainerPtr this_container) {
+void read_csv(cbe::Container this_container) {
   std::ifstream indata_file;
   std::size_t found;
   std::size_t pos1;
@@ -218,11 +217,13 @@ void CBEExample::read_csv(CBE::ContainerPtr this_container) {
           outdata_file << line << "\n";
           outdata_file.close();
         } else {
-          std::cout << "can not open the output file: " << filename << std::endl;
+          std::cout << "can not open the output file: " 
+                    << filename << std::endl;
         }
         upload_file(this_container);
         objects_written = 0;
         total_lines_written = 0;
+        ++data_set;
       }  // writing and uploading column header file
 
       found=line.find(',');
@@ -232,20 +233,30 @@ void CBEExample::read_csv(CBE::ContainerPtr this_container) {
         if (row_label.empty()) {
           row_number=-1;
         } else {
-          row_number=std::stoi(row_label);
+          // row_number=std::stoi(row_label);
+          row_number=lines_read;
         }
       }
       if (row_label == "0") {
         ++data_set;
       }
-      object_number = data_add + (data_set*data_mult) + row_number;
+      // object_number = data_add + (data_set*data_mult) + row_number;
+      object_number = data_add + (data_set*data_mult) + lines_read + 1;
       stemp  = std::to_string(object_number);
+
       object_title  = stemp.substr(1);
       if (debug_this && row_label.empty()) {
         std::cout << "column headers: "
                   << column_headers.substr(0,60) << std::endl;
-        std::cout << "   line #" << "\tset row num" << "\tobject"   << std::endl;
-        std::cout << "---------" << "\t--- -------" << "\t--------" << std::endl;
+        std::cout << "   line #" 
+                  << "\tset row num" 
+                  << "\tobject"   
+                  << std::endl;
+
+        std::cout << "---------" 
+                  << "\t--- -------" 
+                  << "\t--------" 
+                  << std::endl;
       }
       if (line_number > row_begin) {
         if (object_first.empty()) {
@@ -268,16 +279,20 @@ void CBEExample::read_csv(CBE::ContainerPtr this_container) {
         if (outdata_file.is_open()) {
           outdata_file << line << "\n";
           ++lines_written;
-          if ((lines_written == chunk_size) || (line_number == stop_after_line_number)) {
+          if ((lines_written == chunk_size) 
+                                   || (line_number == stop_after_line_number)) {
             outdata_file.close();
           }
         } else {
-          std::cout << "can not open the output file: " << filename << std::endl;
+          std::cout << "can not open the output file: " 
+                    << filename << std::endl;
         }
 
         /* is it time to upload the output data file ? */
         if (!outdata_file.is_open()) {
           upload_file(this_container);
+          ++data_set;
+          if (debug_this) std::cout << "dataset: " << data_set << std::endl;
         } // upload object
       }
       lines_read = line_number;
@@ -312,7 +327,7 @@ void CBEExample::read_csv(CBE::ContainerPtr this_container) {
             << lines_written << std::endl;
 }
 
-void CBEExample::upload_file(CBE::ContainerPtr this_container) {
+void upload_file(cbe::Container this_container) {
   /* upload output file just written */
   if (debug_this) {
   std::cout << "About to upload: " 
@@ -330,7 +345,7 @@ void CBEExample::upload_file(CBE::ContainerPtr this_container) {
   std::system(stemp.c_str());  // delete recent object file
   }
   recent_file = path_filename;
-  waitUntilUploaded();
+  // waitUntilUploaded();
   if (!upload_error) {
     ++objects_written;
     total_lines_written += lines_written;
@@ -343,12 +358,12 @@ void CBEExample::upload_file(CBE::ContainerPtr this_container) {
   }
 }
 
-void CBEExample::write_summary(CBE::ContainerPtr this_container) {
+void write_summary(cbe::Container this_container) {
   std::string path_filename, stemp;
 
   /* write summary to file */
   path_filename = local_temp_dir;
-  filename = "-content";
+  filename = "z-content";
   filename.append(".txt");
   path_filename.append(filename);
   if (debug_this) {
@@ -403,11 +418,11 @@ void CBEExample::write_summary(CBE::ContainerPtr this_container) {
   }
   recent_file = path_filename;
 
-  waitUntilUploaded();
+  // waitUntilUploaded();
 
   stemp = "cat ";
   stemp.append(path_filename);
-  std::system(stemp.c_str()); // delete last object file
+  std::system(stemp.c_str()); // show last object file
 
   if (debug_this) {
     std::cout << time_begin  << std::endl;
@@ -420,10 +435,6 @@ void CBEExample::write_summary(CBE::ContainerPtr this_container) {
   }
   programFinished();
 }
-
-
-
-
 
 //////////////////////////////////////// main //////////////////////////////////
 int main(int argc, char *argv[]) {
@@ -453,7 +464,7 @@ int main(int argc, char *argv[]) {
                 << " -container store"
                 << "\n\n"
                 << "-csv data_file \t\t.csv file name to read as indata, for current directory use prefix ./ \n"
-                << "-head line_number \tline with csv column headings, default 0 \n"
+                << "-header line_number \tline with csv column headings, default 0 \n"
                 << "-from row_number \trow to begin with, skip rows until, default 0 \n"
                 << "\t\t\tfirst line should contain the column headings \n"
                 << "\t\t\tsecond line is row number 0 \n"
@@ -461,6 +472,7 @@ int main(int argc, char *argv[]) {
                 << "-chunk max chunk size \te.g. rows per object file, default 50 000 \n"
                 << "-uc user_credentials \tfile in directory .cbe with login to CloudBackend\n"
                 << "-container name \tthe CloudBackend full container path and name to store the data objects\n"
+                << "Example : ./partition_large_csv_file -csv test.csv -chunk 1000 -container myContainer"
                 << std::endl;
       return 0;
     }
@@ -527,15 +539,22 @@ int main(int argc, char *argv[]) {
   time_begin = std::time(nullptr);
   this_login();
 
-  std::shared_ptr<CBEExample> cbeEx = std::make_shared<CBEExample>();
-  CBE::AccountDelegatePtr accountDelegate(cbeEx);
+  std::shared_ptr<LogInDelegate> logInDelegate= std::make_shared<LogInDelegate>();
+  // cbe::AccountDelegate accountDelegate(cbeEx);
   if (debug_this) {
     std::cout << "About to login as: " << username << std::endl;
   }
-  cbeEx->cloudBackend = CBE::CloudBackend::logIn(username, password, tenant, accountDelegate);
+  logInDelegate->cloudBackend = cbe::CloudBackend::logIn(username, password, tenant, logInDelegate);
+  logInDelegate->waitForRsp();
+  std::cout << "login as: " << logInDelegate->cloudBackend.account().username() << std::endl;
 
-  waitUntilFinished();
+  cbe::Container parentContainer = 
+                          logInDelegate->cloudBackend.account().rootContainer();
+  queryContainer(parentContainer, cbe_container);
+
+  // waitUntilFinished();
   std::cout << "Goodbye." << std::endl;
+  logInDelegate->cloudBackend.terminate();
   return 0;
 }
 
@@ -543,104 +562,85 @@ int main(int argc, char *argv[]) {
 
 //Server requests
 
-void CBEExample::query(CBE::ContainerPtr container, std::string name) {
+void queryContainer(cbe::Container parentContainer, std::string name) {
   std::cout << "About to query container." << std::endl;
+  std::shared_ptr<QueryDelegate> queryDelegate = 
+                                              std::make_shared<QueryDelegate>();
   _queryName = name;
-  CBE::ItemDelegatePtr itemDelegate = getPtr();
-  container->query(itemDelegate);
-}
-
-void CBEExample::uploadToContainer(std::string path, std::string name, CBE::ContainerPtr container) {
-  if (debug_this) {
-    std::cout << "About to upload to container: " << container->name() << std::endl;
+  parentContainer.query(queryDelegate);
+  queryDelegate->waitForRsp();
+  
+  // Check if error
+  if (queryDelegate->errorInfo) {
+    // Yes, error...
+    std::cout <<"Query failed!" << std::endl;
+    std::cout <<"errorInfo = " << queryDelegate->errorInfo << std::endl;
+    // Bail out - Due to failed query
   }
-  CBE::TransferDelegatePtr transferDelegate = getPtr();
-  container->upload(name, path, transferDelegate);
-}
 
-void CBEExample::createContainer(CBE::ContainerPtr container, std::string name) {
-  std::cout << "Create container: " << name << " located in container: " << container->name() << " (" << container->id() <<")" << std::endl;
-  CBE::ItemDelegatePtr itemDelegate = getPtr();
-  container->create(name, itemDelegate);
-}
+  cbe::QueryResult::ItemsSnapshot resultset = 
+                                  queryDelegate->queryResult.getItemsSnapshot();  
+  // Look through the parent container to check if the name has already been 
+  // used.
+  cbe::Container subContainer{cbe::DefaultCtor{}};
+  for (cbe::Item& item : resultset)
+  {
+    // std::cout << item.name() << std::endl;
 
-
-// Callbacks
-
-void CBEExample::onLogin(uint32_t atState, CBE::CloudBackendPtr cbe)
-{
-  std::cout << "Login as: " << username << std::endl;
-  std::string name = cbe_container;
-  query(cbe->account()->rootContainer(), name);
-}
-
-void CBEExample::onQueryLoaded(CBE::QueryResultPtr qr) {
-  std::cout << "Query loaded." << std::endl;
-  std::vector<CBE::ItemPtr> items = qr->getItemsSnapshot();
-  CBE::ContainerPtr container = nullptr;
-  for(auto item : items) {
     if (debug_this) {
-      std::cout << "comparing " << item->name() << " " << _queryName << std::endl;
+      std::cout << "comparing " << item.name() << " " 
+                << _queryName << std::endl;
     }
-    if(item->name() == _queryName) {
-      container = CBE::CloudBackend::castContainer(item);
+    if (item.name() == _queryName){
+      std::cout << "Container already exist! " << item.name() << " (" 
+                << item.id() << ")" << std::endl;
+      subContainer = cbe::CloudBackend::castContainer(item);
     }
   }
-  if(container != nullptr) {
-    CBE::ItemDelegatePtr itemDelegate = getPtr();
-//    container->remove(itemDelegate); 
-// changed to enable restarting uploads that have been interrupted
-    std::cout << "Using existing container: " << container->name()
-              << " (" << container->id() << ")" << std::endl;
-    read_csv(container);
-    write_summary(container);
+
+  if (subContainer) {
+    std::cout << "Using existing container: " << subContainer.name()
+              << " (" << subContainer.id() << ")" << std::endl;
   } else {
-    createContainer(cloudBackend->account()->rootContainer(), _queryName);
+    subContainer = createContainer(parentContainer, _queryName);
+  }
+  read_csv(subContainer);
+  write_summary(subContainer);
+}
+
+void uploadToContainer(std::string path, std::string name, cbe::Container container) {
+  if (debug_this) {
+    std::cout << "About to upload to container: " << container.name() << std::endl;
+  }
+  std::shared_ptr<UploadDelegate> uploadDelegate = std::make_shared<UploadDelegate>();
+  container.upload(name, path, uploadDelegate);
+  uploadDelegate->waitForRsp();
+
+  // Check if error
+  if (uploadDelegate->errorInfo) {
+    // Yes, error...
+    std::cout <<"Upload failed!" << std::endl;
+    std::cout <<"errorInfo = " << uploadDelegate->errorInfo << std::endl;
+    // Bail out - Due to failed Upload
   }
 }
 
-void CBEExample::onContainerRemoved(CBE::item_id_t containerId, std::string name) {
-  std::cout << "Removed container " << name << " (" << containerId << ")" << std::endl;
-  createContainer(cloudBackend->account()->rootContainer(), name);
+cbe::Container createContainer(cbe::Container container, std::string name) {
+  std::cout << "Create container: " << name << " located in container: " << container.name() << " (" << container.id() <<")" << std::endl;
+  std::shared_ptr<CreateContainerDelegate> createContainerDelegate = 
+                                    std::make_shared<CreateContainerDelegate>();
+  container.createContainer(name, createContainerDelegate);
+  createContainerDelegate->waitForRsp();
+
+  // Check if error
+  if (createContainerDelegate->errorInfo) {
+    // Yes, error... 
+    std::cout <<"CreateContainer failed!" << std::endl;
+    std::cout <<"errorInfo = " << createContainerDelegate->errorInfo 
+              << std::endl;
+    // Bail out - Due to failed CreateContainer
+  }
+  return createContainerDelegate->container;
 }
 
-void CBEExample::onContainerAdded(CBE::ContainerPtr container) {
-  std::cout << "New container created: " << container->name() << " (" << container->id() << ")" << std::endl;
-  read_csv(container);
-  write_summary(container);
-}
-
-void CBEExample::onObjectUploaded(CBE::ObjectPtr object)
-{
-  time_finish = std::time(nullptr);
-  time_period = time_finish - time_begin_upl;
-  std::cout << "Object uploaded: " << object->name() 
-            << "\t in  " << time_period << " s"
-            << "\t" << std::asctime(std::localtime(&time_finish));
-  upload_done = true;
-}
-
-// Error handling
-void CBEExample::onError(CBE::persistence_t failedAtState, uint32_t code, std::string reason, std::string message)
-{
-  printf("Account login failed.");
-  programFinished();
-}
-
-void CBEExample::onLoadError(CBE::Filter filter, uint32_t operation, uint32_t code, std::string reason, std::string message){
-  std::cout << "Failed query." << std::endl;
-}
-
-void CBEExample::onItemError(CBE::ItemPtr container, CBE::item_t type, uint32_t operation, uint32_t failedAtState, uint32_t code, std::string reason, std::string message) {
-  std::cout << "Error in: " << container->name() << ", operation: " << operation << " failed with code, reason, message: " << code << " , " << reason << " , " << message << std::endl;
-  programFinished();
-}
-
-void CBEExample::onObjectUploadFailed(std::string name, CBE::object_id_t objectId, CBE::container_id_t parentId, CBE::persistence_t atState, CBE::failed_status_t status)
-{
-  std::cout << "Failed upload of object " << name << std::endl;
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  upload_error = true;
-  upload_done = true;
-}
 

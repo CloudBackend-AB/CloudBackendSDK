@@ -1,72 +1,49 @@
-import java.util.Scanner;
-import com.cbe.*;
-import java.util.*;
+import com.cbe.delegate.*;
 
-public class ShareDelegate extends ShareEventProtocol {
+public class ShareDelegate extends com.cbe.delegate.ShareDelegate {
 
-    public long shareId = 0;
-    public boolean finished = false;
-    public QueryResult _qr = new QueryResult();
-    public AbstractMap<Long, Integer> permissionsMap = new HashMap<Long, Integer>();
+  ShareDelegate() {}
+  private boolean  finished = false;
+  private String   errorInfo;
+  private long     returnShareId;
 
-    ShareDelegate() {}
-    
-    @Override
-    public void onListAvailableShares(QueryResult result) {
-        System.out.println("List Available Shares");
-        this._qr = result;
-        this.finished = true;
-    }
-    
-    @Override
-    public void onListMyShares(QueryResult qResult) {
-        this.finished = true;
-    }
-    
-    @Override
-    public void onContainerShared(long shareId) {
-        this.finished = true;
-        this.shareId = shareId;
-    }
-    
-    @Override
-    public void onContainerUnShared(String message) {
-        System.out.println("onContainerUnShared unShared backend message: " + message);
-        this.finished = true;
-    }
-    
-    @Override
-    public void onObjectShared(long shareId) {
-        this.finished = true;
-    }
-    
-    @Override
-    public void onObjectUnShared(String message) {
-        this.finished = true;
-    }
-    
-    @Override
-    public void onShareError(int type, long operation, long code, String reason, String message) {
-        System.out.println("ShareError: code=" + code + ", reson=\"" + reason + "\", message=\"" + message + "\"");
-        this.finished = true;
-    }
-    
-    @Override
-    public void onACLError(int type, long operation, long code, String reason, String message) {
-        this.finished = true;
-    }
+  /**
+   * Called upon successful share.<br>
+   * @param shareId Id of the share.
+   */
+  @Override
+  synchronized public void onShareSuccess(long shareId) {
+    returnShareId = shareId;
+    this.finished = true;
+    // If delegate is reused, clear possibly error state
+    errorInfo = null;
+    notify();
+  }
 
-    @Override
-    public void onContainerACLAdded(ACL_Map ACLs) {
-        this.finished = true;
+  /**
+   * Called if an error is encountered.
+   */
+  @Override
+  synchronized public void onShareError(com.cbe.delegate.Error error, com.cbe.util.Context context) {
+    errorInfo = "Login error: code=\"" + error.getErrorCode() + 
+                ", reason=\"" + error.getReason() +
+                "\", message=\"" + error.getMessage() + "\"";
+    this.finished = true;
+    notify();
+  }
+
+  synchronized public long waitForRsp() {
+    while (!finished) {
+      try {
+        wait();
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
     }
-    
-    @Override
-    public void onContainerAclLoaded(UserId_Vec userIds, ACL_Map ACLMap) {
-        this.finished = true;
-        // this.permissionsMap.put(ACLMap);
-        this.permissionsMap = ACLMap;
+    if (errorInfo != null) {
+      throw new RuntimeException(errorInfo);
     }
-    
-    
+    return returnShareId; 
+  }
+
 }

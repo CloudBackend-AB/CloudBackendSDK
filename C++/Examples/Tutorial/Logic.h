@@ -1,43 +1,43 @@
 
-#ifndef INCLUDE_CBE_SOLUTIONLOGICBEODY_H_
-#define INCLUDE_CBE_SOLUTIONLOGICBEODY_H_
+#ifndef INCLUDE_cbe_SOLUTIONLOGIcbeODY_H_
+#define INCLUDE_cbe_SOLUTIONLOGIcbeODY_H_
 #include <iostream>
+#include <condition_variable>
+#include <memory>
 #include <mutex>
-#include "CBE/CloudBackend.h"
-#include "CBE/Types.h"
 
-class Logic {
- public:
-  void start();
+#include "cbe/Account.h"
+#include "cbe/CloudBackend.h"
+#include "cbe/Types.h"
+
+class Exercise {
+public:
+  // Logic is the main program 
   void logic();
-  void programFinished();
 
-  bool finished{}; // false
-  CBE::ContainerPtr rootContainer{};
+  // Is used when code should terminate with a unique code
+  void exitProgram(int errorCode);
 
-  void saveQueryResultContinue(CBE::QueryResultPtr qR);
+  // General member variables to use in the code
+  cbe::Container rootContainer{cbe::DefaultCtor{}};
 
-
- private:
-  int logicInstances = 0;
-  int step = 1;
-  std::recursive_mutex logicMutex{};
-  CBE::CloudBackendPtr cloudBackend{};
-  CBE::QueryResultPtr qResult{};
+private:
+  cbe::CloudBackend cloudBackend{cbe::DefaultCtor{}};
+  cbe::QueryResult qResult{cbe::DefaultCtor{}};
 
 #if 1
   // Exercise 2
-  void loadContainerContents(CBE::ContainerPtr container);
-  void printContainerContents(CBE::QueryResultPtr q);
-  CBE::ContainerPtr createContainer(CBE::ContainerPtr container);
-  CBE::ContainerPtr container{};
+  void loadContainerContents(cbe::Container container);
+  void printContainerContents(cbe::QueryResult q);
+  void createContainer(cbe::Container parentContainer);
+  cbe::Container myContainer{cbe::DefaultCtor{}}; 
 
   // Exercise 3
-  void loadContainerObjects(CBE::ContainerPtr container);
-  void printObjects(CBE::QueryResultPtr q);
-  CBE::ContainerPtr selectContainer(const std::string& prompt);
-  CBE::ObjectPtr createObject(CBE::ContainerPtr inContainer);
-  CBE::ObjectPtr object{};
+  void loadContainerObjects(cbe::Container container);
+  void printObjects(cbe::QueryResult q);
+  cbe::Container selectContainer(const std::string& prompt);
+  cbe::Object createObject(cbe::Container inContainer);
+  cbe::Object object{cbe::DefaultCtor{}}; 
 #endif
 
   // Generic functions
@@ -52,17 +52,17 @@ class Logic {
   static const std::string noStringDefaultVal;
   static std::string inquireString(const std::string& prompt,
                                    const std::string& defaultVal =
-                                                        noStringDefaultVal);
+                                                            noStringDefaultVal);
 
   static std::string trimString(const std::string& str);
 
-  static const char* itemTypeString(CBE::item_t itemType);
-  static void printItem(const CBE::Item& item, bool printParentId = false);
+  static const char* itemTypeString(cbe::ItemType itemType);
+  static void printItem(const cbe::Item& item, bool printParentId = false);
 
-  static std::string containerName(CBE::ContainerPtr  container,
-                                   bool               temporary = false);
-  static std::string objectName(CBE::ObjectPtr  object,
-                                bool            temporary = false);
+  static std::string containerName(cbe::Container  container,
+                                   bool            temporary = false);
+  static std::string objectName(cbe::Object  object,
+                                bool         temporary = false);
 };
 
 #endif

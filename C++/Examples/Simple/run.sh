@@ -1,4 +1,4 @@
 echo "CloudBackend SDK is provided under a limited evaluation licence."
-echo "Not for production use. Release 1.3 of 2020-11-13"
+echo "Not for production use. Release 2.0 of 2022-10-03"
 
 ./simpleExample

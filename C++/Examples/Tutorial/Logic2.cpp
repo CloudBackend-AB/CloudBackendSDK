@@ -1,130 +1,362 @@
 #include "Logic.h"
 
-#include "AccountEventProtocol.h"
-#include "ItemEventProtocol.h"
-
 #include <algorithm>  // std::find_if_not
 #include <cstring>
 #include <cctype>     // std:isspace, std::tolower, std::toupper
+#include <iterator>
 #include <ios>        // std::left
 #include <iomanip>    // std::setw
 #include <sstream>    // std::ostringstream
+#include <string>
+#include <stdexcept>
 
+#include "cbe/QueryChain.h"
+#include "cbe/QueryResult.h"
 
-/* Here we will logIn() */
-void Logic::start() {
-  const bool login = inquireBool("Do you want to login", true /* defaultVal*/);
-  if (!login) {
-    programFinished();
-    return;
+// - - - - - - - - - - - - - - - - - DELEGATES - - - - - - - - - - - - - - - - - 
+
+class MyLogInDelegate :  public cbe::delegate::LogInDelegate
+{
+  // Mutex lock and condition variable are used to verify that operation has 
+  // completed.
+  std::mutex              mutex{};
+  std::condition_variable conditionVariable{};
+
+  // Used to see if callback is reached
+  bool                    called = false;
+
+  // User implemented callback, return value is cbe::CloudBackend&&  
+  void onLogInSuccess(cbe::CloudBackend&& cloudBackend) final {
+    {
+      // Lock thread during operation 
+      std::lock_guard<std::mutex> lock(mutex);
+      this->cloudBackend = std::move(cloudBackend); 
+      called = true;
+    }
+    // Notify when operation is done to unlock
+    conditionVariable.notify_one();
   }
-  const auto username = inquireString("Type username", "githubtester2");
-  const auto password = inquireString("Type password");
-  const auto tenant =   inquireString("Enter  tenant", "cbe_githubtesters");
 
-  CBE::AccountDelegatePtr accountDelegate =
-                                  std::make_shared<AccountEventProtocol>(this);
-  cloudBackend = CBE::CloudBackend::logIn(username, password, tenant,
-                                          accountDelegate);
+  // User implemented error callback
+  void onLogInError(cbe::delegate::Error&&  error, 
+                    cbe::util::Context&&    context) final {
+    {
+      std::lock_guard<std::mutex> lock(mutex);
+      // Set member variable errorInfo with information about fail
+      errorInfo = ErrorInfo{std::move(context), std::move(error)};
+      called = true;
+    }
+    conditionVariable.notify_one();
+  }
+public:
+  // Member variables for the delegate, will later be accessed through the 
+  // delegate defined in the code
+  cbe::CloudBackend cloudBackend{cbe::DefaultCtor{}}; 
+  ErrorInfo errorInfo{};
+
+  // Wait function is called on the delegate when it is being used 
+  void waitForRsp() {
+    std::unique_lock<std::mutex> lock(mutex);
+    std::cout << "Waiting, to be logged in" << std::endl;
+    conditionVariable.wait(lock, [this] { return called; });
+    std::cout << "Now we have waited: " << called << std::endl;
+  }
+
+}; // class MyLogInDelegate 
+
+class MyQueryDelegate :  public cbe::delegate::QueryDelegate
+{
+  std::mutex              mutex{};
+  std::condition_variable conditionVariable{};
+  bool                    called = false;
+
+  /**
+   * Called upon successful query.
+   * @param queryResult Instance of a QueryResult containing the result set.
+   */
+  void onQuerySuccess(cbe::QueryResult&& queryResult) final {
+    {      
+      std::lock_guard<std::mutex> lock(mutex);
+      this->queryResult = std::move(queryResult); 
+      called = true;
+    }           
+    conditionVariable.notify_one();
+  }
+
+  /**
+   * Called upon a failed query() or join() call.
+   * @param error   Error information passed from %CloudBackend SDK.
+   * @param context Additional context information about the original service
+   *                call that has failed.
+   */
+  void onQueryError(cbe::delegate::QueryError&&         error,
+                    cbe::util::Context&&                context) final {
+    {
+      std::lock_guard<std::mutex> lock(mutex);
+      errorInfo = ErrorInfo{std::move(context), std::move(error)};
+      called = true;
+    }
+    conditionVariable.notify_one();
+  }
+
+public:
+  /*implementation of delegates */
+  cbe::QueryResult  queryResult{cbe::DefaultCtor{}};
+  ErrorInfo         errorInfo{};
+
+  void waitForRsp() {
+    std::unique_lock<std::mutex> lock(mutex);
+    std::cout << "Waiting, for query" << std::endl;
+    conditionVariable.wait(lock, [this] { return called; });
+    std::cout << "Now we have waited: " << called << std::endl;
+  }
+}; // class MyQueryDelegate
+
+class MyCreateContainerDelegate :  public cbe::delegate::CreateContainerDelegate
+{
+  std::mutex              mutex{};
+  std::condition_variable conditionVariable{};
+
+  bool                    called = false;
+
+  void onCreateContainerSuccess(cbe::Container&& container) final {
+    {      
+      std::lock_guard<std::mutex> lock(mutex);
+      this->container = std::move(container); 
+      called = true;
+    }           
+    conditionVariable.notify_one();      
+  }
+  void onCreateContainerError(Error&& error, cbe::util::Context&& context) final {
+    {
+      std::lock_guard<std::mutex> lock(mutex);
+      errorInfo = ErrorInfo{std::move(context), std::move(error)};
+      called = true;
+    }
+    conditionVariable.notify_one();
+  }
+
+public:
+  /*implementation of delegates */
+  cbe::Container container{cbe::DefaultCtor{}};
+  ErrorInfo errorInfo{};
+
+  void waitForRsp() {
+    std::unique_lock<std::mutex> lock(mutex);
+    std::cout << "Waiting, for create container" << std::endl;
+    conditionVariable.wait(lock, [this] { return called; });
+    std::cout << "Now we have waited: " << called << std::endl;
+  }
+}; // class MyCreateContainerDelegate
+
+class MyCreateObjectDelegate :  public cbe::delegate::CreateObjectDelegate
+{
+
+  std::mutex              mutex{};
+  std::condition_variable conditionVariable{};
+
+  bool                    called = false;
+
+  void onCreateObjectSuccess(cbe::Object&& object) final {
+    {      
+      std::lock_guard<std::mutex> lock(mutex);
+      this->object = std::move(object); 
+      called = true;
+    }           
+    conditionVariable.notify_one();      
+  }
+  void onCreateObjectError(Error&& error, cbe::util::Context&& context) final {
+    {
+      std::lock_guard<std::mutex> lock(mutex);
+      errorInfo = ErrorInfo{std::move(context), std::move(error)};
+      called = true;
+    }
+    conditionVariable.notify_one();
+  }
+
+public:
+  /*implementation of delegates */
+  cbe::Object object{cbe::DefaultCtor{}};
+  ErrorInfo errorInfo{};
+
+  void waitForRsp() {
+    std::unique_lock<std::mutex> lock(mutex);
+    std::cout << "Waiting, for create container" << std::endl;
+    conditionVariable.wait(lock, [this] { return called; });
+    std::cout << "Now we have waited: " << called << std::endl;
+  }
+}; // class MyCreateObjectDelegate
+
+// - - - - - - - - - - - - - - - - - FUNCTIONS - - - - - - - - - - - - - - - - - 
+
+// Exit function that reports how program was terminated
+void Exercise::exitProgram(const int exitCode) {
+  std::ostringstream oss;
+  oss << "Exiting program with exit code: " << exitCode << ".";
+  throw std::invalid_argument( oss.str() );
 }
-
-void Logic::programFinished() {
-  std::cout << "program finished." << std::endl;
-  finished = true;
-}
-
-void Logic::saveQueryResultContinue(CBE::QueryResultPtr qR) {
-  std::cout << "continue program" << std::endl;
-  qResult = qR;
-  logic();
-}
-
 
 /* Exercise 2 */
-CBE::ContainerPtr Logic::createContainer(CBE::ContainerPtr container) {
+// Creates a new container in the parentContainer argument that is passed in
+void Exercise::createContainer(cbe::Container parentContainer) {
   std::cout << "Logic: Create container" << std::endl;
+  // Generic function to get string from user input
   const auto name = inquireString("Set name for Container");
-  CBE::ItemDelegatePtr itemDelegate = std::make_shared<ItemEventProtocol>(this);
-  return container->create(name, itemDelegate);
-}
 
+  // Create a delegate that is going to be used for the createContainer method
+  std::shared_ptr<MyCreateContainerDelegate> createContainerDelegate = 
+                                  std::make_shared<MyCreateContainerDelegate>();
+  parentContainer.createContainer(name, createContainerDelegate);
+  
+  // Calling wait for the delegate to finish
+  createContainerDelegate->waitForRsp();
 
-void Logic::loadContainerContents(CBE::ContainerPtr container) {
-  std::cout << "Getting sub-container of " << containerName(container) << std::endl;
-  CBE::ItemDelegatePtr itemDelegate = std::make_shared<ItemEventProtocol>(this);
-  CBE::Filter filter1;
-  filter1.setDataType(CBE::ItemType::Container);
-  container->query(filter1, itemDelegate);
-}
-
-
-void Logic::printContainerContents(CBE::QueryResultPtr q) {
-  for (const auto& itemPtr : q->getItemsSnapshot()) {
-    printItem(*itemPtr);
+  // Check if error, can also check if a container was constructed.
+  if (createContainerDelegate->errorInfo){ 
+    std::cout << "Error!" << std::endl;
+    std::cout << "Container creation failed." << std::endl;
+    
+    // Print info about error 
+    std::cout << createContainerDelegate->errorInfo << std::endl;
+    
+    // Exit program with unique code 
+    exitProgram(21);
   }
+
+  // Get container from the delegate
+  this->myContainer = createContainerDelegate->container;
 }
 
+// Loads container contents to be able to see what is inside the container that 
+// is passed in
+void Exercise::loadContainerContents(cbe::Container container) {
+  // Generic function to print information about container
+  std::cout << "Getting sub-container of " << containerName(container) 
+            << std::endl;
+  
+  // Create a filter that limits the query to only return containers 
+  cbe::Filter containerFilter;
+  containerFilter.setDataType(cbe::ItemType::Container);
+  std::shared_ptr<MyQueryDelegate> queryDelegate = 
+                                            std::make_shared<MyQueryDelegate>();
 
-/* Exercise 3 */
+  // Call query function with filter and delegate
+  container.query(containerFilter, queryDelegate);
 
+  // Wait for delegate to finish
+  queryDelegate->waitForRsp();
+  
+  // Check if error 
+  if (queryDelegate->errorInfo){ // Could also check if qResult was constructed
+    std::cout << "Error!" << std::endl;
+    std::cout << "Could not load container contents." << std::endl;
 
+    // Print info about error 
+    std::cout << queryDelegate->errorInfo << std::endl;
 
-/** Logic Exercise 1,2 */
-void Logic::logic() {
+    // Exit program with unique code
+    exitProgram(30);
+  }
+  
+  // Get queryResult from the delegate
+  this->qResult = queryDelegate->queryResult;
+}
 
-  std::unique_lock<std::recursive_mutex> lock{logicMutex};
-
-  bool continueToNextStep;
-  const int thisInstance = ++logicInstances;
-  std::cout << "logic instance: " << thisInstance << std::endl;
-  do {
-    continueToNextStep = false;
-    std::cout << "step: " << step << std::endl;
-    switch (step) {
-      /* after login; load the top container list of items in cache */
-      case 1: {
-        loadContainerContents(rootContainer);
-        ++step;
-        break;
-      }
-
-      /* Given the existing containers, should we create a new ? */
-      case 2: {
-        printContainerContents(qResult);
-        if (inquireBool("Do you want to create a new container", false)) {
-          auto newContainer = createContainer(rootContainer);
-          std::cout << "Container name: "
-                    << containerName(newContainer, true /* temporary */)
-                    << std::endl;
-          container = newContainer;
-        } else {
-          continueToNextStep = true;
-        }
-        ++step;
-        break;
-      }
-
-      /* Exercise 3 */
-      
-      /* the end */
-      default: {
-        std::cout << "Exercise completed!" << std::endl;
-        programFinished();
-        break;
-      }
-    }
-  } while(continueToNextStep);
-  std::cout << "end of do-while loop;"
-            << " instance: " << thisInstance
-            << " next step: " << step 
+// Function that prints container contents
+void Exercise::printContainerContents(cbe::QueryResult qResult) {  
+  // Put queryResult in vector of cbe::Item 
+  std::vector<cbe::Item> items = qResult.getItemsSnapshot();
+  std::cout << "------------------------------------------------------------" 
+            << std::endl;
+  // Loop through items and print them
+  for (const auto& item : items) {
+    // Generic print function 
+    printItem(item);
+  }
+  std::cout << "------------------------------------------------------------" 
             << std::endl;
 }
 
+/* Exercise 3 */
 
-/*----- generic functions -----*/
-/*-- generic input functions --*/
-const bool  Logic::noBoolDefaultVal{}; // = false
-bool Logic::inquireBool(const std::string& prompt,
+// - - - - - - - - - - - - - - LOGIC EXERCISE 1,2,3 - - - - - - - - - - - - - - 
+
+void Exercise::logic() {
+  /* Exercise 1 */
+  // Generic function to get bool from user input  
+  const bool login = inquireBool("Do you want to login", true /* defaultVal*/);
+  
+  // If user responds with a no then exit 
+  if (!login) {
+    // Exit program with unique code
+    exitProgram(11);
+  }
+  // Generic function to get strings from user input
+  // Second argument is "default value", user only has to press enter 
+  const auto username = inquireString("Type username", "gitHubTester1");
+  const auto password = inquireString("Type password");
+  const auto tenant =   inquireString("Enter  tenant", "cbe_githubtesters");
+
+  // Create log in delegate
+  std::shared_ptr<MyLogInDelegate> logInDelegate = 
+                                            std::make_shared<MyLogInDelegate>();
+ 
+  // Call login and set member variable 
+  logInDelegate->cloudBackend = cbe::CloudBackend::logIn(username, 
+                                                         password, 
+                                                         tenant,
+                                                         logInDelegate);
+
+  // Wait for delegate to finish
+  logInDelegate->waitForRsp();
+  
+  // Check if error 
+  if (logInDelegate->errorInfo){
+    // Print info about error
+    std::cout << "Error, login failed! \nError info=" 
+              << logInDelegate->errorInfo << std::endl;
+    
+    // Exit program with unique code
+    exitProgram(10);
+  }
+
+  // Confirm login and SDK version
+  cbe::CloudBackend myCloudBackend = logInDelegate->cloudBackend;
+  std::cout << "\nLogged in as:\t" << myCloudBackend.account().username()
+            << "\nSDK version:\t" << myCloudBackend.version() << "\n" 
+            << std::endl; 
+  
+  /* Exercise 2 */
+  // Put root container in member variable
+  this->rootContainer = logInDelegate->cloudBackend.account().rootContainer();     
+  
+  // Load container contents ie. query it to get its contents
+  loadContainerContents(this->rootContainer);
+  
+  // After loading the container, print its contents
+  printContainerContents(this->qResult);
+  
+  // Given the existing containers, should we create a new?
+  if (inquireBool("Do you want to create a new container", false)) {
+    
+    // Create a new container in the container refered container
+    createContainer(rootContainer); 
+
+    // Print some information about container
+    std::cout << "Container name: "
+              << containerName(this->myContainer, true /* temporary */)
+              << std::endl;
+  } 
+  /* Exercise 3 */
+  
+  std::cout << "Exercise completed!" << std::endl;
+  myCloudBackend.terminate();
+} // void Exercise::logic
+
+// - - - - - - - - - - - - - GENERIC INPUT FUNCTIONS - - - - - - - - - - - - - -
+
+const bool  Exercise::noBoolDefaultVal{}; // = false
+bool Exercise::inquireBool(const std::string& prompt,
                         const bool&        defaultVal) {
   const bool hasDefaultVal = (&defaultVal != &noBoolDefaultVal);
   constexpr char  falseChar = 'n';
@@ -150,10 +382,10 @@ bool Logic::inquireBool(const std::string& prompt,
     default: continue;
     }
   }
-}
+} // bool Exercise::inquireBool
 
-const int Logic::noIntDefaultVal{}; // = 0
-int Logic::inquireInt(const std::string& prompt,
+const int Exercise::noIntDefaultVal{}; // = 0
+int Exercise::inquireInt(const std::string& prompt,
                       const int&         defaultVal) {
 
   const bool hasDefaultVal = (&defaultVal != &noIntDefaultVal);
@@ -174,17 +406,18 @@ int Logic::inquireInt(const std::string& prompt,
       const int intVal = std::stoi(answer);
       return intVal;
     } catch (std::exception& e) {
-      std::cout << "Failed to convert answer \"" << answer << "\" to an integer."
-                << "Got exception with what()=\"" << e.what() << "\"" << std::endl;
+      std::cout << "Failed to convert answer \"" << answer 
+                << "\" to an integer." << "Got exception with what()=\"" 
+                << e.what() << "\"" << std::endl;
     }
   }
-}
+} // int Exercise::inquireInt
 
-const std::string Logic::noStringDefaultVal{}; // ""
-std::string Logic::inquireString(const std::string&  prompt,
+const std::string Exercise::noStringDefaultVal{}; // ""
+std::string Exercise::inquireString(const std::string&  prompt,
                                  const std::string&  defaultVal) {
   const bool hasDefaultVal = (&defaultVal != &noStringDefaultVal);
-  while(true) {
+  while (true) {
     std::cout << prompt
               << (hasDefaultVal? (" (Default value is \"" + defaultVal + "\")")
                                : "") << "? ";
@@ -201,9 +434,9 @@ std::string Logic::inquireString(const std::string&  prompt,
       return trimmedAnswer;
     }
   }
-}
+} // std::string Exercise::inquireString
 
-std::string Logic::trimString(const std::string& str) {
+std::string Exercise::trimString(const std::string& str) {
    const auto /* std::string::const_iterator */ noSpaceFront =
        std::find_if_not(str.cbegin() /* first */, str.cend() /* last */,
                         [](int ch){
@@ -217,30 +450,31 @@ std::string Logic::trimString(const std::string& str) {
                         }).base();
 
    return std::string(noSpaceFront, noSpaceBack);
-}
+} // std::string Exercise::trimString
 
-/*-- generic print functions --*/
-const char* Logic::itemTypeString(CBE::item_t itemType) {
+// - - - - - - - - - - - - - GENERIC PRINT FUNCTIONS - - - - - - - - - - - - - -
+
+const char* Exercise::itemTypeString(cbe::ItemType itemType) {
   static const struct ItemTypeValue {
-    CBE::item_t itemType;
+    cbe::ItemType itemType;
     const char* str;
   } ItemTypeValues[] {
-      { CBE::ItemType::Unapplicable , "Unapplicable"  },
-      { CBE::ItemType::Unknown      , "Unknown"       },
-      { CBE::ItemType::Object       , "Object"        },
-      { CBE::ItemType::Container    , "Container"     },
-      { CBE::ItemType::Tag          , "Tag"           },
-      { CBE::ItemType::Group        , "Group"         }
+      { cbe::ItemType::Unapplicable , "Unapplicable"  },
+      { cbe::ItemType::Unknown      , "Unknown"       },
+      { cbe::ItemType::Object       , "Object"        },
+      { cbe::ItemType::Container    , "Container"     },
+      { cbe::ItemType::Tag          , "Tag"           },
+      { cbe::ItemType::Group        , "Group"         }
 };
-  const auto it = std::find_if(std::begin(ItemTypeValues) /* first */,
+  const auto it = std::find_if (std::begin(ItemTypeValues) /* first */,
                                std::end(ItemTypeValues)   /* last */,
                                [itemType](const ItemTypeValue& ItemTypeValue) {
                                  return ItemTypeValue.itemType == itemType;
                                } /* p */);
   return (it != std::end(ItemTypeValues))? it->str : "unknown-item-type";
-}
+} // const char* Exercise::itemTypeString
 
-void Logic::printItem(const CBE::Item& item, bool printParentId) {
+void Exercise::printItem(const cbe::Item& item, bool printParentId) {
   std::cout << std::left << std::setw(32) << item.name()
             << std::left << std::setw(10) << itemTypeString(item.type())
             << std::left << std::setw(3)  << "id:"
@@ -249,20 +483,20 @@ void Logic::printItem(const CBE::Item& item, bool printParentId) {
     std::cout << std::left << std::setw(2)  << "p:" << item.parentId();
   }
   std::cout << std::endl;
-}
+} // void Exercise::printItem
 
-std::string Logic::containerName(CBE::ContainerPtr  container,
-                                 bool               temporary) {
+std::string Exercise::containerName(cbe::Container container,
+                                    bool           temporary) {
   std::ostringstream oss;
-  oss << container->name() <<  " (" << (temporary? "(" : "")
-      << container->id() << (temporary? ")" : "") << ")";
+  oss << container.name() <<  " (" << (temporary? "(" : "")
+      << container.id() << (temporary? ")" : "") << ")";
   return oss.str();
-}
+} // std::string Exercise::containerName
 
-std::string Logic::objectName(CBE::ObjectPtr object,
+std::string Exercise::objectName(cbe::Object object,
                               bool           temporary) {
   std::ostringstream oss;
-  oss << object->name() <<  " (" << (temporary? "(" : "")
-      << object->id() << (temporary? ")" : "") << ")";
+  oss << object.name() <<  " (" << (temporary? "(" : "")
+      << object.id() << (temporary? ")" : "") << ")";
   return oss.str();
-}
+} // std::string Exercise::objectName

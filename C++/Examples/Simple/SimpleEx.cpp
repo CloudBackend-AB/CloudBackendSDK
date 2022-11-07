@@ -1,198 +1,428 @@
 /*
-      Copyright © CloudBackend AB 2020.
+      Copyright © CloudBackend AB 2022.
 */
 
-#include "SimpleEx.h"
-#include <stdio.h>
 #include <chrono>
+#include <condition_variable>
 #include <iostream>
+#include <mutex>
+#include <stdio.h>
 #include <thread>
-#include "user_credentials.cpp"  // The user_credentials.cpp is located whitin this folder
+#include <string>
 
+#include "user_credentials.cpp"  // file is located in this folder
 
+#include "cbe/Account.h"
+#include "cbe/CloudBackend.h"
+#include "cbe/Container.h"
+#include "cbe/QueryChain.h"
+#include "cbe/Types.h"
 
-bool finished;
+#include "cbe/delegate/LogInDelegate.h"
+#include "cbe/delegate/QueryDelegate.h"
+#include "cbe/delegate/UploadDelegate.h"
+#include "cbe/delegate/CreateContainerDelegate.h"
+#include "cbe/delegate/TransferError.h"
 
-/** Keeps the main thread alive while running the program and terminates the main thread when programFinished() sets the bool finished to true. */
-void waitUntilFinished()
+#include "cbe/delegate/container/RemoveDelegate.h"
+
+  //----------------------------------------------------------------------------
+
+class LogInDelegate :  public cbe::delegate::LogInDelegate
 {
-  finished = false;
+  std::mutex              mutex{};
+  std::condition_variable conditionVariable{};
 
-  while (!finished)
-  {
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+  bool                    called = false;
+
+  void onLogInSuccess(cbe::CloudBackend&& cloudBackend) final {
+     {
+      std::lock_guard<std::mutex> lock(mutex);
+      this->cloudBackend = std::move(cloudBackend); 
+      called = true;
+     }
+     conditionVariable.notify_one();
+   }
+   void onLogInError(cbe::delegate::Error&& error, cbe::util::Context&& context) final {
+     {
+      std::lock_guard<std::mutex> lock(mutex);
+      errorInfo = ErrorInfo{std::move(context), std::move(error)};
+      called = true;
+     }
+     conditionVariable.notify_one();
+   }
+public:
+  /*implementation of delegates */
+  cbe::CloudBackend cloudBackend{cbe::DefaultCtor{}};
+  ErrorInfo errorInfo{};
+
+  void waitForRsp() {
+    std::unique_lock<std::mutex> lock(mutex);
+    // std::cout << "Waiting, to be logged in" << std::endl;
+    conditionVariable.wait(lock, [this] { return called; });
+    // std::cout << "Now we have waited: " << called << std::endl;
   }
-}
+};  // class LogInDelegate
 
-/** Called when we wish to terminate the main thread and quit the program. */
-void programFinished() {
-  std::cout << "program complete\n";
-  finished = true;
-}
+  //----------------------------------------------------------------------------
 
+class QueryDelegate :  public cbe::delegate::QueryDelegate
+{
+  std::mutex              mutex{};
+  std::condition_variable conditionVariable{};
+  bool                    called = false;
 
-/** ENTRY POINT for this example code! 
- *  Remember the main function is not whithin the CBEExample namespace therefor we need to call the delegate and the cloudbackend object by cbeEx-> 
-*/
-int main(void) {
-  printf("Hello! This is a test program.\n");
+  /**
+   * Called upon successful query.
+   * @param queryResult Instance of a QueryResult containing the result set.
+   */
+  void onQuerySuccess(cbe::QueryResult&& queryResult) final {
+    {      
+      std::lock_guard<std::mutex> lock(mutex);
+      this->queryResult = std::move(queryResult); 
+      called = true;
+    }           
+    conditionVariable.notify_one();
+  };
 
-  /** Creates a new instance of this class which we need to access the cloudBackend object from.*/
-  std::shared_ptr<CBEExample> cbeEx = std::make_shared<CBEExample>();
-  CBE::AccountDelegatePtr accountDelegate(cbeEx);
-  /** Loging in to the account that you where provided with when downloading this example code. 
-   *  username and password can be found in the scripts and binary folder in user_credentials.cpp if you wish to change the credentials.
-   *  The API call to logIn can be found in CloudBackend.h in the include folder. The respond will either be onLogin located down below in callbacks,
-   *  or if the account does not exists onError(CBE::persistence_t failedAtState, uint32_t code, std::string reason, std::string message). */
-  cbeEx->cloudBackend = CBE::CloudBackend::logIn(username, password, tenant, accountDelegate);
-  
-  /** Keeps the thread alive between API requests. */
-  waitUntilFinished();
-  /** Handle your allocations of memory and clean up! */
-  
-  /** Exit the program.*/
-  return 0;
-}
+  /**
+   * Called upon a failed query() or join() call.
+   * @param error   Error information passed from %CloudBackend SDK.
+   * @param context Additional context information about the original service
+   *                call that has failed.
+   */
+  void onQueryError(cbe::delegate::QueryError&&         error,
+                    cbe::util::Context&&                context) final{
+    {
+      std::lock_guard<std::mutex> lock(mutex);
+      errorInfo = ErrorInfo{std::move(context), std::move(error)};
+      called = true;
+    }
+    conditionVariable.notify_one();
+  };
 
-//Server requests
+public:
+  /*implementation of delegates */
+  cbe::QueryResult queryResult{cbe::DefaultCtor{}};
+  ErrorInfo errorInfo{};
 
-/** call query on the container of your choice, try implement query on the container after the upload as a new method in this class where you simply query for all items in the container.*/
-void CBEExample::query(CBE::ContainerPtr container, std::string name) {
+  void waitForRsp() {
+    std::unique_lock<std::mutex> lock(mutex);
+    // std::cout << "Waiting, for query" << std::endl;
+    conditionVariable.wait(lock, [this] { return called; });
+    // std::cout << "Now we have waited: " << called << std::endl;
+  }
 
-  /** To see if the Container that we want to add is not already added on the account we create a filter where we want to search specifically for that container.
-   *  Another way to do this would be to check onItemError if the respond states 409 conflict, container already exists then we could remove the container and create it again. 
-   *  That would probably be the smarter and easier way, but to show the variety of the SDK we use the filter and query insted of handling this by error statements.
+  /** SDK requests, user defined functionallity: 
+   *  Feel free to implement more functionallity using the library as you please.
   */
 
-  /** Save the name to be able to compare in the result. */
-  _queryName = name;
+  /** Example of how to implement the library call to query. */
+  void query(cbe::Container container, std::string name);
+};  // class QueryDelegate
 
-  /** Query has the callback onQueryLoaded and if an error occures then onLoadError is called. To make the program complete implement both. */
-  CBE::ItemDelegatePtr itemDelegate = getPtr();
-  container->query(itemDelegate);
-}
+  //----------------------------------------------------------------------------
 
-/*  Upload file to a given container */
-void CBEExample::uploadToContainer(std::string path, std::string name, CBE::ContainerPtr container) {
-  /** Upload to the container with the file name + extension and from the folder path.
-   *  transfer delegate defined in the .h file.
-   *  upload has the callback onObjectUploaded and if file is missing from folder or other failure occurs then onObjectUploadFailed() is where the respond is.
-   */
-  CBE::TransferDelegatePtr transferDelegate = getPtr();
-  container->upload(name, path, transferDelegate);
-}
-
-void CBEExample::createContainer(CBE::ContainerPtr container, std::string name) {
-  std::cout << "Create container: " << name << " located in container: " << container->name() << " with id: " << container->id() << std::endl;
-  /** Create found in Container.h creates a container in the container that calls this SDK method / API.
-   *  
-   *  You can call it as below or if it is a container you want to have a pointer to in your 
-   *  program by defining CBE::ContainerPtr newNameContainer = container->create(..).
-   *  
-   *  Create has the corresponding callback onContainerAdded(CBE::ContainerPtr container) seen down below in callbacks.
-   */
-  CBE::ItemDelegatePtr itemDelegate = getPtr();
-  container->create(name, itemDelegate);
-}
-
-// Callbacks
-
-/** onLogin is the callback to logIn and can be found in AccountEventProtocol. */
-void CBEExample::onLogin(uint32_t atState, CBE::CloudBackendPtr cbe)
+class UploadDelegate :  public cbe::delegate::UploadDelegate
 {
-  printf("onLogin reached \n");
+  std::mutex              mutex{};
+  std::condition_variable conditionVariable{};
 
-  /** add input to name a company specific container. */
-  std::cout << "Name for a new Company Container: ";
-  std::string name;
-  std::getline(std::cin, name);
+  bool                    called = false;
 
-  query(cbe->account()->rootContainer(), name);
+   /**
+     * Called upon successful Upload.
+     * @param object Instance of object that is being Uploadd.
+     */
+    void onUploadSuccess(cbe::Object&& object){
+      {      
+      std::lock_guard<std::mutex> lock(mutex);
+      this->object = std::move(object); 
+      called = true;
+      }           
+      conditionVariable.notify_one();
+    };
 
-}
+    void onUploadError(cbe::delegate::TransferError&& error, 
+                       cbe::util::Context&&         context){
+      {
+        std::lock_guard<std::mutex> lock(mutex);
+        errorInfo = ErrorInfo{std::move(context), std::move(error)};
+        called = true;
+      }
+      conditionVariable.notify_one();
+    };
 
-/** Gets called when the account status has changed (required). */
-void CBEExample::onError(CBE::persistence_t failedAtState, uint32_t code, std::string reason, std::string message)
+public:
+  /*implementation of delegates */
+  cbe::Object object{cbe::DefaultCtor{}};
+  ErrorInfo errorInfo{};
+
+  void waitForRsp() {
+    std::unique_lock<std::mutex> lock(mutex);
+    // std::cout << "Waiting, for query" << std::endl;
+    conditionVariable.wait(lock, [this] { return called; });
+    // std::cout << "Now we have waited: " << called << std::endl;
+  }
+
+  /** Example of how to implement the library call to upload. */
+  void uploadToContainer(std::string path, std::string name, cbe::Container container);
+};  // class UploadDelegate
+
+  //----------------------------------------------------------------------------
+
+class CreateContainerDelegate :  public cbe::delegate::CreateContainerDelegate
 {
-  printf("Account Fail ");
-  programFinished();
-}
+  std::mutex              mutex{};
+  std::condition_variable conditionVariable{};
 
-void CBEExample::onQueryLoaded(CBE::QueryResultPtr qr) {
-  /** qr holds both the filter which you used to query and the list of items that you asked for qould be a nullptr if there was'nt any items according to your request. */
-  std::vector<CBE::ItemPtr> items = qr->getItemsSnapshot();
-  CBE::ContainerPtr container = nullptr;
-  for(auto item : items) {
-    std::cout << "comparing " << item->name() << " " << _queryName << std::endl;
-    if(item->name() == _queryName) {
-      container = cloudBackend->castContainer(item);
+  bool                    called = false;
+
+    void onCreateContainerSuccess(cbe::Container&& container) {
+      {      
+      std::lock_guard<std::mutex> lock(mutex);
+      this->container = std::move(container); 
+      called = true;
+      }           
+      conditionVariable.notify_one();      
+    };
+    void onCreateContainerError(Error&& error, cbe::util::Context&& context) {
+      {
+        std::lock_guard<std::mutex> lock(mutex);
+        errorInfo = ErrorInfo{std::move(context), std::move(error)};
+        called = true;
+      }
+      conditionVariable.notify_one();
+    };
+
+public:
+  /*implementation of delegates */
+  cbe::Container container{cbe::DefaultCtor{}};
+  ErrorInfo errorInfo{};
+
+  void waitForRsp() {
+    std::unique_lock<std::mutex> lock(mutex);
+    // std::cout << "Waiting, for query" << std::endl;
+    conditionVariable.wait(lock, [this] { return called; });
+    // std::cout << "Now we have waited: " << called << std::endl;
+  }
+};  // class CreateContainerDelegate
+
+  //----------------------------------------------------------------------------
+
+class RemoveContainerDelegate :  public cbe::delegate::container::RemoveDelegate
+{
+  std::mutex              mutex{};
+  std::condition_variable conditionVariable{};
+
+  bool                    called = false;
+
+    void onRemoveSuccess(cbe::ItemId containerId, std::string name) {
+      {      
+      std::lock_guard<std::mutex> lock(mutex);
+      called = true;
+      }           
+      conditionVariable.notify_one();      
+    };
+    void onRemoveError(Error&& error, cbe::util::Context&& context) {
+      {
+        std::lock_guard<std::mutex> lock(mutex);
+        errorInfo = ErrorInfo{std::move(context), std::move(error)};
+        called = true;
+      }
+      conditionVariable.notify_one();
+    };
+
+public:
+  /*implementation of delegates */
+  ErrorInfo errorInfo{};
+
+  void waitForRsp() {
+    std::unique_lock<std::mutex> lock(mutex);
+    // std::cout << "Waiting, for deletion" << std::endl;
+    conditionVariable.wait(lock, [this] { return called; });
+    // std::cout << "Now we have waited: " << called << std::endl;
+  }
+};  // class RemoveContainerDelegate
+
+
+  //----------------------------------------------------------------------------
+  //============================================================================
+  //----------------------------------------------------------------------------
+
+int main(void) {
+  printf("Starting SimplEx program.\n");
+
+  /** Creates a new instance of this class which we need to access the 
+   * cloudBackend object from.
+   */
+  std::shared_ptr<LogInDelegate> logInDelegate = 
+                                              std::make_shared<LogInDelegate>();
+  /** Login in to the account that you where provided with when downloading 
+   *  this example code. 
+   *  username and password can be found in the scripts and binary folder in 
+   *  user_credentials.cpp if you wish to change the credentials.
+   *  The API call to logIn can be found in CloudBackend.h in the include folder.
+   *  The respond will either be onLoginSuccess located down below in callbacks,
+   *  or if the account does not exists 
+   *  onLogInError(cbe::delegate::Error&& error, cbe::util::Context&& context). 
+   */
+
+  logInDelegate->cloudBackend = cbe::CloudBackend::logIn(username, 
+                                                         password,
+                                                         tenant, 
+                                                         logInDelegate);
+  /** Keeps the thread alive between API requests. */
+  // Waiting for the cloud response
+  logInDelegate->waitForRsp();
+
+  // Check if login was without error
+  if (!logInDelegate->errorInfo) {
+    // Yes, success!  
+    std::cout << "Logged in:" << std::endl;
+    std::cout << "SDK version = "
+              << logInDelegate->cloudBackend.version() << std::endl;
+    std::cout << "   username = "
+              << logInDelegate->cloudBackend.account().username() << std::endl;
+    std::cout << "     userId = "
+              << logInDelegate->cloudBackend.account().userId() << std::endl;
+    std::cout << "     tenant = "
+              << logInDelegate->cloudBackend.account().source() << std::endl;
+    std::cout << "      first = "
+              << logInDelegate->cloudBackend.account().firstName() << std::endl;
+    std::cout << "       last = "
+              << logInDelegate->cloudBackend.account().lastName() << std::endl;
+  } 
+  else {
+    // No, error...
+    std::cout <<"Exiting: Login failed!" << std::endl;
+    std::cout <<"errorInfo = " << logInDelegate->errorInfo << std::endl;
+    return 1; // Bail out - Due to failed login
+  }
+
+  //----------------------------------------------------------------------------
+
+  std::shared_ptr<QueryDelegate> queryDelegate = 
+                                              std::make_shared<QueryDelegate>();
+  // Logged in users root container
+  cbe::Container container = 
+                          logInDelegate->cloudBackend.account().rootContainer();
+
+  // We want to check if the container the user wants to create already exist in 
+  // the parent container.
+  std::cout << "Name for a new Container to be created: ";
+  std::string containerName;
+  std::getline(std::cin, containerName);
+  logInDelegate->cloudBackend.query(container.id(), queryDelegate);
+  // Waiting for the cloud response
+  queryDelegate->waitForRsp();
+
+  cbe::QueryResult::ItemsSnapshot resultset = 
+                                  queryDelegate->queryResult.getItemsSnapshot();  
+  // Look through the parent container to check if the name has already been 
+  // used.
+  std::cout << "Content of /" << std::endl;
+  std::cout << "---------------------------" << std::endl;
+  for (cbe::Item& item : resultset)
+  {
+    std::cout << item.name() << std::endl;
+    if(item.name() == containerName){
+      std::cout << "Exiting: Container already exist! " << item.name() << " (" 
+                << item.id() << ")" << std::endl;
+      return 2;
+    }
+  }
+  std::cout << "---------------------------" << std::endl;
+
+  // Check if error
+  if (queryDelegate->errorInfo) {
+    // Yes, error...
+    std::cout <<"Exiting: Query failed!" << std::endl;
+    std::cout <<"errorInfo = " << queryDelegate->errorInfo << std::endl;
+    return 3; // Bail out - Due to failed query
+  }
+
+  //----------------------------------------------------------------------------
+
+  std::shared_ptr<CreateContainerDelegate> createContainerDelegate = 
+                                    std::make_shared<CreateContainerDelegate>();
+  // Create a container in the parent container using the name that the user
+  // provided
+  container.createContainer(containerName, createContainerDelegate);
+  // Waiting for the cloud response
+  createContainerDelegate->waitForRsp();
+
+  // Check if error
+  if (createContainerDelegate->errorInfo) {
+    // Yes, error... 
+    std::cout <<"Exiting: CreateContainer failed!" << std::endl;
+    std::cout <<"errorInfo = " << createContainerDelegate->errorInfo 
+              << std::endl;
+    return 4; // Bail out - Due to failed CreateContainer
+  }
+
+  cbe::Container newContainer = createContainerDelegate->container;
+  std::cout << "/" << newContainer.name() << " (" << newContainer.id()
+            << ")\t created." << std::endl;
+ 
+  //----------------------------------------------------------------------------
+
+  std::shared_ptr<UploadDelegate> uploadDelegate = 
+                                             std::make_shared<UploadDelegate>();
+  // Here we define which file to upload from the local system.
+  std::string fileName = "w2.xml";
+  // Here we define the file's relative path on the local system. 
+  // Note: path must end with "/".
+  std::string filePath = "Upload_files/";
+
+  // Upload the file to the newly created container.
+  newContainer.upload(fileName, filePath, uploadDelegate);
+  // Waiting for the cloud response
+  uploadDelegate->waitForRsp();
+
+  // Check if error
+  if (uploadDelegate->errorInfo) {
+    // Yes, error...
+    std::cout <<"Exiting: Upload failed!" << std::endl;
+    std::cout <<"errorInfo = " << uploadDelegate->errorInfo << std::endl;
+    return 5; // Bail out - Due to failed Upload
+  }
+
+  cbe::Object newObject = uploadDelegate->object;
+  std::cout << "/" << newContainer.name() << "/" << newObject.name()
+            << "\t uploaded." << std::endl;
+
+  //----------------------------------------------------------------------------
+
+
+  std::cout << "Do you want to delete your newly created container called \"";
+  std::cout << newContainer.name() << "\"?" << std::endl;
+  
+  std::string shouldBeDeleted{};
+  while (true)
+  { 
+    shouldBeDeleted = "";
+    std::cout << "(y/n): ";
+    std::getline(std::cin, shouldBeDeleted);
+
+    if (shouldBeDeleted == "y"){
+      std::cout << "Deleting container." << std::endl;
+      std::shared_ptr<RemoveContainerDelegate> removeContainerDelegate = 
+                                      std::make_shared<RemoveContainerDelegate>();
+      
+      newContainer.remove(removeContainerDelegate);
+      removeContainerDelegate->waitForRsp();
+      std::cout << "Container was deleted successfully!" << std::endl;
+      break;
+    } else if (shouldBeDeleted == "n")
+    {
+      std::cout << "The container will be kept." << std::endl;
+      break;
     }
   }
 
-  if(container != nullptr) {
-    /** Since the container already exists on the account and we want to have a clean container, without sub containers that might have been created by other 
-     * company personel that have tested the library, we delete the container and then create it again. 
-     * When deleting a container all the sub containers and its objects are removed/deleted as well.
-    */
-    CBE::ItemDelegatePtr itemDelegate = getPtr();
-    container->remove(itemDelegate);
-  } else {
-    /** Since we did not find the container on the account we can create it directly. */
-    createContainer(cloudBackend->account()->rootContainer(), _queryName);
-  }
-
-}
-
-/** If the query fails the error will be returned in onLoadError. */
-void CBEExample::onLoadError(CBE::Filter filter, uint32_t operation, uint32_t code, std::string reason, std::string message){
-  std::cout << "Failed query.\n";
-}
-
-/** onContainerAdded is related to create in container.h, the callback is found in the protocol ItemEventProtocol. */
-void CBEExample::onContainerAdded(CBE::ContainerPtr container) {
-  std::cout << "New container created: " << container->name() << " : " << container->id() << std::endl;
-  /** path to where on you file ssytem you have the file, either absolute path or as in this case relative. */
-  
-  std::string path = "Upload_files/";
-  /** File name with extension, only objects created in the cloud using createObject method does not need a file extension. */
-  std::string uploadFilename = "w1.xml";
-  uploadToContainer(path, uploadFilename, container);
-}
-
-/** onContainerRemoved is related to remove in container.h, the callback is found in the protocol ItemEventProtocol. */
-void CBEExample::onContainerRemoved(CBE::item_id_t containerId, std::string name) {
-  std::cout << name << " with id: " << containerId << " has been removed.\n";
-
-  /** We removed the container since it was on the account after a person at you office done this lab since before and you named the container the same thing.
-   * When removing a container all containers and objects within that container are removed which is important to remomber so that no important files are lost.
-   */
-  createContainer(cloudBackend->account()->rootContainer(), name);
-}
-
-/** onItemError gets called if the respond from calling an itemDelegate action fails, e.x container->move(...). */
-void CBEExample::onItemError(CBE::ItemPtr container, CBE::item_t type, uint32_t operation, uint32_t failedAtState, uint32_t code, std::string reason, std::string message) {
-  std::cout << "Error in: " << container->name() << ", operation: " << operation << " failed with code, reason, message: " << code << " , " << reason << " , " << message << std::endl;
-
-  /** Program failed call to programFinished and debug what happend by reading print out in command line. */
-  programFinished();
-}
-
-
-//  TransferDelegate respons
-
-/** onObjectUploaded is called when an object has been uploaded by the call upload in container.h you find the call in TransferEventProtocol. */
-void CBEExample::onObjectUploaded(CBE::ObjectPtr object)
-{
-  std::cout << "CBEExample::OnObjectUploaded\n";
-  /** Program finished we can call to terminate the main thread and cleanup allocation of memory with new CBEExample and exit.
-   *  When that happens the cloudbackend object gets its destructor called internally and starts cleaning up and terminates its threads. */
-  programFinished();
-}
-
-/** Gets called when a error has occured in the upload. */
-void CBEExample::onObjectUploadFailed(std::string name, CBE::object_id_t objectId, CBE::container_id_t parentId, CBE::persistence_t atState, CBE::failed_status_t status)
-{
-  std::cout << "CBEExample::OnObjectUploadFailed\n";
-  /** Upload failed so we terminate and debug to find what was wrong, is the file in the path that you designated to the upload call, to upload from? */
-  programFinished();
-}
+  //----------------------------------------------------------------------------
+  std::cout << "End of program!" << std::endl;
+  logInDelegate->cloudBackend.terminate();
+  return 0;
+}  // main

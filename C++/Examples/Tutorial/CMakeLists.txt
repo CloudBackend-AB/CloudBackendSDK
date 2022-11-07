@@ -6,7 +6,7 @@ set(PROJECT_VERSION "")
 set(PROJECT_VERSION_MAJOR "")
 set(PROJECT_VERSION_MINOR "")
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -33,9 +33,6 @@ endif()
 
 set(
   COMMON_SOURCES
-
-  AccountEventProtocol.cpp
-  ItemEventProtocol.cpp
   Main.cpp
 )
 
