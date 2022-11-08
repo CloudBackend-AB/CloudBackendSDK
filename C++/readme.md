@@ -1,4 +1,3 @@
-!\[alt text\](https://badgen.net/badge/version/2.0.0/blue)
 # CloudBackendSDK 2.0
 This repository contains the CloudBackend SDK, a build for Linux x86_64 Ubuntu 22 LTS.
 The CloudBackend SDK is a tool for application developers that provides a simple way to store data in the cloud.
