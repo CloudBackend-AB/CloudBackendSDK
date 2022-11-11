@@ -1,5 +1,5 @@
-#### SDK Android version: 1.3.5
-- The Java wrappers are built on the C++ sdk version 1.3.5 this includes share actions but not group actions.
+#### SDK Android version: 2.0.0
+- The Java wrappers are built on the C++ sdk version 2.0.0 this includes share actions but not group actions.
 
 
 The Android native library is compiled with **android-ndk-r21** with **api 29** for ABI x86_64 and tested on the following android emulator:
@@ -92,4 +92,4 @@ Only LogIn have been tested this far on Android but the Java wrappers have been 
 
 ------------------------------------------------------------------------------
 
-#### Copyright © CloudBackend AB 2021.
+#### Copyright © CloudBackend AB 2022.
