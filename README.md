@@ -5,8 +5,8 @@
 This repository contains the CloudBackend SDK, a build for Linux x86_64 Ubuntu 22 LTS.
 The CloudBackend SDK is a tool for application developers that provides a simple way to store data in the cloud.
 
-To learn more about the SDK, see documentation links via:
-https://cloudbackend.com/docs.html
+To learn more about the SDK, see developer documentation links via:
+https://cloudbackend.com/
 
 ### SDK Content
 languages: Java and C++, each containing lib and example code.
