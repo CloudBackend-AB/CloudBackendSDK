@@ -77,20 +77,23 @@ bash run.sh                                 # run the installation test program
 ---
 ## C++
 ```
+g++ --version                               # check that the compiler is installed
 cd                                          # the home directory
 cd cbe/current                              # the name previously given this release's directory
-cd C++/lib/Linux_x86/                       # SDK C++ lib
-unzip libcb_sdk.zip                         # unpack the libcb_sdk.a
-cd ../../Examples                           # Example Code directory
-cd Simple                                   # Simple code example directory
+cd C++                                      # SDK C++
+cd Examples/Simple                          # Simple code example directory
 sh compile.sh                               # compile the test program
-sh run.sh                                   # run the installation test program and then enter name e.g.
-
-Name for a new Company Container: Adam
-.
-New container created: Adam
-.
-program complete
+sh run.sh                                   # run the installation test program and then enter name
+...
+Name for a new Container to be created: Adam2
+...
+/Adam2            created.
+/Adam2/w2.xml     uploaded.        
+Do you want to delete your newly created container called "Adam2"?
+(y/n): y
+Deleting container.
+Container was deleted successfully!
+End of program!
 ```
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
