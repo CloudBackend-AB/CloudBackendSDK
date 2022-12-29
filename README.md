@@ -1,4 +1,4 @@
-![version](https://badgen.net/badge/version/2.0.0/green)
+![version](https://badgen.net/badge/version/2.0.1/green)
 ![platform](https://badgen.net/badge/platform/ubuntu)
 ![languages](https://badgen.net/badge/language/C++,Java,Android/purple?list=|)
 # CloudBackendSDK 2.0.1
