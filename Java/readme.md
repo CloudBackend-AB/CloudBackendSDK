@@ -20,11 +20,16 @@ java --version
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 ## Release notes
+### Current version SDK Java: **2.0.1**
+
+- Updated Example code.
+- Installation script.
+
+### Older versions
+
 ### Current version SDK Java: **2.0.0**
 
 - The Protocols shared pointers have been replaced with object classes and more detailed Delegate classes.
-
-### Older versions
 
 #### SDK Java version: 1.4.6.7
 - Due to a wrapper missmatch in callbacks, TransferEventProtocol does not exists anymore. 
