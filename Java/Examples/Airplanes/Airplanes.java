@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.Random;
 
+import javax.security.auth.login.AccountException;
+
 import com.cbe.Account;
 import com.cbe.CloudBackend;
 import com.cbe.Container;
@@ -14,254 +16,71 @@ import com.std.Obj_KV_Map;
 import com.std.Obj_VI_Pair;
 
 public class Airplanes {
+  static String programName = "Airplanes";
   private CloudBackend   cloudBackend = null;
-  public  final Account  account;
   static  final Inquiry  inquiry = new Inquiry();
 
-  public Airplanes(String credentials) {
-    try (final InputStream inputStream =
-                     new FileInputStream("../../resources/config.properties")) {
-      final var prop = new Properties();
-
+  public com.cbe.CloudBackend myLogin(String credentials) {
+    String username = "";
+    String password = "";
+    String tenant   = "";
+    try (InputStream input = new FileInputStream("../../resources/config.properties")) {
+      Properties myProperties = new Properties();
       // load a properties file
-      prop.load(inputStream);
-
+      myProperties.load(input);
       // get the property value and set the login credentials
-      final var username = prop.getProperty(credentials + ".username");
-      final var password = prop.getProperty(credentials + ".password");
-      final var tenant   = prop.getProperty(credentials + ".tenant");
-
-      class LogInDelegate extends com.cbe.delegate.LogInDelegate {
-        private CloudBackend  cloudBackend; /* null */
-        private String        errorInfo;    /* null */
-        private boolean       finished;     /* false */
-
-        @Override
-        synchronized public void onLogInSuccess(CloudBackend cloudBackend) {
-          this.cloudBackend = cloudBackend;
-          finished = true;
-          // If delegate is reused, clear possibly error state
-          errorInfo = null;
-          notify();
-        }
-
-        @Override
-        synchronized public void onLogInError(com.cbe.delegate.Error error, 
-                                                com.cbe.util.Context context) {
-          errorInfo = "Login error: code=\"" + error.getErrorCode() + 
-                      ", reason=\"" + error.getReason() +
-                      "\", message=\"" + error.getMessage() + "\"";
-          finished = true;
-          notify();
-        }
-        
-        synchronized public CloudBackend waitForRsp() {
-          while (!finished) {
-            try {
-              wait();
-            } catch (InterruptedException e) {
-              e.printStackTrace();
-            }
-          }
-          if (errorInfo != null) {
-            throw new RuntimeException(errorInfo);
-          }
-          return cloudBackend; 
-        }
-      } // class LogInDelegate
-
-      final var loginDelegate = new LogInDelegate();
-      cloudBackend = CloudBackend.logIn(username, password, tenant, loginDelegate);
-      loginDelegate.waitForRsp();
-      account = cloudBackend.account();
-
+      username = myProperties.getProperty(credentials + ".username");
+      password = myProperties.getProperty(credentials + ".password");
+      tenant   = myProperties.getProperty(credentials + ".tenant");
     } catch (IOException ex) {
-      // Soften the IOException
-      throw new RuntimeException("Failed to open resource file", ex);
+      throw new RuntimeException(ex);
     }
-    finally {
-      cloudBackend.terminate();
-      System.out.println("Airplanes program stop:");
+    if (username == null) {
+      System.out.println("Credentials not found: " + credentials);
+      username = "?";
+      password = "?";
+      tenant   = "?";
     }
+    com.cbe.CloudBackend cloudBackend = null;
+    MyLogInDelegate delegate = new MyLogInDelegate();
+    try
+    {
+      System.out.println("Connecting as " + username);
+      cloudBackend = com.cbe.CloudBackend.logIn(username, password, tenant, delegate);
+      System.out.println("Waiting.");
+      cloudBackend = delegate.waitForRsp();
+    }
+    catch (RuntimeException e)
+    {
+      System.out.println("Caught error:");
+      e.printStackTrace();
+      System.out.println();
+    };
+    return cloudBackend;
   }
   
   public QueryResult query(Filter filter, long containerId) {
-    final var delegate = new QueryDelegate();
+    final var delegate = new MyQueryDelegate();
     cloudBackend.query(containerId, filter, delegate);
     return delegate.waitForRsp();
   }
 
-  private static class QueryDelegate extends com.cbe.delegate.QueryDelegate {
-    private QueryResult queryResult; /* null */
-    private String      errorInfo;
-    private boolean     finished;  /* false */
-    
-    @Override
-    synchronized public void onQuerySuccess(com.cbe.QueryResult qR) {
-      queryResult = qR;
-      finished = true;
-      // If delegate is reused, clear possibly error state
-      errorInfo = null;
-      notify();
-    }
-    @Override
-    synchronized public void onQueryError(com.cbe.delegate.QueryError error, 
-                                                com.cbe.util.Context context) {
-      errorInfo = "LoadError: code=" + error.getErrorCode() + 
-                  ", reason=\"" + error.getReason() +
-                  "\", message=\"" + error.getMessage() + "\"";
-      finished = true;
-      notify();
-    }
-    synchronized public QueryResult waitForRsp() {
-      while (!finished) {
-        try {
-          wait();
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-      }
-      if (errorInfo != null) {
-        throw new RuntimeException(errorInfo);
-      }
-      return queryResult; 
-    }
-  } // class QueryDelegate
 
-
-    private static class CreateContainerDelegate 
-                            extends com.cbe.delegate.CreateContainerDelegate {
-    // private QueryResult queryResult; /* null */
-    private Container   container;
-    private String      errorInfo;
-    private boolean     finished;  /* false */
-    
-    @Override
-    synchronized public void onCreateContainerSuccess(Container _container) {
-      container = _container;
-      finished = true;
-      // If delegate is reused, clear possibly error state
-      errorInfo = null;
-      notify();
-    }
-    @Override
-    synchronized public void onCreateContainerError(com.cbe.delegate.Error error, 
-                                                    com.cbe.util.Context context) {
-      errorInfo = "CreateContainerError: code=" + error.getErrorCode() + 
-                  ", reason=\"" + error.getReason() +
-                  "\", message=\"" + error.getMessage() + "\"";
-      finished = true;
-      notify();
-    }
-    synchronized public Container waitForRsp() {
-      while (!finished) {
-        try {
-          wait();
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-      }
-      if (errorInfo != null) {
-        throw new RuntimeException(errorInfo);
-      }
-      return container; 
-    }
-  }
-  
-    private static class CreateObjectDelegate extends com.cbe.delegate.CreateObjectDelegate {
-    private com.cbe.Object  object;     /* null */
-    private String          errorInfo;
-    private boolean         finished;  /* false */
-    
-    @Override
-    synchronized public void onCreateObjectSuccess(com.cbe.Object _object) {
-      object = _object;
-      finished = true;
-      // If delegate is reused, clear possibly error state
-      errorInfo = null;
-      notify();
-    }
-    @Override
-    synchronized public void onCreateObjectError(com.cbe.delegate.Error error, 
-                                                 com.cbe.util.Context context) {
-      errorInfo = "CreateObjectError: code=" + error.getErrorCode() + 
-                  ", reason=\"" + error.getReason() +
-                  "\", message=\"" + error.getMessage() + "\"";
-      finished = true;
-      notify();
-    }
-    synchronized public com.cbe.Object waitForRsp() {
-      while (!finished) {
-        try {
-          wait();
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-      }
-      if (errorInfo != null) {
-        throw new RuntimeException(errorInfo);
-      }
-      return object; 
-    }
-  }
-
-  private static class RemoveContainerDelegate 
-                            extends com.cbe.delegate.container.RemoveDelegate {
-
-    private com.cbe.delegate.container.RemoveSuccess success = 
-                                new com.cbe.delegate.container.RemoveSuccess();
-    private String      errorInfo;
-    private boolean     finished;  /* false */
-    
-    @Override
-    synchronized public void onRemoveSuccess(long containerId, String name) {
-      success.setContainerId(containerId);
-      success.setName(name);
-      finished = true;
-      // If delegate is reused, clear possibly error state
-      errorInfo = null;
-      notify();
-    }
-    @Override
-    synchronized public void onRemoveError(com.cbe.delegate.Error error, 
-                                                com.cbe.util.Context context) {
-      errorInfo = "RemoveContainerError: code=" + error.getErrorCode() + 
-                  ", reason=\"" + error.getReason() +
-                  "\", message=\"" + error.getMessage() + "\"";
-      finished = true;
-      notify();
-    }
-    synchronized public com.cbe.delegate.container.RemoveSuccess waitForRsp() {
-      while (!finished) {
-        try {
-          wait();
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-      }
-      if (errorInfo != null) {
-        throw new RuntimeException(errorInfo);
-      }
-      return success; 
-    }
-  }
   
   public Container createContainer(Container parentContainer, String name) {
     // Delegate using anonymous class
-    final var delegate = new CreateContainerDelegate();
+    final var delegate = new MyCreateContainerDelegate();
     parentContainer.createContainer(name, delegate);
     return delegate.waitForRsp();
   } // createContainer()
 
   public com.cbe.Object createObject(Container parentContainer, String name,
                                      Obj_KV_Map metadata) {
-    final var delegate =  new CreateObjectDelegate();   
-
+    final var delegate =  new MyCreateObjectDelegate();   
     metadata.forEach((K,V)->{
       System.out.printf("%-14s ", V.getFirst());
     });
     System.out.print("\t");
-    
     parentContainer.createObject(name, delegate, metadata);
     final var object = delegate.waitForRsp();
     System.out.println("Created object \"" + object.name() + "\" with id " +
@@ -270,8 +89,7 @@ public class Airplanes {
   }
 
   public void removeContainer(Container container) {
-    final var delegate = new RemoveContainerDelegate();
-
+    final var delegate = new MyRemoveContainerDelegate();
     container.remove(delegate);
     delegate.waitForRsp();
   }
@@ -300,21 +118,27 @@ public class Airplanes {
 
 
   public static void main(String[] argv) {
-    System.out.println("Airplanes program start");
-    final var airplanes = new Airplanes("cr1" /* credentials */);
-    final var account = airplanes.account;
-    System.out.println("Login: " + 
-                       account.username() + " " +
-                       account.firstName() + " " +
-                       account.lastName());
+    System.out.println(programName + " program start.");
+    Airplanes inst = new Airplanes();
+    com.cbe.CloudBackend cbobj = inst.myLogin("gh1");
+    if (cbobj.account().userId()>0) {
+      System.out.println("Authenticated as: " + cbobj.account().username() + "\t" + cbobj.account().firstName() + " " + cbobj.account().lastName());
+    } else {
+      System.out.println("Login failed.");
+      cbobj.terminate();
+      System.out.println(programName + " program stop.");
+      return;
+    }
     boolean foundPlanes = false;
     Container airports = null;
     Container planes = null;
     Container simulation = null;
     String    planesName = "";
+    inst.cloudBackend = cbobj;
+    final var account = cbobj.account();
+    final var containerFilter = new Filter();
     final var rand = new Random();
     final var rootContainer = account.rootContainer();
-    final var containerFilter = new Filter();
     containerFilter.setDataType(com.cbe.ItemType.Container);
     
 
@@ -349,8 +173,8 @@ public class Airplanes {
                                        "Örebro", "Luleå", "Kiruna" };
     try {
       System.out.println("\nContent of: " + rootContainer.name());
-      var queryResult = airplanes.query(containerFilter,
-                                        rootContainer.id());
+      var queryResult = inst.query(containerFilter,
+                                   rootContainer.id());
       for(final var item : queryResult.getItemsSnapshot()) {
         if (item.name().equals("Simulation")) {
           System.out.println("Found: " + item.name());
@@ -360,12 +184,12 @@ public class Airplanes {
         }
       }
       if (simulation == null) {
-        simulation = airplanes.createContainer(rootContainer, "Simulation");
+        simulation = inst.createContainer(rootContainer, "Simulation");
         System.out.println("Created container " + simulation.name() +
                            " with id: " + simulation.id());
       }
       System.out.println("\nContent of: " + simulation.name());
-      queryResult = airplanes.query(containerFilter, simulation.id());
+      queryResult = inst.query(containerFilter, simulation.id());
       for(final var item : queryResult.getItemsSnapshot()) {
         if (item.name().equals("Airports")) {
           System.out.println("Found: " + item.name());
@@ -376,11 +200,11 @@ public class Airplanes {
         }
       }
   
-      // Testing to create some data points for 2 different containers Airports
-      // and Planes.
+      // Testing to create some data points for 2 different containers 
+      // Airports and Planes.
       System.out.println("\nLoad airports");
       if (airports == null) {
-        airports = airplanes.createContainer(simulation, "Airports");
+        airports = inst.createContainer(simulation, "Airports");
         System.out.println("Created container " + airports.name() +
                            " with id: " + airports.id());
 
@@ -392,7 +216,7 @@ public class Airplanes {
               put("Name",    new Obj_VI_Pair(entry.airportLocation, true));
             }
           };
-          airplanes.createObject(airports, entry.airportLocation, metadata);
+          inst.createObject(airports, entry.airportLocation, metadata);
         }
     
         {
@@ -403,7 +227,7 @@ public class Airplanes {
           };
           for(final var swedishAirport : swedishAirports) {
             metadata.put("Name", new Obj_VI_Pair(swedishAirport, true));
-            airplanes.createObject(airports, swedishAirport, metadata);
+            inst.createObject(airports, swedishAirport, metadata);
           }
         }
       } else {
@@ -425,7 +249,7 @@ public class Airplanes {
       if (planes == null) {
         planesName = "Planes" + 
                      Long.toString(java.lang.Math.abs(rand.nextLong()));
-        planes =  airplanes.createContainer(simulation, planesName);
+        planes =  inst.createContainer(simulation, planesName);
         System.out.println("\nCreated container " + planes.name() +
                           " with id: " + planes.id());
         System.out.println("Load planes");
@@ -455,11 +279,11 @@ public class Airplanes {
           };
           final var flight = airLines[rand.nextInt(airLines.length)] +
                                       Integer.toString(index);
-          airplanes.createObject(planes, flight, metadata);
+          inst.createObject(planes, flight, metadata);
         } // for (int index= ...
       }
+
       // testing query.join for Airports with Planes.
-  
       final var countryFilter = new Filter();
       final var countryText = inquiry.inquireString("Country", "Sweden");
       countryFilter.setQuery("Country:" + countryText);
@@ -473,7 +297,7 @@ public class Airplanes {
       System.out.println("\nFilter " + countryFilter.getQuery() + " and " +
                           modelFilter.getQuery());
       System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-      final var flightsInCountryDelegate1 = new QueryDelegate();
+      final var flightsInCountryDelegate1 = new MyQueryDelegate();
       final var queryJoinDelegate = new com.cbe.delegate.JoinDelegate();
       airports.query(countryFilter,
                      flightsInCountryDelegate1)
@@ -487,7 +311,7 @@ public class Airplanes {
       System.out.println("\n\nFilter " + countryFilter.getQuery() + " and "
                          + modelFilter.getQuery());
       System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-      final var flightsInCountryDelegate2 = new QueryDelegate();
+      final var flightsInCountryDelegate2 = new MyQueryDelegate();
       airports.query(countryFilter, flightsInCountryDelegate2)
               .join(planes, "Name", "Location", modelFilter, queryJoinDelegate);  
       printItems(flightsInCountryDelegate2.waitForRsp().getItemsSnapshot(),
@@ -496,13 +320,13 @@ public class Airplanes {
     finally {
       System.out.println();
       if (inquiry.inquireBool("Do you want to remove the planes", false)) {
-        airplanes.removeContainer(planes);
+        inst.removeContainer(planes);
         System.out.println("Removed " + planes.name());
       }
     }
     System.out.println();
-    airplanes.cloudBackend.terminate();
-    System.out.println("Airplanes program end.");
+    cbobj.terminate();
+    System.out.println(programName + " program end.");
   }  //  main
 
 
@@ -596,6 +420,6 @@ public class Airplanes {
     boolean inquireBool(String  prompt) {
       return inquireBool(prompt, null /* defaultVal */);
     }
-  }  //  Inquiry
+  }  //  Inquiry  - Generic functions -
 
-}  //  Airplanes
+}  //  class Airplanes
