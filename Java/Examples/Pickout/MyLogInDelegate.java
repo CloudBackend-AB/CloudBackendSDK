@@ -1,13 +1,11 @@
 import com.cbe.*;
 import com.cbe.delegate.*;
 
+public class MyLogInDelegate extends com.cbe.delegate.LogInDelegate {
 
-public class LogInDelegate extends com.cbe.delegate.LogInDelegate {
-
-
-  LogInDelegate() {}
-  private boolean              finished = false;
-  private String               errorInfo;
+  MyLogInDelegate() {}
+  private boolean       finished = false;
+  private String       errorInfo;
   private com.cbe.CloudBackend cbObj;
 
       /**
@@ -17,9 +15,9 @@ public class LogInDelegate extends com.cbe.delegate.LogInDelegate {
   @Override
   synchronized public void onLogInSuccess(com.cbe.CloudBackend cloudBackend) {
     cbObj = cloudBackend;
-    this.finished = true;
-    // If delegate is reused, clear possibly error state
+    // If delegate is reused, clear possible error state
     errorInfo = null;
+    finished = true;
     notify();
   }
 
@@ -30,11 +28,12 @@ public class LogInDelegate extends com.cbe.delegate.LogInDelegate {
    *                call that has failed.
    */
   @Override
-  synchronized public void onLogInError(com.cbe.delegate.Error error, com.cbe.util.Context context) {
-    errorInfo = "Login error: code=\"" + error.getErrorCode() + 
+  synchronized public void onLogInError(com.cbe.delegate.Error error,
+                                        com.cbe.util.Context   context) {
+    errorInfo = "Login error: code=" + error.getErrorCode() + 
                 ", reason=\"" + error.getReason() +
                 "\", message=\"" + error.getMessage() + "\""; 
-    this.finished = true;
+    finished = true;
     notify();
   }
     
@@ -46,6 +45,8 @@ public class LogInDelegate extends com.cbe.delegate.LogInDelegate {
         e.printStackTrace();
       }
     }
+    // Reset finished flag, so current delegate instance can be reused
+    finished = false; 
     if (errorInfo != null) {
       throw new RuntimeException(errorInfo);
     }

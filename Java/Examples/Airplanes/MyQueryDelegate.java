@@ -1,11 +1,11 @@
 import com.cbe.delegate.*;
 
-public class QueryDelegate extends com.cbe.delegate.QueryDelegate {
+public class MyQueryDelegate extends com.cbe.delegate.QueryDelegate {
 
-  QueryDelegate() {}
+  MyQueryDelegate() {}
   private boolean             finished = false;
   private String              errorInfo;
-  private com.cbe.QueryResult qR;
+  private com.cbe.QueryResult queryResult;
 
    /**
    * Called upon successful query.<br>
@@ -13,10 +13,10 @@ public class QueryDelegate extends com.cbe.delegate.QueryDelegate {
    */
   @Override
   synchronized public void onQuerySuccess(com.cbe.QueryResult queryResult) {
-    qR = queryResult;
-    this.finished = true;
-    // If delegate is reused, clear possibly error state
+    this.queryResult = queryResult;
+    // If delegate is reused, clear possible error state
     errorInfo = null;
+    finished = true;
     notify();
   }
 
@@ -27,11 +27,12 @@ public class QueryDelegate extends com.cbe.delegate.QueryDelegate {
    *                call that has failed.
    */
   @Override
-  synchronized public void onQueryError(com.cbe.delegate.QueryError error, com.cbe.util.Context context) {
-    errorInfo = "Login error: code=\"" + error.getErrorCode() + 
+  synchronized public void onQueryError(com.cbe.delegate.QueryError error,
+                                        com.cbe.util.Context        context) {
+    errorInfo = "Query error: code=" + error.getErrorCode() + 
                 ", reason=\"" + error.getReason() +
                 "\", message=\"" + error.getMessage() + "\"";
-    this.finished = true;
+    finished = true;
     notify();
   }
 
@@ -43,9 +44,11 @@ public class QueryDelegate extends com.cbe.delegate.QueryDelegate {
         e.printStackTrace();
       }
     }
+    // Reset finished flag, so current delegate instance can be reused
+    finished = false; 
     if (errorInfo != null) {
       throw new RuntimeException(errorInfo);
     }
-    return qR; 
+    return queryResult; 
   }
 }

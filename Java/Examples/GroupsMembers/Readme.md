@@ -1,4 +1,4 @@
-### Example MyGroups
+### Example GroupsMembers
 
 list my groups and the members of these groups.
 

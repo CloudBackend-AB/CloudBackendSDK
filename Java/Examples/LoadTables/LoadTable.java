@@ -4,16 +4,18 @@ import java.io.FileInputStream;
 import java.io.FileReader;      // read csv
 import java.io.InputStream;
 import java.io.IOException;     // read csv
-import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.Properties; 
 import java.util.Scanner;
-import java.util.*;
-import java.math.*;
+import java.util.TimeZone;
 import com.cbe.*;
 import com.std.*;
 
@@ -21,138 +23,69 @@ import com.std.*;
 
 public class LoadTable {
 
-  public CloudBackend login(String credentials) {
-    CloudBackend cloudBackend = null;
+  static String programName = "LoadTable";
+
+  public com.cbe.CloudBackend myLogin(String credentials) {
+    String username = "";
+    String password = "";
+    String tenant   = "";
     try (InputStream input = new FileInputStream("../../resources/config.properties")) {
-      String username ;
-      String password;
-      String tenant;
-      Properties prop = new Properties();
+      Properties myProperties = new Properties();
       // load a properties file
-      prop.load(input);
+      myProperties.load(input);
       // get the property value and set the login credentials
-      username = prop.getProperty(credentials + ".username");
-      password = prop.getProperty(credentials + ".password");
-      tenant   = prop.getProperty(credentials + ".tenant");
-      LogInDelegate delegate = new LogInDelegate();
-      cloudBackend = CloudBackend.logIn(username, password, tenant, delegate);
-      cloudBackend = delegate.waitForRsp();
-      return cloudBackend;
-      // If login happened then return the cloudbackend object.
+      username = myProperties.getProperty(credentials + ".username");
+      password = myProperties.getProperty(credentials + ".password");
+      tenant   = myProperties.getProperty(credentials + ".tenant");
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     }
-    finally {
-      cloudBackend.terminate();
+    if (username == null) {
+      System.out.println("Credentials not found: " + credentials);
+      username = "?";
+      password = "?";
+      tenant   = "?";
     }
+    com.cbe.CloudBackend cloudBackend = null;
+    MyLogInDelegate delegate = new MyLogInDelegate();
+    try
+    {
+      System.out.println("Connecting as " + username);
+      cloudBackend = com.cbe.CloudBackend.logIn(username, password, tenant, delegate);
+      System.out.println("Waiting.");
+      cloudBackend = delegate.waitForRsp();
+    }
+    catch (RuntimeException e)
+    {
+      System.out.println("Caught error:");
+      e.printStackTrace();
+      System.out.println();
+    };
+    return cloudBackend;
   }
  
-  public QueryResult queryR(CloudBackend obj, Filter filter, long containerId) {
-    QueryDelegate delegate = new QueryDelegate();
+  public QueryResult queryF(com.cbe.CloudBackend obj, Filter filter, long containerId) {
+    MyQueryDelegate delegate = new MyQueryDelegate();
     QueryChain QC=obj.query(containerId, filter, delegate);
     return delegate.waitForRsp();
   }
 
-  public QueryResult query(Container container) {
-    QueryDelegate delegate = new QueryDelegate();
-    container.query(delegate);
-    return delegate.waitForRsp();
-  }
-
-  public Container createContainer(Container container, String containerName) {
-    CreateContainerDelegate delegate = new CreateContainerDelegate();
+  public Container createContainer(com.cbe.Container container, String containerName) {
+    MyCreateContainerDelegate delegate = new MyCreateContainerDelegate();
     container.createContainer(containerName, delegate);
     return delegate.waitForRsp();
   }
 
-
-  public com.cbe.Object uploadBinary(Container container) throws IOException {
-    // Try fetch from relative path
-      UploadDelegate delegate = new UploadDelegate();
-    try (InputStream input = new FileInputStream("../../resources/config.properties")) {
-      byte[] data;
-      String name = "";
-      Properties prop = new Properties();
-      // load a properties file
-      prop.load(input);
-
-      data = Files.readAllBytes(Paths.get(prop.getProperty("binaryPath")));
-      name = prop.getProperty("binaryFileName");
-      container.uploadBinary(name, data, delegate);
-    } catch (IOException ex) {
-      throw new RuntimeException(ex);
-    }
-    return delegate.waitForRsp();
-  }
-
-  public com.cbe.Object uploadObject(Container container) {
-    String name = "";
-    String path = "";
-    try (InputStream input = new FileInputStream("../../resources/config.properties")) {
-      Properties prop = new Properties();
-      
-      // load a properties file
-      prop.load(input);
-      name = prop.getProperty("filename");
-      path = prop.getProperty("path");
-
-    } catch (IOException ex) {
-      ex.printStackTrace();
-    }
-
-    UploadDelegate delegate = new UploadDelegate();
-    container.upload(name, path, delegate);
-
-    return delegate.waitForRsp();
-  }
-
   public com.cbe.Object createObject(Container container, String title, Obj_KV_Map metadata) {
-    CreateObjectDelegate delegate = new CreateObjectDelegate();
+    MyCreateObjectDelegate delegate = new MyCreateObjectDelegate();
     container.createObject(title, delegate, metadata);
     return delegate.waitForRsp();
   }
 
-  public void removeContainer(Container container) {
-    RemoveContainerDelegate delegate = new RemoveContainerDelegate();
-    container.remove(delegate);
-    delegate.waitForRsp();
-    return;
-  }
-
-  public void setContainerAcl(Container container, com.std.Acl_Map permissionsMap) {
-    AclDelegate delegate = new AclDelegate();
-    container.setAcl(permissionsMap, delegate);
-    delegate.waitForRsp();
-    return;
-  }
-
-  public com.std.Acl_Map getContainerAcl(Container container) {
-    AclDelegate delegate = new AclDelegate();
-    container.getAcl(delegate);
-    return delegate.waitForRsp();
-
-  }
-
-  public long share(long userGroupId, Container container) {
-    ShareDelegate delegate = new ShareDelegate();
-    container.share(userGroupId, "javaShare", delegate);
-    return delegate.waitForRsp();
-  }
-
-  public QueryResult listAvailableShares(com.cbe.CloudBackend cloudbackend) {
-    ListSharesDelegate delegate = new ListSharesDelegate();
-    cloudbackend.shareManager().listAvailableShares(delegate);
-    return delegate.waitForRsp();
-  }
-
-  public void unshareContainer(long shareId, Container container) {
-    UnShareDelegate delegate = new UnShareDelegate();
-    container.unShare(shareId, delegate);
-    delegate.waitForRsp();
-  }
 
 
-  // program: loaddbtables
+
+  // program: LoadTable
   // first parameter:  csv-file with input records
   // csv format: separator defined in csvSplitBy = ";"
   //
@@ -173,20 +106,20 @@ public class LoadTable {
   // subtables and described as           /level1/level2/primarykey e.g. /unit1001/2022-01-19/1642609149
   // author: Anders Weister
   // company: CloudBackend AB
-  // date: 2022-02-18, 2022-11-02
+  // date: 2022-02-18, 2022-12-16
   
+  //////////////////////////////////////////////////////////////////////////////
+
   public static void main(String[] argv) {
-    System.out.println("LoadTable program start");
-
+    System.out.println(programName + " program start.");
     int argvCount=argv.length;
-
     boolean foundHeader  = false;
     boolean foundItem    = false;
     boolean skipThisLine = false;
     boolean switchedDB   = false;
     int i = 0;
     int getItem = 0;
-    int noSearchableKeyIndexFromColumn = 3;     // No Searchable Key/Value index after column
+    int noSearchableKeyIndexFromColumn = 99;    // No Searchable Key/Value index after column
     String format = "%-38s%s%n";                // printf
     String expectHeaderColumn1 = "Level1";      // required as first column header
     String expectHeaderColumn2 = "Level2";      // required as second column header
@@ -255,15 +188,23 @@ public class LoadTable {
     timestamp1 = Instant.now().getEpochSecond();
 
     LoadTable inst = new LoadTable();
-    CloudBackend cbobj = inst.login("cr1");  // referencing user credentials
-    System.out.println("CloudBackend login as " + cbobj.account().username());
-    Container level1Container=cbobj.account().rootContainer();
-    Container level2Container=cbobj.account().rootContainer();
-    QueryResult qR = inst.queryR(cbobj, filterC, cbobj.account().rootContainer().id());
+    com.cbe.CloudBackend cbobj = inst.myLogin("gh1");  // referencing user credentials
+    if (cbobj.account().userId()>0) {
+      System.out.println("Authenticated as: " + cbobj.account().username() + "\t" + cbobj.account().firstName() + " " + cbobj.account().lastName());
+    } else {
+      System.out.println("Login failed.");
+      cbobj.terminate();
+      System.out.println(programName + " program stop.");
+      return;
+    }
+
+    com.cbe.Container level1Container=cbobj.account().rootContainer();
+    com.cbe.Container level2Container=cbobj.account().rootContainer();
+    QueryResult qR = inst.queryF(cbobj, filterC, cbobj.account().rootContainer().id());
     List<Item> items = qR.getItemsSnapshot();
 
     try   
-    {  
+    {
       //parsing a CSV file into BufferedReader class constructor
       System.out.println("Using input file: " + inputFileName);
       BufferedReader br = new BufferedReader(new FileReader(inputFileName));  
@@ -328,7 +269,7 @@ public class LoadTable {
           if (!level1.equals(level1Container.name())) {
             // level1 container selection start
             // System.out.println("step: search for our level1 container");
-            qR = inst.queryR(cbobj, filterC, cbobj.account().rootContainer().id());
+            qR = inst.queryF(cbobj, filterC, cbobj.account().rootContainer().id());
             foundItem = false;
             i = 0;
             getItem = 0;
@@ -336,7 +277,7 @@ public class LoadTable {
               System.out.println("Query failed null. ");
             } else {
               items = qR.getItemsSnapshot();
-              for(Item item : items) {
+              for(com.cbe.Item item : items) {
                 // System.out.println("Compare Item: " + item.name());
                 if(item.name().equals(level1)) {
                   foundItem = true;
@@ -360,7 +301,7 @@ public class LoadTable {
 
           if ((!level2.equals(level2Container.name())) || switchedDB) {
             // level2 container selection start
-            qR = inst.queryR(cbobj, filterCA, level1Container.id());
+            qR = inst.queryF(cbobj, filterCA, level1Container.id());
             foundItem = false;
             i = 0;
             getItem = 0;
@@ -368,7 +309,7 @@ public class LoadTable {
               System.out.println("Query failed null. ");
             } else {
               items = qR.getItemsSnapshot();
-              for(Item item : items) {
+              for(com.cbe.Item item : items) {
                 // System.out.println("Compare Item: " + item.name());
                 if(item.name().equals(level2)) {
                   foundItem = true;
@@ -410,6 +351,6 @@ public class LoadTable {
     tempString = Long.toString(timestamp2-timestamp1);
     System.out.println("Run completed in: " + tempString + " s  @ " + tempString2 );
     cbobj.terminate();
-    System.out.println("LoadTable program end");
+    System.out.println(programName + " program end.");
   }  // main
 }

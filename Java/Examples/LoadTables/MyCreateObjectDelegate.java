@@ -1,24 +1,23 @@
 import com.cbe.delegate.*;
+import com.cbe.*;
 
-public class CreateObjectDelegate extends com.cbe.delegate.CreateObjectDelegate {
+public class MyCreateObjectDelegate extends com.cbe.delegate.CreateObjectDelegate {
 
-  CreateObjectDelegate() {}
   private boolean        finished = false;
   private String         errorInfo;
   private com.cbe.Object returnObject;
-
-
+  MyCreateObjectDelegate() {}
 
   /**
-   * Called upon successful CreateObject.<br>
+   * Called upon successful creation object.<br>
    * 
    */
   @Override
   synchronized public void onCreateObjectSuccess(com.cbe.Object object) {
     returnObject = object;
-    this.finished = true;
-    // If delegate is reused, clear possibly error state
+    // If delegate is reused, clear possible error state
     errorInfo = null;
+    finished = true;
     notify();
   }
 
@@ -26,11 +25,12 @@ public class CreateObjectDelegate extends com.cbe.delegate.CreateObjectDelegate 
    * Called if an error is encountered.
    */
   @Override
-  synchronized public void onCreateObjectError(com.cbe.delegate.Error error, com.cbe.util.Context context) {
-    errorInfo = "Login error: code=\"" + error.getErrorCode() + 
+  synchronized public void onCreateObjectError(com.cbe.delegate.Error error,
+                                               com.cbe.util.Context   context) {
+    errorInfo = "Create error: code=" + error.getErrorCode() + 
                 ", reason=\"" + error.getReason() +
                 "\", message=\"" + error.getMessage() + "\"";
-    this.finished = true;
+    finished = true;
     notify();
   }
 
@@ -42,10 +42,11 @@ public class CreateObjectDelegate extends com.cbe.delegate.CreateObjectDelegate 
         e.printStackTrace();
       }
     }
+    // Reset finished flag, so current delegate instance can be reused
+    finished = false; 
     if (errorInfo != null) {
       throw new RuntimeException(errorInfo);
     }
     return returnObject; 
   }
-
 }

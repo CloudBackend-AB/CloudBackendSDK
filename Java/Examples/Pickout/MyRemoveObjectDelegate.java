@@ -1,18 +1,18 @@
-public class MyRemoveContainerDelegate extends 
-                                    com.cbe.delegate.container.RemoveDelegate {
+public class MyRemoveObjectDelegate extends 
+                                    com.cbe.delegate.object.RemoveDelegate {
 
   private boolean                                   finished = false;
   private String                                    errorInfo;
-  private com.cbe.delegate.container.RemoveSuccess  removeSuccess;
-  MyRemoveContainerDelegate() {}
+  private com.cbe.delegate.object.RemoveSuccess  removeSuccess;
+  MyRemoveObjectDelegate() {}
 
   /**
    * Called upon successful remove.<br>
    * 
    */
   @Override
-  synchronized public void onRemoveSuccess(long containerId, String name) {
-    removeSuccess = new com.cbe.delegate.container.RemoveSuccess(containerId,
+  synchronized public void onRemoveSuccess(long objectId, String name) {
+    removeSuccess = new com.cbe.delegate.object.RemoveSuccess(objectId,
                                                                  name);
     // If delegate is reused, clear possible error state
     errorInfo = null;
@@ -33,7 +33,7 @@ public class MyRemoveContainerDelegate extends
     notify();
   }
 
-  synchronized public com.cbe.delegate.container.RemoveSuccess waitForRsp() {
+  synchronized public com.cbe.delegate.object.RemoveSuccess waitForRsp() {
     while (!finished) {
       try {
         wait();

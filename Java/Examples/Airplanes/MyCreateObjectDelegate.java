@@ -1,23 +1,23 @@
 import com.cbe.delegate.*;
 import com.cbe.*;
 
-public class UploadDelegate extends com.cbe.delegate.UploadDelegate {
+public class MyCreateObjectDelegate extends com.cbe.delegate.CreateObjectDelegate {
 
-  UploadDelegate() {}
-  public boolean         finished = false;
-  private com.cbe.Object returnObject;
+  private boolean        finished = false;
   private String         errorInfo;
+  private com.cbe.Object returnObject;
+  MyCreateObjectDelegate() {}
 
-    /**
-   * Called upon successful Upload.<br>
-   * @param object Instance of object that is being Uploaded.
+  /**
+   * Called upon successful creation object.<br>
+   * 
    */
   @Override
-  synchronized public void onUploadSuccess(com.cbe.Object object) {
+  synchronized public void onCreateObjectSuccess(com.cbe.Object object) {
     returnObject = object;
-    // If delegate is reused, clear possibly error state
+    // If delegate is reused, clear possible error state
     errorInfo = null;
-    this.finished = true;
+    finished = true;
     notify();
   }
 
@@ -25,11 +25,12 @@ public class UploadDelegate extends com.cbe.delegate.UploadDelegate {
    * Called if an error is encountered.
    */
   @Override
-  synchronized public void onUploadError(com.cbe.delegate.TransferError error, com.cbe.util.Context context) {
-    errorInfo = "Login error: code=\"" + error.getErrorCode() + 
+  synchronized public void onCreateObjectError(com.cbe.delegate.Error error,
+                                               com.cbe.util.Context   context) {
+    errorInfo = "Create error: code=" + error.getErrorCode() + 
                 ", reason=\"" + error.getReason() +
                 "\", message=\"" + error.getMessage() + "\"";
-    this.finished = true;
+    finished = true;
     notify();
   }
 

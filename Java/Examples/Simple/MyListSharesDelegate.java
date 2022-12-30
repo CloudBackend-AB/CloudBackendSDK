@@ -5,7 +5,7 @@ public class MyListSharesDelegate extends com.cbe.delegate.ListSharesDelegate {
 
   MyListSharesDelegate() {}
   private boolean     finished = false;
-  private String     errorInfo;
+  private String      errorInfo;
   private QueryResult qr;
 
    /**
@@ -15,7 +15,7 @@ public class MyListSharesDelegate extends com.cbe.delegate.ListSharesDelegate {
   @Override
   synchronized public void onListSharesSuccess(com.cbe.QueryResult qResult) {
     qr = qResult;
-    // If delegate is reused, clear possibly error state
+    // If delegate is reused, clear possible error state
     errorInfo = null;
     finished = true;
     notify();
@@ -27,7 +27,7 @@ public class MyListSharesDelegate extends com.cbe.delegate.ListSharesDelegate {
   @Override
   synchronized public void onListSharesError(com.cbe.delegate.Error error,
                                              com.cbe.util.Context   context) {
-    errorInfo = "Login error: code=\"" + error.getErrorCode() + 
+    errorInfo = "List shares error: code=" + error.getErrorCode() + 
                 ", reason=\"" + error.getReason() +
                 "\", message=\"" + error.getMessage() + "\"";
     finished = true;

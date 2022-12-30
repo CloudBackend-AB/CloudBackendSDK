@@ -2,24 +2,24 @@ import com.cbe.*;
 import com.cbe.util.*;
 import com.cbe.delegate.*;
 
-public class CreateContainerDelegate extends com.cbe.delegate.CreateContainerDelegate {
+public class MyCreateContainerDelegate extends com.cbe.delegate.CreateContainerDelegate {
 
-  CreateContainerDelegate() {}
+  MyCreateContainerDelegate() {}
   private boolean           finished = false;
   private String            errorInfo;
   private com.cbe.Container returnContainer;
 
 
   /**
-   * Called upon successful CreateContainer.<br>
+   * Called upon successful creation of container.<br>
    * 
    */
   @Override
   synchronized public void onCreateContainerSuccess(com.cbe.Container container) {
     returnContainer = container;
-    this.finished = true;
-    // If delegate is reused, clear possibly error state
+    // If delegate is reused, clear possible error state
     errorInfo = null;
+    finished = true;
     notify();
   }
 
@@ -27,15 +27,16 @@ public class CreateContainerDelegate extends com.cbe.delegate.CreateContainerDel
    * Called if an error is encountered.
    */
   @Override
-  synchronized public void onCreateContainerError(com.cbe.delegate.Error error, com.cbe.util.Context context) {
-    errorInfo = "Login error: code=\"" + error.getErrorCode() + 
+  synchronized public void onCreateContainerError(com.cbe.delegate.Error error,
+                                                  com.cbe.util.Context context) {
+    errorInfo = "Create error: code=" + error.getErrorCode() + 
                 ", reason=\"" + error.getReason() +
                 "\", message=\"" + error.getMessage() + "\"";
-    this.finished = true;
+    finished = true;
     notify();
   }
 
-    synchronized public Container waitForRsp() {
+  synchronized public com.cbe.Container waitForRsp() {
     while (!finished) {
       try {
         wait();
@@ -43,6 +44,8 @@ public class CreateContainerDelegate extends com.cbe.delegate.CreateContainerDel
         e.printStackTrace();
       }
     }
+    // Reset finished flag, so current delegate instance can be reused
+    finished = false; 
     if (errorInfo != null) {
       throw new RuntimeException(errorInfo);
     }

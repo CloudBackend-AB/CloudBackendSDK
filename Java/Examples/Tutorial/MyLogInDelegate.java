@@ -4,11 +4,11 @@ import com.cbe.delegate.*;
 public class MyLogInDelegate extends com.cbe.delegate.LogInDelegate {
 
   MyLogInDelegate() {}
-  private boolean      finished = false;
+  private boolean       finished = false;
   private String       errorInfo;
   private com.cbe.CloudBackend cbObj;
 
-  /**
+      /**
    * Called upon successful log in.<br>
    * @param cloudBackend Instance of a CloudBackend holding the session.
    */

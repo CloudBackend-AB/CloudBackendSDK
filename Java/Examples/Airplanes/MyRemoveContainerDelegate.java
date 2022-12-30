@@ -1,23 +1,22 @@
-import com.cbe.delegate.container.*;
+public class MyRemoveContainerDelegate extends 
+                                    com.cbe.delegate.container.RemoveDelegate {
 
-public class RemoveContainerDelegate extends com.cbe.delegate.container.RemoveDelegate {
-
-  RemoveContainerDelegate() {}
   private boolean                                   finished = false;
   private String                                    errorInfo;
   private com.cbe.delegate.container.RemoveSuccess  removeSuccess;
+  MyRemoveContainerDelegate() {}
 
   /**
-   * Called upon successful Download.<br>
+   * Called upon successful remove.<br>
    * 
    */
   @Override
   synchronized public void onRemoveSuccess(long containerId, String name) {
-    removeSuccess.setContainerId(containerId);
-    removeSuccess.setName(name);
-    this.finished = true;
-    // If delegate is reused, clear possibly error state
+    removeSuccess = new com.cbe.delegate.container.RemoveSuccess(containerId,
+                                                                 name);
+    // If delegate is reused, clear possible error state
     errorInfo = null;
+    finished = true;
     notify();
   }
 
@@ -25,11 +24,12 @@ public class RemoveContainerDelegate extends com.cbe.delegate.container.RemoveDe
    * Called if an error is encountered.
    */
   @Override
-  synchronized public void onRemoveError(com.cbe.delegate.Error error, com.cbe.util.Context context) {
-    errorInfo = "Login error: code=\"" + error.getErrorCode() + 
+  synchronized public void onRemoveError(com.cbe.delegate.Error error,
+                                         com.cbe.util.Context   context) {
+    errorInfo = "Remove error: code=" + error.getErrorCode() + 
                 ", reason=\"" + error.getReason() +
                 "\", message=\"" + error.getMessage() + "\"";
-    this.finished = true;
+    finished = true;
     notify();
   }
 
@@ -41,6 +41,8 @@ public class RemoveContainerDelegate extends com.cbe.delegate.container.RemoveDe
         e.printStackTrace();
       }
     }
+    // Reset finished flag, so current delegate instance can be reused
+    finished = false; 
     if (errorInfo != null) {
       throw new RuntimeException(errorInfo);
     }

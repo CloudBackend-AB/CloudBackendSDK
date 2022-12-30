@@ -14,7 +14,7 @@ public class MyUnShareDelegate extends com.cbe.delegate.UnShareDelegate {
   @Override
   synchronized public void onUnShareSuccess(String message) {
     returnMessage = message;
-    // If delegate is reused, clear possibly error state
+    // If delegate is reused, clear possible error state
     errorInfo = null;
     finished = true;
     notify();
@@ -26,7 +26,7 @@ public class MyUnShareDelegate extends com.cbe.delegate.UnShareDelegate {
   @Override
   synchronized public void onUnShareError(com.cbe.delegate.Error error,
                                           com.cbe.util.Context   context) {
-    errorInfo = "Login error: code=\"" + error.getErrorCode() + 
+    errorInfo = "Unshare error: code=" + error.getErrorCode() + 
                 ", reason=\"" + error.getReason() +
                 "\", message=\"" + error.getMessage() + "\"";
     finished = true;

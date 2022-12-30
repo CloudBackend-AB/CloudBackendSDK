@@ -8,4 +8,4 @@
 # if you want to have them somewhere else than the standard path. 
 
 # run
-java -Djava.library.path=../../lib/ -cp 'classes:../../lib/com.cbe.jar' MyGroups
+java -Djava.library.path=../../lib/ -cp 'classes:../../lib/com.cbe.jar' GroupsMembers

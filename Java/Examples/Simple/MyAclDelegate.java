@@ -16,7 +16,7 @@ public class MyAclDelegate extends com.cbe.delegate.AclDelegate {
   @Override
   synchronized public void onAclSuccess(com.std.Acl_Map aclMap) {
     permissionsMap = aclMap;
-    // If delegate is reused, clear possibly error state
+    // If delegate is reused, clear possible error state
     errorInfo = null;
     finished = true;
     notify();
@@ -28,7 +28,7 @@ public class MyAclDelegate extends com.cbe.delegate.AclDelegate {
   @Override
   synchronized public void onAclError(com.cbe.delegate.Error error,
                                       com.cbe.util.Context   context) {
-    errorInfo = "Login error: code=\"" + error.getErrorCode() + 
+    errorInfo = "ACL error: code=" + error.getErrorCode() + 
                 ", reason=\"" + error.getReason() +
                 "\", message=\"" + error.getMessage() + "\"";
     finished = true;

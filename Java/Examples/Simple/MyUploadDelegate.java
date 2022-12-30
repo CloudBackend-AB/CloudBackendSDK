@@ -15,7 +15,7 @@ public class MyUploadDelegate extends com.cbe.delegate.UploadDelegate {
   @Override
   synchronized public void onUploadSuccess(com.cbe.Object object) {
     returnObject = object;
-    // If delegate is reused, clear possibly error state
+    // If delegate is reused, clear possible error state
     errorInfo = null;
     finished = true;
     notify();
@@ -27,7 +27,7 @@ public class MyUploadDelegate extends com.cbe.delegate.UploadDelegate {
   @Override
   synchronized public void onUploadError(com.cbe.delegate.TransferError error,
                                          com.cbe.util.Context         context) {
-    errorInfo = "Login error: code=\"" + error.getErrorCode() + 
+    errorInfo = "Upload error: code=" + error.getErrorCode() + 
                 ", reason=\"" + error.getReason() +
                 "\", message=\"" + error.getMessage() + "\"";
     finished = true;

@@ -15,7 +15,7 @@ public class MyDownloadDelegate extends com.cbe.delegate.DownloadDelegate {
   @Override
   synchronized public void onDownloadSuccess(com.cbe.Object object, String path) {
     returnObject = object;
-    // If delegate is reused, clear possibly error state
+    // If delegate is reused, clear possible error state
     errorInfo = null;
     finished = true;
     notify();
@@ -27,7 +27,7 @@ public class MyDownloadDelegate extends com.cbe.delegate.DownloadDelegate {
   @Override
   synchronized public void onDownloadError(com.cbe.delegate.TransferError error,
                                            com.cbe.util.Context       context) {
-    errorInfo = "Login error: code=\"" + error.getErrorCode() + 
+    errorInfo = "Download error: code=" + error.getErrorCode() + 
                 ", reason=\"" + error.getReason() +
                 "\", message=\"" + error.getMessage() + "\"";
     finished = true;
