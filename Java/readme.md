@@ -1,10 +1,6 @@
 ### CloudBackend SDK Java API.
 
 **lib** contains the jar files needed for installing and running the SDK.
-```
-cd lib
-bash install.sh
-```
 
 **Example** provides a number of code that can be run to learn how to use the API.
 
@@ -17,17 +13,25 @@ sudo apt install openjdk-17-jre-headless
 jar --version
 java --version
 ```
+or run the installation script which will do
+```
+cd ~/cbe/current                            # the release directory
+cd Java                                     # SDK Java
+pwd
+bash installJavaSDK.sh                      # install script
+```
 
----------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------
 ## Release notes
-### Current version SDK Java: **2.0.1**
+### Current version
+#### SDK Java version: **2.0.1**
 
 - Updated Example code.
 - Installation script.
 
 ### Older versions
 
-### Current version SDK Java: **2.0.0**
+#### SDK Java version: **2.0.0**
 
 - The Protocols shared pointers have been replaced with object classes and more detailed Delegate classes.
 
