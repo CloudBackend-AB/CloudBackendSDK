@@ -10,17 +10,17 @@ mv CloudBackendSDK-main 2.0.1               # release number or another name of 
 rm -i current                               # remove old symbolic link
 ln -s 2.0.1 current                         # create symbolic link to the current version of the SDK
 
-cd                                          # the home directory
-cd cbe/current                              # the name previously given this release's directory
+cd ~/cbe/current                            # the release directory
 cd C++                                      # SDK C++
 bash installC++SDK.sh                       # install script
 
-cd                                          # the home directory
-cd cbe/current                              # the name previously given this release's directory
+cd ~/cbe/current                            # the release directory
+cd Java                                     # SDK Java
 bash installJavaSDK.sh                      # install script
 
 echo "Installing CloudBackend CLI."
-cd current/tools                            # cli
+cd ~/cbe/current                            # the release directory
+cd tools                                    # cli
 unzip new_cli.zip                           # unpack the new_cli
 ./new_cli -uc gh1  << EOF                   # start new_cli with user credentials of githubtester1
  help
