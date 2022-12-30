@@ -37,7 +37,7 @@ Change the user account for the sample program in user_credentials.cpp
 
 Notes: This SDK has been built and tested on x86_64 Ubuntu 22 LTS
 
----------------------------------------------------------------------------------------
+------------------------------------------------------------------------
 
 # Installation
 
@@ -45,7 +45,7 @@ Notes: This SDK has been built and tested on x86_64 Ubuntu 22 LTS
 
 ```
 cd ~/Downloads
-unzip CloudBackendSDK-main.zip              # or the zip file name previously downloaded
+unzip CloudBackendSDK-main.zip              # or the zip file name
 cd CloudBackendSDK-main
 sh installSDK.sh
 ```
@@ -53,16 +53,12 @@ sh installSDK.sh
 ---
 ## Java
 Previous script calls
-```
-installJavaSDK.sh
-```
+Java/installJavaSDK.sh
 
 ---
 ## C++
 Previous script calls
-```
-installC++SDK.sh
-```
+C++/installC++SDK.sh
 
 ------------------------------------------------------------------------
 ### Relese notes
