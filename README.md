@@ -53,12 +53,12 @@ sh installSDK.sh
 ---
 ## Java
 Previous script calls
-Java/installJavaSDK.sh
+- Java/installJavaSDK.sh
 
 ---
 ## C++
 Previous script calls
-C++/installC++SDK.sh
+- C++/installC++SDK.sh
 
 ------------------------------------------------------------------------
 ### Relese notes
