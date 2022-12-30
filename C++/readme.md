@@ -20,11 +20,17 @@ bash installC++SDK.sh                       # install script
 ------------------------------------------------------------------------
 
 ## Release notes
-### Current version SDK C++: **2.0.0**
+### Current version
 
-- The Protocols shared pointers have been replaced with object classes and more detailed Delegate classes.
+#### SDK C++ version: **2.0.1**
+
+- New installation script
 
 ### Older versions
+
+#### SDK C++ version: **2.0.0**
+
+- The Protocols shared pointers have been replaced with object classes and more detailed Delegate classes.
 
 #### SDK C++ version: 1.4.6.4
 
