@@ -10,7 +10,7 @@ then
   sudo apt-get install g++                  # if not already installed
 fi
 echo
-echo "Compile and run Java C++ installation test"
+echo "Compile and run C++ installation test"
 cd Examples/Simple                          # Simple code example directory
 sh compile.sh                               # compile the test program
 sh run.sh  << EOF                           # run the installation test program and then enter name
