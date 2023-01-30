@@ -44,10 +44,11 @@ Notes: This SDK has been built and tested on x86_64 Ubuntu 22 LTS
 ## x86_64 Ubuntu 22.04 LTS
 
 ```
-cd ~/Downloads
+cd
+cd Downloads                                # or where you downloaded the package
 unzip CloudBackendSDK-main.zip              # or the zip file name
 cd CloudBackendSDK-main
-sh installSDK.sh
+bash installSDK.sh
 ```
 
 ---
@@ -64,4 +65,4 @@ Previous script calls
 ### Relese notes
 - See each language folder
 ----
-#### Copyright © CloudBackend AB 2020-2022.
+#### Copyright © CloudBackend AB 2020-2023.
