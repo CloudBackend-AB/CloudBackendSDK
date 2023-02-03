@@ -1,6 +1,6 @@
+#ifndef INCLUDE_cbe_SOLUTION_LOGIC_BODY_H_
+#define INCLUDE_cbe_SOLUTION_LOGIC_BODY_H_
 
-#ifndef INCLUDE_cbe_SOLUTIONLOGIcbeODY_H_
-#define INCLUDE_cbe_SOLUTIONLOGIcbeODY_H_
 #include <iostream>
 #include <condition_variable>
 #include <memory>
@@ -9,6 +9,8 @@
 #include "cbe/Account.h"
 #include "cbe/CloudBackend.h"
 #include "cbe/Types.h"
+#include "cbe/QueryChain.h"
+#include "cbe/QueryResult.h"
 
 class Exercise {
 public:
@@ -19,11 +21,11 @@ public:
   void exitProgram(int errorCode);
 
   // General member variables to use in the code
-  cbe::Container rootContainer{cbe::DefaultCtor{}};
+  cbe::CloudBackend myCloudBackend{cbe::DefaultCtor{}};
+  cbe::Container    rootContainer{cbe::DefaultCtor{}};
 
 private:
-  cbe::CloudBackend cloudBackend{cbe::DefaultCtor{}};
-  cbe::QueryResult qResult{cbe::DefaultCtor{}};
+  cbe::QueryResult  qResult{cbe::DefaultCtor{}};
 
 #if 1
   // Exercise 2
@@ -63,6 +65,6 @@ private:
                                    bool            temporary = false);
   static std::string objectName(cbe::Object  object,
                                 bool         temporary = false);
-};
+};  //  class Exercise
 
-#endif
+#endif  // INCLUDE_cbe_SOLUTION_LOGIC_BODY_H_

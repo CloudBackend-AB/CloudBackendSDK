@@ -1,7 +1,7 @@
 #!/bin/sh
-# CloudBackend AB 2022.
+# CloudBackend AB 2023.
 # compile.sh #
-# version 2022-10-24
+# version 2023-02-03
 # This compiler script has sections corresponding to
 # the different exercises in the Tutorial # on the website. 
 # Submit the number of the Exercise to compile.

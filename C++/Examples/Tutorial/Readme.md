@@ -1,12 +1,18 @@
 # Tutorial examples code.
 
-Contains the files from the SDK tutorial document at
+Contains the files from the SDK tutorial document
+available via
 https://cloudbackend.com/docs.html
 
-CloudBackend AB 2021-2022.
+CloudBackend AB 2021-2023.
 
 Release notes
 =============
+
+Release 2023-02-03
+------------------
+* Updated for SDK version 2.0.1
+* Delegates and general functions separated in own files
 
 Release 2022-10-24
 ------------------

@@ -1,10 +1,10 @@
-# setupSolution.sh <excercise>
-# release 2022-04-08
+#!/usr/bin/sh
+# compile.sh
+# release 2023-02-03
 
 PARENTSCRIPT_PATH="$(dirname "$0")"
-echo "$PARENTSCRIPT_PATH" 
-cd "$PARENTSCRIPT_PATH"
-echo $PWD
+cd ${PARENTSCRIPT_PATH}
+echo ${PWD}
 
 if [ $# -gt 0 ]
 then
@@ -14,26 +14,24 @@ else
 fi
 ARCH=`uname -m`
 echo "computer architechture ${ARCH}"
-case "$ARCH" in
+case "${ARCH}" in
     "x86_64")
     COMPILER_COMMAND="g++ -std=c++11 -pthread -ggdb3"
-    echo $PWD
     #libCBE="../../lib/Linux_x86/libcb_sdk.so"
     libCBE="../../lib/Linux_x86/libcb_sdk.a"
     # libCBE="/home/linus/buildc-ubuntu-x86_64-Linux/libcb_sdk_static.a"
     CODE_PATH="./"
-    echo $CODE_PATH
     ;;
 
-    "armv6l")
-    COMPILER_COMMAND="arm-linux-gnueabihf-g++ -mcpu=arm1176jzf-s -mfpu=vfp -fPIC -ldl -pthread "
-    libCBE="libCloudBackend-rpi.a"
-    ;;
+    # "armv6l")
+    # COMPILER_COMMAND="arm-linux-gnueabihf-g++ -mcpu=arm1176jzf-s -mfpu=vfp -fPIC -ldl -pthread "
+    # libCBE="libCloudBackend-rpi.a"
+    # ;;
 
-    "armv7l")
-    COMPILER_COMMAND="arm-linux-gnueabihf-g++ -mcpu=cortex-a53 -mfpu=neon-vfpv4 -fPIC -ldl -pthread "
-    libCBE="libCloudBackend-rpi.a"
-    ;;
+    # "armv7l")
+    # COMPILER_COMMAND="arm-linux-gnueabihf-g++ -mcpu=cortex-a53 -mfpu=neon-vfpv4 -fPIC -ldl -pthread "
+    # libCBE="libCloudBackend-rpi.a"
+    # ;;
 
     *)
     uname -a
@@ -44,14 +42,13 @@ esac
 
 case "$exercise" in
   "1")
-  # Section 1:
     echo "compile example code."
-    #  ${COMPILER_COMMAND} -o "simpleExample" "${CODE_PATH}SimpleEx.cpp" ${libCBE} -I "../../include" # DETTA ÄR DEN SOM ÄR BRA
      ${COMPILER_COMMAND} -o "simpleExample" "${CODE_PATH}SimpleEx.cpp" ${libCBE} -I "../../include" 
-     #${COMPILER_COMMAND} -o "simpleExample" "${CODE_PATH}SimpleEx.cpp" ${libCBE} -I "../../include/" "-Wl,-rpath,../../SDK/Linux_x86" "-Wl,-rpath,."
     if [ $? -eq 0 ]
     then
-        echo "to run use: sh run.sh"
+        echo "To run use: sh run.sh"
+    else
+        echo "Error encountered."
     fi
     ;;
 
