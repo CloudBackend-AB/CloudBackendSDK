@@ -5,11 +5,11 @@ echo "Installing CloudBackend SDK."
 mkdir -p ~/cbe                              # if not already created
 mydir=${PWD}
 echo "moving" ${mydir} "to ~/cbe"
-mv ${mydir} ~/cbe/2.0.1
+mv ${mydir} ~/cbe/2.0.2
 cd ~/cbe
 ls -l current
 rm -i current                               # remove old symbolic link
-ln -s 2.0.1 current                         # create symbolic link to the current version of the SDK
+ln -s 2.0.2 current                         # create symbolic link to the current version of the SDK
 echo "done."
 
 echo ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
