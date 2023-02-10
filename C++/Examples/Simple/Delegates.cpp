@@ -55,6 +55,8 @@ class LogInDelegate :  public cbe::delegate::LogInDelegate
     // std::cout << "Waiting, to be logged in" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
     // std::cout << "Now we have waited: " << called << std::endl;
+    // Reset called flag, so current delegate instance can be reused
+    called = false;
   }
 };  // class LogInDelegate
 
@@ -105,15 +107,9 @@ class QueryDelegate :  public cbe::delegate::QueryDelegate
     // std::cout << "Waiting, for query" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
     // std::cout << "Now we have waited: " << called << std::endl;
+    // Reset called flag, so current delegate instance can be reused
+    called = false;
   }
-
-  /**
-   * SDK requests, user defined functionality: 
-   * Feel free to implement more functionality using the library as you please.
-   */
-
-  // Example of how to implement the library call to query.
-  void query(cbe::Container container, std::string name);
 };  // class QueryDelegate
 
 //------------------------------------------------------------------------------
@@ -157,10 +153,9 @@ class UploadDelegate :  public cbe::delegate::UploadDelegate
     // std::cout << "Waiting, for query" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
     // std::cout << "Now we have waited: " << called << std::endl;
+    // Reset called flag, so current delegate instance can be reused
+    called = false;
   }
-
-  // Example of how to implement the library call to upload.
-  void uploadToContainer(std::string path, std::string name, cbe::Container container);
 };  // class UploadDelegate
 
 //------------------------------------------------------------------------------
@@ -198,6 +193,8 @@ class CreateContainerDelegate :  public cbe::delegate::CreateContainerDelegate
     // std::cout << "Waiting, for query" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
     // std::cout << "Now we have waited: " << called << std::endl;
+    // Reset called flag, so current delegate instance can be reused
+    called = false;
   }
 };  // class CreateContainerDelegate
 
@@ -234,6 +231,8 @@ class RemoveContainerDelegate :  public cbe::delegate::container::RemoveDelegate
     // std::cout << "Waiting, for deletion" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
     // std::cout << "Now we have waited: " << called << std::endl;
+    // Reset called flag, so current delegate instance can be reused
+    called = false;
   }
 };  // class RemoveContainerDelegate
 

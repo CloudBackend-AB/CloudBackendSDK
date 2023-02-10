@@ -3,17 +3,15 @@
 
 #include <iostream>
 /*
-Replace the empty string variables with the account that you want to use, all accounts have the first and last name of Test and User.
-
-username: githubtester1 ; password: gitHubTester1password ; email: githubtester0MockEmailForTest@CreateAccountTest.com;
-username: githubtester2 ; password: gitHubTester2password ; email: githubtester1MockEmailForTest@CreateAccountTest.com;
-username: githubtester3 ; password: gitHubTester3password ; email: githubtester2MockEmailForTest@CreateAccountTest.com;
+ Test accounts:
+   username: githubtester1 ; password: gitHubTester1password ;
+   username: githubtester2 ; password: gitHubTester2password ;
+   username: githubtester3 ; password: gitHubTester3password ;
+ Replace the following string variables with the account that you want to use.
 */
 
-std::string username      = "githubtester1";
-std::string password      = "gitHubTester1password";
-std::string tenant        = "cbe_githubtesters";
-std::string firstname     = "Test";
-std::string lastname      = "User";
-std::string email         = "";
-#endif
+std::string username = "githubtester1";
+std::string password = "gitHubTester1password";
+std::string tenant   = "cbe_githubtesters";
+
+#endif  // USER_CREDENTIALS

@@ -19,7 +19,6 @@ case "${ARCH}" in
     COMPILER_COMMAND="g++ -std=c++11 -pthread -ggdb3"
     #libCBE="../../lib/Linux_x86/libcb_sdk.so"
     libCBE="../../lib/Linux_x86/libcb_sdk.a"
-    # libCBE="/home/linus/buildc-ubuntu-x86_64-Linux/libcb_sdk_static.a"
     CODE_PATH="./"
     ;;
 
