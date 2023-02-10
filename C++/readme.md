@@ -22,11 +22,15 @@ bash installC++SDK.sh                       # install script
 ## Release notes
 ### Current version
 
+#### SDK C++ version: **2.0.2**
+
+- Examples with improved error handling
+
+### Older versions
+
 #### SDK C++ version: **2.0.1**
 
 - New installation script
-
-### Older versions
 
 #### SDK C++ version: **2.0.0**
 
