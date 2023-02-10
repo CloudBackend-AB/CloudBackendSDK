@@ -10,8 +10,8 @@
  Replace the following string variables with the account that you want to use.
 */
 
-std::string username = "githubtester1";
-std::string password = "gitHubTester1password";
+std::string username = "githubtester2";
+std::string password = "gitHubTester2password";
 std::string tenant   = "cbe_githubtesters";
 
 #endif  // USER_CREDENTIALS

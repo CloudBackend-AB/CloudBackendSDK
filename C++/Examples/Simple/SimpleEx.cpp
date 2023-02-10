@@ -7,30 +7,26 @@
 #include <iostream>
 #include <mutex>
 #include <stdio.h>
-#include <thread>
 #include <string>
-
-#include "user_credentials.cpp"  // file is located in this folder
+#include <thread>
 
 #include "cbe/Account.h"
 #include "cbe/CloudBackend.h"
 #include "cbe/Container.h"
-#include "cbe/QueryChain.h"
+#include "cbe/QueryResult.h"
 #include "cbe/Types.h"
 
 #include "Delegates.cpp"
+#include "user_credentials.cpp"  // file is located in this folder
 
 
 int main(void) {
   printf("Starting SimplEx program.\n");
+
+  // The central object owning the login session.
   cbe::CloudBackend cloudBackend{cbe::DefaultCtor{}};
 
-  /**
-   * Creates a new instance of this class which we need to access the 
-   * cloudBackend object from.
-   */
-  std::shared_ptr<LogInDelegate> logInDelegate = 
-                                              std::make_shared<LogInDelegate>();
+  //----------------------------------------------------------------------------
   /** 
    * Login in to the account that you where provided with when downloading 
    * this example code. 
@@ -45,20 +41,20 @@ int main(void) {
    * onLogInError(cbe::delegate::Error&& error, cbe::util::Context&& context). 
    */
 
-  logInDelegate->cloudBackend = cbe::CloudBackend::logIn(username, 
-                                                         password,
-                                                         tenant, 
-                                                         logInDelegate);
-  /** Keeps the thread alive between API requests. */
-  // Waiting for the cloud response
-  logInDelegate->waitForRsp();
+  // Create a new delegate callback instance of this class.
+  std::shared_ptr<LogInDelegate> logInDelegate = 
+                                              std::make_shared<LogInDelegate>();
 
-  // Store a local copy
-  cloudBackend = logInDelegate->cloudBackend;
+  cloudBackend = cbe::CloudBackend::logIn(username, 
+                                          password,
+                                          tenant, 
+                                          logInDelegate);
+  // Wait until the delegate has received a response from the cloud service.
+  logInDelegate->waitForRsp();
 
   // Check if login was without error
   if (!logInDelegate->errorInfo) {
-    // Yes, success!  
+    // Yes, no error, success!  
     std::cout << "Logged in:" << std::endl;
     std::cout << "SDK version = "
               << cloudBackend.version() << std::endl;
@@ -72,114 +68,158 @@ int main(void) {
               << cloudBackend.account().firstName() << std::endl;
     std::cout << "       last = "
               << cloudBackend.account().lastName() << std::endl;
-  } 
-  else {
-    // No, error...
-    std::cout << "Exiting: Login failed!" << std::endl;
+  } else {
+    std::cout << "Warning: Login failed!" << std::endl;
     std::cout << "errorInfo = " << logInDelegate->errorInfo << std::endl;
+    std::cout << "Exiting." << std::endl;
     cloudBackend.terminate();
     return 1; // Bail out - Due to failed login
   }
 
   //----------------------------------------------------------------------------
+  // Ask for name of new container.
+  std::string containerName;
+  std::cout << "Name for a new Container to be created: ";
+  std::getline(std::cin, containerName);
 
+  //----------------------------------------------------------------------------
+  // Check if the name the user wants to create
+  // already exist in the parent container.
   std::shared_ptr<QueryDelegate> queryDelegate = 
                                               std::make_shared<QueryDelegate>();
-  // Logged in users root container
-  cbe::Container container = cloudBackend.account().rootContainer();
+  cbe::QueryResult::ItemsSnapshot resultSet;
+  // My top root container to be used as parent - home://
+  // in which to create the new sub-container
+  cbe::Container parentContainer = cloudBackend.account().rootContainer();
 
-  // We want to check if the container the user wants to create already exist in 
-  // the parent container.
-  std::cout << "Name for a new Container to be created: ";
-  std::string containerName;
-  std::getline(std::cin, containerName);
-  cloudBackend.query(container.id(), queryDelegate);
-  // Waiting for the cloud response
+  cloudBackend.query(parentContainer.id(), queryDelegate);
+  // Wait until the delegate has received a response from the cloud service.
   queryDelegate->waitForRsp();
-
-  cbe::QueryResult::ItemsSnapshot resultSet = 
-                                  queryDelegate->queryResult.getItemsSnapshot();  
-  // Look through the parent container to check if the name has already been 
-  // used.
-  std::cout << "Content of /" << std::endl;
-  std::cout << "---------------------------" << std::endl;
-  for (cbe::Item& item : resultSet)
-  {
-    std::cout << item.name() << std::endl;
-    if(item.name() == containerName){
-      std::cout << "Exiting: Container already exist! " << item.name() << " (" 
-                << item.id() << ")" << std::endl;
-      cloudBackend.terminate();
-      return 2;
-    }
-  }
-  std::cout << "---------------------------" << std::endl;
 
   // Check if error
   if (queryDelegate->errorInfo) {
     // Yes, error...
-    std::cout <<"Exiting: Query failed!" << std::endl;
-    std::cout <<"errorInfo = " << queryDelegate->errorInfo << std::endl;
+    std::cout << "Warning: Query failed!" << std::endl;
+    std::cout << "errorInfo = " << queryDelegate->errorInfo << std::endl;
+    std::cout << "Exiting." << std::endl;
+    cloudBackend.terminate();
     return 3; // Bail out - Due to failed query
+  } else {
+    resultSet = queryDelegate->queryResult.getItemsSnapshot();  
+    std::cout << "after getItemsSnapshot"  << std::endl;
+    // Look through the parent container to check
+    // if the name has already been used.
+    for (cbe::Item& item : resultSet) {
+      // std::cout << item.name() << std::endl;
+      if (item.name() == containerName) {
+        std::cout << "Warning: Container already exists! "
+                  << item.name()
+                  << " (" << item.id() << ")" 
+                  << std::endl;
+        std::cout << "Exiting." << std::endl;
+        cloudBackend.terminate();
+        return 2;
+      }
+    }
   }
+  std::cout << "after if"  << std::endl;
+
 
   //----------------------------------------------------------------------------
 
+  // Create a new sub-container in the parent container
+  // using the name that the user provided
   std::shared_ptr<CreateContainerDelegate> createContainerDelegate = 
                                     std::make_shared<CreateContainerDelegate>();
-  // Create a container in the parent container using the name that the user
-  // provided
-  container.createContainer(containerName, createContainerDelegate);
-  // Waiting for the cloud response
+  parentContainer.createContainer(containerName, createContainerDelegate);
+  // Wait until the delegate has received a response from the cloud service.
   createContainerDelegate->waitForRsp();
-
   // Check if error
   if (createContainerDelegate->errorInfo) {
     // Yes, error... 
-    std::cout <<"Exiting: CreateContainer failed!" << std::endl;
-    std::cout <<"errorInfo = " << createContainerDelegate->errorInfo 
+    std::cout << "Warning: CreateContainer failed!" << std::endl;
+    std::cout << "errorInfo = " << createContainerDelegate->errorInfo 
               << std::endl;
+    std::cout << "Exiting." << std::endl;
+    cloudBackend.terminate();
     return 4; // Bail out - Due to failed CreateContainer
   }
 
   cbe::Container newContainer = createContainerDelegate->container;
-  std::cout << "/" << newContainer.name() << " (" << newContainer.id()
-            << ")\t created." << std::endl;
+  std::cout << "/" << newContainer.name()
+            << "\t\tcreated" 
+            << "\t\t(" << newContainer.id() << ")" 
+            << std::endl;
  
   //----------------------------------------------------------------------------
 
+  // Define which file to upload from the local system.
   std::shared_ptr<UploadDelegate> uploadDelegate = 
                                              std::make_shared<UploadDelegate>();
-  // Here we define which file to upload from the local system.
   std::string fileName = "w2.xml";
-  // Here we define the file's relative path on the local system. 
+  // Define the file's relative path on the local system. 
   // Note: path must end with "/".
   std::string filePath = "Upload_files/";
 
   // Upload the file to the newly created container.
   newContainer.upload(fileName, filePath, uploadDelegate);
-  // Waiting for the cloud response
+  // Wait until the delegate has received a response from the cloud service.
   uploadDelegate->waitForRsp();
 
   // Check if error
   if (uploadDelegate->errorInfo) {
     // Yes, error...
-    std::cout <<"Exiting: Upload failed!" << std::endl;
-    std::cout <<"errorInfo = " << uploadDelegate->errorInfo << std::endl;
+    std::cout << "Warning: Upload failed!" << std::endl;
+    std::cout << "errorInfo = " << uploadDelegate->errorInfo << std::endl;
+    std::cout << "Exiting." << std::endl;
+    cloudBackend.terminate();
     return 5; // Bail out - Due to failed Upload
   }
 
   cbe::Object newObject = uploadDelegate->object;
   std::cout << "/" << newContainer.name() << "/" << newObject.name()
-            << "\t uploaded." << std::endl;
+            << "\tuploaded"
+            << "\t("
+            << newObject.parentId()
+            <<":"
+            << newObject.id()
+            << ")" 
+            << std::endl;
 
   //----------------------------------------------------------------------------
 
+  // Inspect content of the new container.
+  // Note: Reusing the delegate.
+  newContainer.query(queryDelegate);
+  // Wait until the delegate has received a response from the cloud service.
+  queryDelegate->waitForRsp();
 
+  // Check if error
+  if (queryDelegate->errorInfo) {
+    // Yes, error...
+    std::cout << "Warning: Query failed!" << std::endl;
+    std::cout << "errorInfo = " << queryDelegate->errorInfo << std::endl;
+    std::cout << "Exiting." << std::endl;
+    cloudBackend.terminate();
+    return 3; // Bail out - Due to failed query
+  } else {
+    std::cout << "Content of /" << newContainer.name() << std::endl;
+    std::cout << "---------------------------" << std::endl;
+    resultSet = queryDelegate->queryResult.getItemsSnapshot();
+    for (cbe::Item& item : resultSet)
+    {
+      std::cout << item.name() << std::endl;
+    }
+    std::cout << "---------------------------" << std::endl;
+  }
+
+  //----------------------------------------------------------------------------
+
+  // Clean up.
+  std::string shouldBeDeleted{};
   std::cout << "Do you want to delete your newly created container called \"";
   std::cout << newContainer.name() << "\"?" << std::endl;
   
-  std::string shouldBeDeleted{};
   while (true)
   { 
     shouldBeDeleted = "";
@@ -190,10 +230,17 @@ int main(void) {
       std::cout << "Deleting container." << std::endl;
       std::shared_ptr<RemoveContainerDelegate> removeContainerDelegate = 
                                       std::make_shared<RemoveContainerDelegate>();
-      
       newContainer.remove(removeContainerDelegate);
+      // Wait until the delegate has received a response from the cloud service.
       removeContainerDelegate->waitForRsp();
-      std::cout << "Container was deleted successfully!" << std::endl;
+
+      if (removeContainerDelegate->errorInfo) {
+        std::cout << "errorInfo = "
+                  << removeContainerDelegate->errorInfo << std::endl;
+        std::cout << "Container could not be deleted!" << std::endl;
+      } else {
+        std::cout << "Container was deleted successfully!" << std::endl;
+      }
       break;
     } else if (shouldBeDeleted == "n")
     {

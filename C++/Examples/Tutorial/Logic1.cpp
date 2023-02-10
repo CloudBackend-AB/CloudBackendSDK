@@ -1,10 +1,10 @@
 #include "Logic.h"
 
 #include <algorithm>  // std::find_if_not
-#include <cstring>
 #include <cctype>     // std:isspace, std::tolower, std::toupper
-#include <ios>        // std::left
+#include <cstring>
 #include <iomanip>    // std::setw
+#include <ios>        // std::left
 #include <sstream>    // std::ostringstream
 #include <stdexcept>
 #include <string>
@@ -14,11 +14,13 @@
 
 // - - - - - - - - - - - - - - - - - FUNCTIONS - - - - - - - - - - - - - - - - - 
 
-// Exit function that reports how program was terminated
+// Exit function that reports how the program was terminated
 void Exercise::exitProgram(const int exitCode) {
   std::ostringstream oss;
   oss << "Exiting program with exit code: " << exitCode << ".";
-  myCloudBackend.terminate();
+  if (myCloudBackend) {
+    myCloudBackend.terminate();
+  }
   throw std::invalid_argument( oss.str() );
 }
 

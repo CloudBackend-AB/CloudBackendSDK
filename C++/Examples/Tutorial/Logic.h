@@ -21,7 +21,9 @@ public:
   void exitProgram(int errorCode);
 
   // General member variables to use in the code
+  // The central object owning the login session.
   cbe::CloudBackend myCloudBackend{cbe::DefaultCtor{}};
+  // Top root container - home://
   cbe::Container    rootContainer{cbe::DefaultCtor{}};
 
 private:

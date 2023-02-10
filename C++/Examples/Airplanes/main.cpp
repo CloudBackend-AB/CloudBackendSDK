@@ -13,225 +13,308 @@
 #include <random>
 #include <stdexcept>
 
+#include "MyDelegates.cpp"
+#include "MyGenericFunctions.cpp"
+
 namespace {
 
-class Random {
-  std::random_device  rd{};
-  std::mt19937        generator{rd()};
-public:
-  using Int = std::uint64_t;
+  using Items = std::vector<cbe::Item>;
+  void printItems(Items&& items, const std::string& headline);
 
-  Int nextInt() {
-    return nextInt(Int{1} << 48 /* bound */);
-  }
-  Int nextInt(Int bound) {
-    std::uniform_int_distribution<Int>  distribution{0, bound - 1};
-    return distribution(generator);
-  }
-};
+  struct Entry {
+    const char* const code;
+    const char* const country;
+    const char* const location;
+  };
+  static const Entry entries[] = {
+                                  {"AMS", "Netherlands"  , "Amsterdam" },
+                                  {"ARN", "Sweden"       , "Stockholm" },
+                                  {"ATH", "Greece"       , "Athens"    },
+                                  {"BER", "Germany"      , "Berlin"    },
+                                  {"BRU", "Belgium"      , "Brussels"  },
+                                  {"BTS", "Slovakia"     , "Bratislava"},
+                                  {"CDG", "France"       , "Paris"     },
+                                  {"CPH", "Denmark"      , "Copenhagen"},
+                                  {"DUB", "Ireland"      , "Dublin"    },
+                                  {"FCO", "Italy"        , "Rome"      },
+                                  {"FRA", "Germany"      , "Frankfurt" },
+                                  {"GOT", "Sweden"       , "Gothenburg"},
+                                  {"GVA", "Switzerland"  , "Geneva"    },
+                                  {"HAD", "Sweden"       , "Halmstad"  },
+                                  {"HEL", "Finland"      , "Helsinki"  },
+                                  {"KEF", "Iceland"      , "Reykjavik" },
+                                  {"KRN", "Sweden"       , "Kiruna"    },
+                                  {"LHR", "UK"           , "London"    },
+                                  {"LUX", "Luxembourg"   , "Luxembourg"},
+                                  {"MAD", "Spain"        , "Madrid"    },
+                                  {"OSL", "Norway"       , "Oslo"      },
+                                  {"PRG", "Czechia"      , "Prague"    },
+                                  {"RIX", "Latvia"       , "Riga"      },
+                                  {"TLL", "Estonia"      , "Tallinn"   },
+                                  {"VBY", "Sweden"       , "Visby"     },
+                                  {"VIE", "Austria"      , "Vienna"    },
+                                  {"VNO", "Lithuania"    , "Vilnius"   },
+                                  {"WAW", "Poland"       , "Warsaw"    },
+                                };
 
-using Items = std::vector<cbe::Item>;
-void printItems(Items&& items, const std::string& headline);
+  constexpr auto entriesSize = sizeof(entries) / sizeof(entries[0]);
 
 } // Anonymous namespace
 
 
 int main() {
-  std::cout << "Airplanes program start" << std::endl;
-  Airplanes airplanes{"" /* credentials */};
+  std::cout << "Airplanes main program start." << std::endl;
+  Airplanes airplanes{};
   const auto account = airplanes.account;
-  std::cout <<  "Login: " << account.username() << " " <<
-                account.firstName() << " " << account.lastName() << '\n';
-  const auto rootContainer = account.rootContainer();
-
-  cbe::Filter ascendingFilter;
-  ascendingFilter.setAscending(true);
-
-  const auto queryResult = airplanes.query(ascendingFilter,
-                                            rootContainer.id());
-  for (const auto& item : queryResult.getItemsSnapshot()) {
-    std::cout << "Item: " << item.name() << '\n';
+  if (account.userId() == 0) {
+    std::cout << "Login failed." << std::endl;
+    std::cout << "Exiting." << std::endl;
+    airplanes.cloudBackend.terminate();
+    return 1;
+  } else {
+    std::cout << "Login as: "
+              << account.username()  << "\t"
+              << account.firstName() << " "
+              << account.lastName()
+              << std::endl;
   }
-
+  cbe::Container rootContainer = account.rootContainer();
+  cbe::Container simulation{cbe::DefaultCtor{}};
+  cbe::Container airports{cbe::DefaultCtor{}};
+  cbe::Container planes{cbe::DefaultCtor{}};
+  cbe::QueryResult myQueryResult{cbe::DefaultCtor{}};
+  cbe::QueryResult::ItemsSnapshot myItemsSnapshot;
+  cbe::Filter containerFilter;
+  containerFilter.setAscending(true);
+  containerFilter.setDataType(cbe::ItemType::Container);
+  std::string startContainerName = "Simulation";
+  std::string airportsName = "Airports";
+  std::string planesName = "Planes";
   Random rand;
-  const auto startContainer = "AirSimulation" +
-                              std::to_string(rand.nextInt());
-  const auto subContainer = airplanes.createContainer(rootContainer,
-                                                      startContainer);
-  std::cout << "Created container " << subContainer.name()
-            << " with id: " << subContainer.id() << '\n';
+
   try {
-    // Testing to create some data points for 2 different containers Airports
-    // and Planes.
-    std::cout << "\nLoad airports" << '\n';
-    /* const */ auto airports = airplanes.createContainer(subContainer, "Airports");
-
-    struct Entry {
-      const char* const country;
-      const char* const airportLocation;
-    };
-    static const Entry entries[] = {{ "France"       , "Paris"     },
-                                    { "Spain"        , "Madrid"    },
-                                    { "UK"           , "London"    },
-                                    { "Netherlands"  , "Amsterdam" },
-                                    { "Denmark"      , "Copenhagen"},
-                                    { "Norway"       , "Oslo"      },
-                                    { "Finland"      , "Helsinki"  },
-                                    { "Estonia"      , "Tallin"    },
-                                    { "Lithuania"    , "Vilnius"   },
-                                    { "Latvia"       , "Riga"      },
-                                    { "Iceland"      , "Reijkavik" },
-                                    { "Luxemburg"    , "Luxemburg" },
-                                    { "Belgium"      , "Antwerpen" },
-                                    { "Germany"      , "Berlin"    },
-                                    { "Poland"       , "Warsaw"    },
-                                    { "Italy"        , "Rome"      },
-                                    { "Czech Repulic", "Praha"     },
-                                    { "Slovakia"     , "Bratislava"},
-                                    { "Austria"      , "Wien"      },
-                                    { "Switzerland"  , "Bern"      },
-                                    { "Slovenia"     , "Ljubljana" },
-                                    { "Greece"       , "Athens"    },
-                                    { "Irland"       , "Dublin"    },
-                                  };
-    constexpr auto entriesSize = sizeof(entries) / sizeof(entries[0]);
-    for (const auto& entry : entries) {
-      cbe::KeyValues keyValues{{"Country", {entry.country,  true}},
-                              {"Name",    {entry.airportLocation, true}}};
-
-      airplanes.createObject(airports, 
-                             entry.airportLocation, 
-                             std::move(keyValues));
-    }
-
-    static const char* swedishAirports[]{
-                                "Gothenburg", "Sundsvall","Linköping",
-                                "Örebro", "Norrköping", "Stockholm",
-                                "Malmö", "Luleå", "Kiruna"
-                              };
-    constexpr auto swedishAirportsSize = sizeof(swedishAirports) /
-                                          sizeof(swedishAirports[0]);
-    {
-      cbe::KeyValues keyValues{{"Country", { "Sweden",  true}}};
-      for (auto swedishAirport : swedishAirports) {
-        keyValues["Name"] = {swedishAirport, true};
-        airplanes.createObject(airports, swedishAirport, std::move(keyValues));
+    myQueryResult = airplanes.query(containerFilter, rootContainer.id());
+    for (const auto& item : myQueryResult.getItemsSnapshot()) {
+      if (item.name() == startContainerName) {
+        simulation=cbe::CloudBackend::castContainer(item);
+        break;
       }
     }
 
-    std::cout << "\nLoad planes" << '\n';
-    const auto planes = airplanes.createContainer(subContainer, "Planes");
+    if (simulation) {
+        std::cout << "Using: /"
+                  << simulation.name()
+                  << std::endl;
+    } else {
+      simulation = airplanes.createContainer(rootContainer, startContainerName);
+      std::cout << "Created: /" << simulation.name()
+                << " with id: " << simulation.id()
+                << std::endl;
+    }
 
-    static const char* aircraftModels[] = { "Boeing_737", "Airbus_A220",
-                                            "Boeing_747", "Airbus_A320",
-                                            "Boeing_777", "Airbus_A340",
-                                            "Boeing_787", "Airbus_A350" };
-    constexpr auto aircraftModelsSize = sizeof(aircraftModels) /
-                                        sizeof(aircraftModels[0]);
-    static const char* airLines[] = { "AF", "AY", "AZ", "BA", "DY", "IB",
-                                      "KL", "LH", "LX", "SK", "TP", "UX" };
-    constexpr auto airLinesSize = sizeof(airLines) / sizeof(airLines[0]);
+    myQueryResult = airplanes.query(containerFilter, simulation.id());
+    myItemsSnapshot = myQueryResult.getItemsSnapshot();
+    std::cout << "Content of: " << simulation.name() << std::endl;
+    for (const auto& item : myItemsSnapshot) {
+      if (item.name() == airportsName) {
+        std::cout << "Found: "
+                  << item.name()
+                  << "  ("
+                  << item.id()
+                  << ")"
+                  << std::endl;
+        airports=cbe::CloudBackend::castContainer(item);
+      } else {
+        // std::cout << "Item : " << item.name() << std::endl;
+      }
+    }
 
-    for (auto index=100U; index<=160U; index++) {
-      const auto swedish = (index % 20) == 0U;
-      const auto airportLocation =
-          swedish? swedishAirports[rand.nextInt(swedishAirportsSize)]
-                  : entries[rand.nextInt(entriesSize)].airportLocation;
-      cbe::KeyValues keyValues{
-        {"Location", {airportLocation,  true}},
-        {"Model",    {aircraftModels[rand.nextInt(aircraftModelsSize)],
-                      true}},
-        {"ACID",     {std::to_string(rand.nextInt(9000)+1000), true}}};
-      const auto flight = airLines[rand.nextInt(airLinesSize)] +
-                          std::to_string(index);
-      airplanes.createObject(planes, flight, std::move(keyValues));
-    } // for ( ...
-    // testing query.join for Airports with Planes.
+    if (airports) {
+      std::cout << "Using: /" 
+                << simulation.name()
+                << "/"
+                << airports.name()
+                << std::endl;
+    } else {
+      // Create some data points for airports
+      std::cout << "\nLoad " << airportsName << std::endl;
+      airports = airplanes.createContainer(simulation, airportsName);
+      std::cout << "Created: /" 
+                << simulation.name()
+                << "/"
+                << airports.name()
+                << std::endl;
 
+      for (const auto& entry : entries) {
+        cbe::KeyValues keyValues{{"Country", {entry.country,  true}},
+                                 {"Name",    {entry.location, true}}};
+        airplanes.createObject(airports, 
+                              entry.code, 
+                              std::move(keyValues));
+      }
+    }  // Load airports
+
+    // Planes
+    int i = 0;
+    int selection = 0;
+    std::string pName;
+    std::cout << "Content of: " << simulation.name() << std::endl;
+    std::cout << "0 : - none - create a new set" << std::endl;
+    for (const auto& item : myItemsSnapshot) {
+      pName = item.name();
+      if (pName.at(0) == 'P') {
+        std::cout << i << " : " << item.name() << std::endl;
+      }
+      i++;
+    }
+    int maxVal = myItemsSnapshot.size();
+    // std::cout << "max: " << maxVal << std::endl;
+    do {
+      selection = inquireInt("Which Planes do you want to reuse", 0);
+    } while (selection >= maxVal);
+    if (selection > 0) {
+      planes = cbe::CloudBackend::castContainer(myItemsSnapshot[selection]);
+      std::cout << "Using " << planes.name()
+                << "  ("    << planes.id() << ")"
+                << std::endl;
+    } else {
+      std::string numbers;
+      while (numbers.length() < 12 ) {
+        numbers = std::to_string(rand.nextInt());
+      }
+      std::string myPlanesName = planesName + "_" + numbers.substr(1,10);
+      std::cout << "\nLoad planes" << '\n';
+      planes = airplanes.createContainer(simulation, myPlanesName);
+      std::cout << "Created: /" 
+                << simulation.name()
+                << "/"
+                << planes.name()
+                << std::endl;
+
+      static const char* aircraftModels[] = { "Boeing_737", "Airbus_A220",
+                                              "Boeing_747", "Airbus_A320",
+                                              "Boeing_777", "Airbus_A340",
+                                              "Boeing_787", "Airbus_A350" };
+      constexpr auto aircraftModelsSize = sizeof(aircraftModels) /
+                                          sizeof(aircraftModels[0]);
+      static const char* airLines[] = { "AF", "AY", "AZ", "BA", "DY", "IB",
+                                        "KL", "LH", "LX", "SK", "TP", "UX" };
+      constexpr auto airLinesSize = sizeof(airLines) / sizeof(airLines[0]);
+
+      for (auto index=100U; index<160U; index++) {
+        const auto location = entries[rand.nextInt(entriesSize)].location;
+        cbe::KeyValues keyValues{
+          {"Location", {location, true}},
+          {"Model",    {aircraftModels[rand.nextInt(aircraftModelsSize)], true}},
+          {"ACID",     {std::to_string(rand.nextInt(9000)+1000), true}}};
+        const auto flight = airLines[rand.nextInt(airLinesSize)] +
+                            std::to_string(index);
+        airplanes.createObject(planes, flight, std::move(keyValues));
+      } // for ( ...
+    }  // if
+
+    // query.join for Airports with Planes.
+    std::string queryFor;
+    std::string queryPrefix = "Country:";
     cbe::Filter countryFilter{};
-    countryFilter.setQuery("Country:Sweden");
-    countryFilter.setDataType(cbe::ItemType::Object);
     cbe::Filter modelFilter{};
-    modelFilter.setQuery("Model:Boeing*");
-    modelFilter.setDataType(cbe::ItemType::Object);
 
-    std::cout << "\n\nFilter " << countryFilter.getQuery() << " and "
-              << modelFilter.getQuery()
-              << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+    do {
+      queryFor = inquireString(queryPrefix,"Sweden");
+      countryFilter.setDataType(cbe::ItemType::Object);
+      countryFilter.setQuery(queryPrefix+queryFor);
+      modelFilter.setDataType(cbe::ItemType::Object);
+      modelFilter.setQuery("Model:Boeing*");
+      std::cout << "\n  Filter " << countryFilter.getQuery() << " and "
+                << modelFilter.getQuery()
+                << "\n  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                << std::endl;
 
-    cbe::Filter containerFilter;
-    containerFilter.setDataType(cbe::ItemType::Object);
+      cbe::Filter containerFilter;
+      containerFilter.setDataType(cbe::ItemType::Object);
 
-    std::shared_ptr<QueryDelegate> queryDelegate = 
-                                              std::make_shared<QueryDelegate>();
-    airports.query(containerFilter, queryDelegate);
-    queryDelegate->waitForRsp();
+      // queries joining tables airports and planes
+      std::shared_ptr<QueryJoinDelegate> queryJoinDelegate = 
+                                          std::make_shared<QueryJoinDelegate>();
+      airports.query(countryFilter, queryJoinDelegate).join(planes, 
+                                                            "Name", 
+                                                            "Location", 
+                                                            modelFilter);
+      queryJoinDelegate->waitForRsp();
+      if (queryJoinDelegate->errorInfo) {
+        std::cout << queryJoinDelegate->errorInfo << std::endl;
+        throw std::invalid_argument("first planes query join");
+      }
+      printItems(queryJoinDelegate->queryResult.getItemsSnapshot(), 
+                "Boeing in "+queryFor);
 
-    std::shared_ptr<QueryJoinDelegate> queryJoinDelegate = 
-                                              std::make_shared<QueryJoinDelegate>();
-    airports.query(countryFilter, queryJoinDelegate).join(planes, 
-                                                          "Name", 
-                                                          "Location", 
-                                                          modelFilter);
-    queryJoinDelegate->waitForRsp();
-    printItems(queryJoinDelegate->queryResult.getItemsSnapshot(), 
-               "Boeing in Sweden");
+      modelFilter.setQuery("Model:Airbus*");
+      std::cout << "\n  Filter " << countryFilter.getQuery() << " and "
+                << modelFilter.getQuery()
+                << "\n  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                << std::endl;
+      const auto flightsInCountryDelegate2 = std::make_shared<QueryDelegate>();
+      airports.query(countryFilter, queryJoinDelegate).join(planes, 
+                                                            "Name", 
+                                                            "Location", 
+                                                            modelFilter);
+      queryJoinDelegate->waitForRsp();
+      if (queryJoinDelegate->errorInfo) {
+        std::cout << queryJoinDelegate->errorInfo << std::endl;
+        throw std::invalid_argument("second planes query join");
+      }
 
-    modelFilter.setQuery("Model:Airbus*");
-    std::cout << "\n\nFilter " << countryFilter.getQuery() << " and "
-              << modelFilter.getQuery()
-              << "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
-    const auto flightsInCountryDelegate2 = std::make_shared<QueryDelegate>();
+      printItems(queryJoinDelegate->queryResult.getItemsSnapshot(),
+                "Airbus in "+queryFor);
+    } while (inquireBool("\nAnother country search", "y"));
 
-    airports.query(countryFilter, queryJoinDelegate).join(planes, 
-                                                          "Name", 
-                                                          "Location", 
-                                                          modelFilter);
-    queryJoinDelegate->waitForRsp();
+    std::cout << std::endl;
 
-    printItems(queryJoinDelegate->queryResult.getItemsSnapshot(), "Airbus in Sweden");
+    if (inquireBool("Delete "+planes.name(),false)) {
+      airplanes.removeContainer(planes);
+      std::cout << "\nRemoved " + planes.name() << std::endl;
+    }
   }
-  catch (... /* catch any exception */) {
-    airplanes.removeContainer(subContainer);
-    std::cout << "\nRemoved " + subContainer.name() << '\n';
-    throw; // Re-throw exception
+  catch (std::invalid_argument& e) {
+    std::cout << "\nException I caught after " << e.what() << " failed." << std::endl;
   }
-  
-  airplanes.removeContainer(subContainer);
-  std::cout << "\nRemoved " + subContainer.name() << '\n';
+  catch (std::runtime_error& e) {
+    std::cout << "\nException R caught after " << e.what() << " failed." << std::endl;
+  }
+  catch (...) {
+    std::cout << "\nException O caught." << std::endl;
+  }
 
   airplanes.cloudBackend.terminate();
-}
+  std::cout << "Airplanes program end." << std::endl;
+}  //  main
+
 
 namespace {
-
-void printItems(Items&& items, const std::string& headline) {
-  std::cout << headline << ", count: " << items.size() << '\n';
-  for (const auto& item : items) {
-    std::cout << "Name: " << item.name()
-              << " pid(" << item.parentId()
-              << ") ts: " << item.updated() << '\n';
-    if (item.type() == cbe::ItemType::Object) {
-      /* const */ auto object = cbe::CloudBackend::castObject(item);
-      const auto keyValues = object.keyValues();
-
-      if (!keyValues.empty()) {
-        std::cout << "-----------------------------------------------\n";
-        const auto flags = std::cout.flags(); // Save formatting state of cout
-        std::for_each(std::begin(keyValues), std::end(keyValues),
-                      [](const decltype(keyValues)::value_type& keyValue) {
-                        std::cout << std::right << std::setw(10)
-                                  << keyValue.first << " = "
-                                  << std::left << std::setw(15)
-                                  << keyValue.second.first
-                                  << (keyValue.second.second? " (indexed)" : "")
-                                  << '\n';
-                      } /* f */);
-        std::cout.flags(flags); // // Restore formatting state of cout
+  void printItems(Items&& items, const std::string& headline) {
+    std::cout << "  " << headline << ", count: " << items.size() << '\n';
+    std::cout << "+--------+------------+------------+-------------+"
+              << std::endl;
+    for (const auto& item : items) {
+      std::cout << "| " << item.name() << "  ";
+      if (item.type() == cbe::ItemType::Object) {
+        /* const */ auto object = cbe::CloudBackend::castObject(item);
+        const auto keyValues = object.keyValues();
+        if (!keyValues.empty()) {
+          const auto flags = std::cout.flags(); // Save formatting state of cout
+          std::for_each(std::begin(keyValues), std::end(keyValues),
+                        [](const decltype(keyValues)::value_type& keyValue) {
+                          std::cout << "| "
+                                    << std::left << std::setw(11)
+                                    << keyValue.second.first;
+                        } /* f */);
+          std::cout.flags(flags); // // Restore formatting state of cout
+          std::cout << " |" << std::endl;
+        }
       }
-      std::cout << "===============================================\n";
     }
-  }
-} // printItems
+    std::cout << "+--------+------------+------------+-------------+"
+              << std::endl;
+  } // printItems
 
 } // Anonymous namespace
