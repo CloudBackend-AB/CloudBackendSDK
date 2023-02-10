@@ -20,7 +20,8 @@ case "$ARCH" in
     COMPILER_COMMAND="g++ -std=c++17 -pthread "
     WARNINGS="-Wpedantic -Wall -Wextra -Weffc++ -Wsuggest-override -Wno-unused-parameter"
     # your path to the copy of the SDK binary lib
-    # libCBE="../../lib/Linux_x86/libcb_sdk.so"    # export LD_LIBRARY_PATH="../../lib/Linux_x86/"
+    # libCBE="../../lib/Linux_x86/libcb_sdk.so"
+    # export LD_LIBRARY_PATH="../../lib/Linux_x86/"
     libCBE="../../lib/Linux_x86/libcb_sdk.a"
     ;;
 

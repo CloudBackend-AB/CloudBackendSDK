@@ -6,8 +6,8 @@
 #include <iostream>
 #include <iterator>
 #include <mutex>
-#include <string>
 #include <stdexcept>
+#include <string>
 
 #include "cbe/CloudBackend.h"
 #include "cbe/Container.h"
@@ -64,6 +64,8 @@ public:
     std::cout << "Waiting, to be logged in" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
     std::cout << "Now we have waited: " << called << std::endl;
+    // Reset called flag, so current delegate instance can be reused
+    called = false;
   }
 
 }; // class MyLogInDelegate 
@@ -115,6 +117,8 @@ public:
     std::cout << "Waiting, for query" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
     std::cout << "Now we have waited: " << called << std::endl;
+    // Reset called flag, so current delegate instance can be reused
+    called = false;
   }
 }; // class MyQueryDelegate
 
@@ -154,6 +158,8 @@ public:
     std::cout << "Waiting, for create container" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
     std::cout << "Now we have waited: " << called << std::endl;
+    // Reset called flag, so current delegate instance can be reused
+    called = false;
   }
 }; // class MyCreateContainerDelegate
 
@@ -193,6 +199,8 @@ public:
     std::cout << "Waiting, for create object" << std::endl;
     conditionVariable.wait(lock, [this] { return called; });
     std::cout << "Now we have waited: " << called << std::endl;
+    // Reset called flag, so current delegate instance can be reused
+    called = false;
   }
 }; // class MyCreateObjectDelegate
 
