@@ -43,7 +43,10 @@ Notes: This SDK has been built and tested on x86_64 Ubuntu 22 LTS
 
 ### x86_64 Ubuntu 22.04 LTS
 
+Click on
 Code : Download ZIP
+
+then do:
 ```
 cd
 cd Downloads                                # or where you downloaded the package
