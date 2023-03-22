@@ -40,13 +40,17 @@ namespace cbe {
    */
   using Date        = std::uint64_t;
   /**
-   * @brief The id of a drive.
+   * @brief The id of a database.
    */
-  using DriveId     = std::uint64_t;
+  using DatabaseId     = std::uint64_t;
+  /**
+ * @brief Uniquely identifies the Group.
+   */
+  using GroupId     = std::uint64_t;
   /**
    * @brief Uniquely identifies the Group.
    */
-  using GroupId     = std::uint64_t;
+  using RoleId     = std::uint64_t;
   /**
    * @brief Id of a cbe::Container or cbe::Object
    */ 
@@ -256,7 +260,7 @@ namespace cbe {
 
   /**
     * @brief Mimics the general error code encoding in the www.
-    * \see [Wikipedia: List of HTTP status codes]
+    * see [Wikipedia: List of HTTP status codes]
     *      (https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
     */
   using ErrorCode = std::uint32_t;
@@ -286,24 +290,25 @@ namespace cbe {
 
   class Account;
   class CloudBackend;
-  class Connection;
   class Container;
-  class Document;
-  class Folder;
-  class Group;
-  class Item;
-  class Object;
-  class Stream;
-  class Tag;
-  class Member;
-  class Transfer;
-  class GroupInvite;
-  class QueryResult;
-  class GroupQueryResult;
-  class QueryChain;
   class Database;
+  class Filter;
+  class Group;
+  class GroupFilter;
+  class GroupManager;
+  class GroupQueryResult;
+  class Item;
+  class Member;
+  class Object;
   class Publish;
+  class PublishManager;
+  class QueryChain;
+  class QueryResult;
+  class Role;
+  class ShareManager;
+  class Stream;
   class Subscribe;
+  class SubscribeManager;
 
   /**
    * @brief @ref cbe::Database "Databases" available for the
@@ -360,3 +365,4 @@ namespace cbe {
 
 
 #endif // INCLUDE_CBE_TYPES_H_
+

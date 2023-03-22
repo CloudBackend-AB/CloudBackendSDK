@@ -30,18 +30,18 @@ public:
   cbe::UserId ownerId() const;
 
   /**
-   * the driveId number
+   * the databaseId number
    * 
-   * @return cbe::DriveId 
+   * @return cbe::DatabaseId 
    */
-  cbe::DriveId driveId() const;
+  cbe::DatabaseId databaseId() const;
 
   /**
    * the containerId number
    * 
    * @return cbe::ContainerId    
    */
-  cbe::ContainerId    folderId() const;
+  cbe::ContainerId containerId() const;
 
   /**
    * the database name
