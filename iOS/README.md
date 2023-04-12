@@ -9,6 +9,9 @@ To learn more about the SDK, see [documentation](https://db.cloudbackend.com/doc
 ## Release notes
 ### Current version
 
+##### Note!
+To use the simulator version of sdk, unzip it and use it as the normal version. 
+Be sure to also exclude **arm64** as shown [here](https://github.com/rodgomesc/vision-camera-code-scanner/issues/114#issuecomment-1321142781).
 #### SDK Swift version: **1.0**
 - First version of the Swift SDK.
 ----
