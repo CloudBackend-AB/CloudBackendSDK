@@ -22,12 +22,11 @@ namespace cbe {
  */
 class CreateAccountDelegate {
 public:
-  using Success = void;
+  using Success = CloudBackend;
   /**
-   * Called upon successful log in.
-   * @param cloudBackend Instance of a CloudBackend holding the session.
+   * Called upon successful account creation.
    */
-  virtual void onCreateAccountSuccess() = 0;
+  virtual void onCreateAccountSuccess(CloudBackend&& cloudBackend) = 0;
 
   using Error = delegate::Error;
   /**

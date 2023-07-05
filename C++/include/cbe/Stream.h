@@ -1,12 +1,14 @@
 /*
-  Copyright © CloudBackend AB 2020 - 2022.
+  Copyright © CloudBackend AB 2020-2023.
 */
 
 #ifndef INCLUDE_CBE_STREAM_H_
 #define INCLUDE_CBE_STREAM_H_
 
-#include <string>
 #include "cbe/Types.h"
+
+#include <string>
+#include <vector>
 
 namespace CBI {
 class Stream;
@@ -24,12 +26,12 @@ public:
   /**
    * the id number of the stream
    */
-  cbe::StreamId _streamId{};
+  cbe::StreamId streamId{};
 
   /**
    * the size in Bytes
    */
-  std::size_t   _length{};
+  std::size_t   length{};
 
   Stream();
   ~Stream();
@@ -39,6 +41,11 @@ private:
   explicit operator CBI::Stream () const;
   //fix cbiPeer pointer
 }; // class Stream
+
+/**
+ * @brief Collection of @ref cbe::Stream "Stream" objects. 
+ */
+using Streams = std::vector<cbe::Stream>;
 
 } // namespace cbe
 

@@ -1,6 +1,6 @@
 /*
   SDK type definitions.
-  Copyright © CloudBackend AB 2020 - 2022.
+  Copyright © CloudBackend AB 2020-2023.
 */
 #ifndef INCLUDE_CBE_TYPES_H_
 #define INCLUDE_CBE_TYPES_H_
@@ -15,6 +15,8 @@
 /**
  * @brief Root namespace for the %CloudBackend SDK API.
  * 
+ * Located in Types.h
+ * that should be included.
  */
 namespace cbe {
 
@@ -103,17 +105,6 @@ namespace cbe {
   using object_t              = int;
 
   /**
-   * ApplicationType is not used in this version of groups but will be added
-   * later.
-   */
-  enum class ApplicationType : application_t {
-    Open = 1,
-    Invite = 2,
-    Review = 3,
-    Closed = 4
-  };
-
-  /**
    * Type of invite. 
    */
   enum class ObjectType : object_t {
@@ -122,26 +113,16 @@ namespace cbe {
     ShareInvite = 3
   };
 
-  //! @cond Doxygen_Suppress
-  /**
-   * HttpType is used when you want to call rest requests directly.
-   * \note This might in the future be taken out since we may parse 
-   * the URI string where the request type would be present instead.
-  */
-  enum class HttpType : http_t {
-    GET = 1,
-    POST = 2,
-    PUT = 3,
-    DELETE = 4,
-    HEAD = 5
-  };
-  //! @endcond
-
   /**
    * Visibility is used for both groups and members, in this version 
    * the member visibility will be Public for all members who join a group.
    * 
    * Members will in the future also have the option of visibility friends.
+   * 
+   * <ol>
+   *   <li>Public </li>
+   *   <li>Private </li>
+   * </ol>
   */
   enum class Visibility : visibility {
     Public = 1,
@@ -160,8 +141,28 @@ namespace cbe {
    * </ul> 
    * combinations give access for users to use different API calls.
    * 
+   *   &nbsp; &nbsp; &nbsp; &nbsp; 0. NoPermissions
+   * <ol>
+   *   <li>Read </li>
+   *   <li>Write </li>
+   *   <li>ReadWrite </li>
+   *   <li>Delete </li>
+   *   <li>ReadDelete </li>
+   *   <li>WriteDelete </li>
+   *   <li>ReadWriteDelete </li>
+   *   <li>ChangeACL </li>
+   *   <li>ReadChangeACL </li>
+   *   <li>WriteChangeACL </li>
+   *   <li>ReadWriteChangeACL </li>
+   *   <li>DeleteChangeACL </li>
+   *   <li>ReadDeleteChangeACL </li>
+   *   <li>WriteDeleteChangeACL </li>
+   *   <li>AllPermissions </li>
+   * </ol> 
+   * 
    * E.g.: 
-   * 6 = ReadDelete gives the ability to call Move on a Container or an Object.
+   * cbe::Permissions::ReadDelete
+   * gives the ability to call move() on a Container or an Object.
   */
   enum class Permissions : permission_status_t
   {
@@ -185,6 +186,18 @@ namespace cbe {
 
   /**
    * Set the filter order in which the search or query will be sorted after.
+   * 
+   * <ol>
+   *   <li>Title </li>
+   *   <li>Relevance </li>
+   *   <li>Published </li>
+   *   <li>Updated </li>
+   *   <li>Length </li>
+   *   <li>S1 </li>
+   *   <li>S2 </li>
+   *   <li>S3 </li>
+   *   <li>S4 </li>
+   * </ol>
   */
   enum class FilterOrder : uint32_t {
     Title = 1,
@@ -202,6 +215,12 @@ namespace cbe {
   /**
    * ItemType can be used to sort out cbe objects if the user would like to
    * create a container to put all different kinds of cbe objects in.
+   * <ul>
+   *   <li>Object </li>
+   *   <li>Container </li>
+   *   <li>Tag </li>
+   *   <li>Group </li>
+   * </ul>
   */
   enum class ItemType : cbe::item_t  {
     Unapplicable =  1,
@@ -214,6 +233,12 @@ namespace cbe {
 
   /**
    * Access permission for publish
+   * 
+   * <ol>
+   *   <li>Read </li>
+   *   <li>Update </li>
+   *   <li>Create </li>
+   * </ol>
    */
   enum class PublishAccess : cbe::publish_access_t {
     Read = 1,
@@ -223,6 +248,12 @@ namespace cbe {
 
   /**
    * Visibility for publish
+   * <ol>
+   *   <li>Public </li>
+   *   <li>Friends </li>
+   *   <li>Private </li>
+   *   <li>Invited </li>
+   * </ol>
    */
   enum class PublishVisibility : cbe::publish_visibility_t {
     Public =  1,
@@ -233,6 +264,11 @@ namespace cbe {
 
   /**
    * Callback for login returns one of these three in callback.
+   * <ol>
+   *   <li>NotLoggedIn </li>
+   *   <li>LoggedIn </li>
+   *   <li>Failed </li>
+   * </ol>
    */
   enum class AccountStatus : cbe::account_status_t {
     NotLoggedIn = 1,
@@ -269,7 +305,7 @@ namespace cbe {
    * @brief ACL map (<b>Access</b> <b>Control</b> <b>List</b>) of users and
    * groups.
    * Map of a specific user, in terms of cbe::UserId, and its cbe::Permission,
-   * to reperesent permissions for specific users.
+   * to represent permissions for specific users.
    */
   using AclMap = std::map<cbe::UserId, cbe::Permissions>;
 
@@ -277,7 +313,7 @@ namespace cbe {
    * @brief Map with key/value pairs, a.k.a. metadata.<br>
    * Can be applied on @ref cbe::Object but not on @ref cbe::Container.<br>
    * <ul>
-   *   <li> <b>key</b> uniquely identifies the value
+   *   <li> <b>key</b> uniquely identifies the value; name must start with a letter or _
    *   <li> <b>value</b> and <b>index flag</b>
    *   <ul>
    *     <li> a string value
@@ -339,7 +375,7 @@ namespace cbe {
    *     <ul>
    *       <li> <code>first</code> represents the banned member.
    *       <li> <code>second</code> represents the banning member with
-   *            adminstration priviliges.
+   *            administration privileges.
    *     </ul>
    *   <li> <b>Value</b> is formed by another pair:
    *     <ul>
@@ -350,9 +386,25 @@ namespace cbe {
                                  std::pair<cbe::Date, std::string>>;
 
   /**
-   * @brief collection of delegates for the main classes
+   * @brief Root namespace for the delegate interfaces.
    */
-  namespace delegate {}
+  namespace delegate {
+    /**
+     * @brief Namespace for cbe::Container specific delegate interfaces.
+     */
+    namespace container {
+    } // namespace container
+    /**
+     * @brief Namespace for cbe::Group specific delegate interfaces.
+     */
+    namespace group {
+    } // namespace group
+    /**
+     * @brief Namespace for cbe::Object specific delegate interfaces.
+     */
+    namespace object {
+    } // namespace object
+  } // namespace delegate
 
   /**
    * @brief general utilities
@@ -365,4 +417,3 @@ namespace cbe {
 
 
 #endif // INCLUDE_CBE_TYPES_H_
-

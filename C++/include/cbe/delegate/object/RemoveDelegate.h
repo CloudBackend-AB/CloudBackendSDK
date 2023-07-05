@@ -26,7 +26,7 @@ class RemoveDelegate {
 public:
   using Success = RemoveSuccess;
   /**
-   * Called upon successful objecty remove.
+   * Called upon successful object remove.
    * @param objectId  Id of object being removed.
    * @param name      Name of object being removed.
    */
@@ -68,6 +68,7 @@ public:
 using RemoveDelegatePtr = std::shared_ptr<RemoveDelegate>;
 
 /**
+ * @brief
  * Convenience type that bundles all parameters passed to method
  * cbe::delegate::object::onRemoveSuccess.
  */
@@ -79,6 +80,13 @@ public:
   RemoveSuccess();
   RemoveSuccess(cbe::DefaultCtor);
   RemoveSuccess(cbe::ItemId objectId, std::string name);
+
+/**
+   * @brief Checks if current instance is valid.
+   * 
+   * @return \c true: is valid
+   */
+  explicit operator bool() const;
 }; // class RemoveSuccess
 
     } // namespace object

@@ -1,5 +1,5 @@
 /*
- Copyright © CloudBackend AB 2020 - 2022.
+ Copyright © CloudBackend AB 2020-2023.
  */
 
 #ifndef INCLUDE_CBE_GROUP_QUERY_H_

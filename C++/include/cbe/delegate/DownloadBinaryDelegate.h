@@ -1,9 +1,6 @@
 #ifndef CBE__delegate__DownloadBinaryDelegate_h__
 #define CBE__delegate__DownloadBinaryDelegate_h__
 
-#include "cbe/delegate/DownloadBinaryDelegatePtr.h"
-
-#include "cbe/Object.h"
 #include "cbe/QueryResult.h"
 #include "cbe/Types.h"
 
@@ -17,6 +14,7 @@
 
 namespace cbe {
   namespace delegate {
+class DownloadBinarySuccess;
 /**
  * Delegate class for the asynchronous version of method:
  * <ul>
@@ -25,7 +23,7 @@ namespace cbe {
  */
 class DownloadBinaryDelegate {
 public:
-  using Success = char*;
+  using Success = DownloadBinarySuccess;
   /**
    * Called upon successful Download.
    * @param object  Instance of cbe::Object that is being downloaded.
@@ -81,19 +79,12 @@ public:
 }; // class DownloadBinaryDelegate
 
 /**
- * Convenience type that bundles all parameters passed to method
- * cbe::delegate::DownloadBinaryDelegate::onDownloadBinarySuccess.
+ * Pointer to DownloadBinaryDelegate that is passed into:
+ * <ul>
+ *   <li> cbe::Object::download(DownloadBinaryDelegatePtr)
+ * </ul>
  */
-class DownloadBinarySuccess {
-public:
-  cbe::Object             object{cbe::DefaultCtor{}};
-  std::unique_ptr<char[]> data{};
-  
-  DownloadBinarySuccess();
-  DownloadBinarySuccess(cbe::DefaultCtor);
-  DownloadBinarySuccess(cbe::Object&&            object,  
-                        std::unique_ptr<char[]>  data);
-};
+using DownloadBinaryDelegatePtr = std::shared_ptr<DownloadBinaryDelegate>;
 
   } // namespace delegate
 } // namespace cbe

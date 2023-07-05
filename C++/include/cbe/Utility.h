@@ -1,6 +1,6 @@
 /*
  SDK Utility definitions.
- Copyright © CloudBackend AB 2020 - 2022.-2022.
+ Copyright © CloudBackend AB 2020-2023.
  */
 #ifndef INCLUDE_SDK_UTILITY_H_
 #define INCLUDE_SDK_UTILITY_H_
@@ -35,7 +35,8 @@ struct ShareData {
  * 
  * Example:
  * \code bool alreadyExists = std::find_if(vector.begin(), vector.end(), 
- * cbe::MatchesID<uint64_t>(id)) != vector.end();
+ *                                    cbe::MatchesID<uint64_t>(id)) != vector.end();
+ * \endcode
  */
 template<typename IdT>
 class MatchesID {

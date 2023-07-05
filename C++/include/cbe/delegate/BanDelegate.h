@@ -69,6 +69,7 @@ public:
 using BanDelegatePtr = std::shared_ptr<BanDelegate>;
 
 /**
+ * @brief
  * Convenience type that bundles all parameters passed to method
  * cbe::delegate::BanDelegate::onBanSuccess.
  */

@@ -28,6 +28,13 @@ namespace cbe {
   *   <li> @ref cbe::Container::search() "Container::search()",
   *        and its overloads
   * </ul>
+  * 
+  * @anchor anchorEx__cbe__delegate_QueryDelegate 
+  * @par Example
+  * @include example/query_delegate.cpp
+  * Usage of the class above, see
+  * @ref anchorEx__cbe__CloudBackend__query_async 
+   *     "Example of asynchronous query"
  */
 class QueryDelegate {
 public:

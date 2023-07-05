@@ -1,5 +1,5 @@
 /*
-     Copyright © CloudBackend AB 2020 - 2022.
+     Copyright © CloudBackend AB 2020-2023.
 */
 
 #ifndef INCLUDE_CBE_ITEM_H_
@@ -130,6 +130,18 @@ class Item {
   ~Item();
   //! @endcond
 
+  /**
+   * @brief Checks if the inherited instance is real.
+   * 
+   * An "unreal" instance implies typically a failed event.
+   * 
+   * Relies on the \c Default \c constructor
+   * cbe::DefaultCtor
+   * 
+   * @return \c true  : is real
+   * @return \c false : unreal; got nullptr; if current instance is unbound/undefined. I.e., if it is
+   *         only default constructed.
+   */
   explicit operator bool() const;
 
   friend std::ostream& operator<<(std::ostream& os, const Item& item);
@@ -153,8 +165,6 @@ protected:
 private:
   CBI::ItemPtr&       getCbiPeerPtr();
   const CBI::ItemPtr& getCbiPeerPtr() const;
-
-  friend std::ostream& operator<<(std::ostream& os, const Item& item);
 }; // class Item
 
 cbe::ItemType operator|(cbe::ItemType lh, cbe::ItemType rh);

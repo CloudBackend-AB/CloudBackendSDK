@@ -61,6 +61,11 @@ public:
  * Group::createGroup(std::string,std::string,CreateGroupDelegatePtr,cbe::Visibility).
  */
 using CreateGroupDelegatePtr = std::shared_ptr<CreateGroupDelegate>;
+/**
+ * @brief
+ * Convenience type that bundles all parameters passed to method
+ * cbe::delegate::CreateGroupDelegate::onCreateGroupSuccess.
+ */
   } // namespace delegate
 } // namespace cbe
 

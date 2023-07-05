@@ -68,6 +68,7 @@ public:
 using UnBanDelegatePtr = std::shared_ptr<UnBanDelegate>;
 
 /**
+ * @brief
  * Convenience type that bundles all parameters passed to method
  * cbe::delegate::UnBanDelegate::onUnBanSuccess.
  */

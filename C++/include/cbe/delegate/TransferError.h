@@ -5,7 +5,6 @@
 
 #include "cbe/delegate/Error.h"
 
-
 #include <iosfwd>
 
 namespace cbe {
@@ -13,8 +12,8 @@ namespace cbe {
 
 using Error = delegate::Error;
 /**
- * Contains error information delivered from %CloudBackend SDK i connection with
- * a failed Transfer, or join
+ * Contains error information delivered from %CloudBackend SDK in connection 
+ * with a failed transfer, i.e., upload/download.
  */ 
 class TransferError : public Error {
 public:
@@ -33,6 +32,5 @@ public:
 
   } // namespace delegate
 } // namespace cbe
-
 
 #endif // #ifndef CBE__delegate__TransferError_h__

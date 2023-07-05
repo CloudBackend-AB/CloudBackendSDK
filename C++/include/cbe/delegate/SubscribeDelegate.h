@@ -20,7 +20,7 @@ public:
   using Success = cbe::Items;
   /**
    * Called upon successful subscribe.
-   * @param object Instance of object that is being subscribed.
+   * @param success Instance of Items that are being subscribed.
    */
   virtual void onSubscribeSuccess(cbe::Items&& success) = 0;
 
@@ -51,6 +51,12 @@ public:
 
   virtual ~SubscribeDelegate();
 }; // class SubscribeDelegate
+/**
+ * Pointer to SubscribeDelegate that is passed into:
+ * <ul>
+ *   <li> cbe::SubscribeManager::subscribe(cbe::UserId,std::string,cbe::PublishId,std::string,std::string,std::string,SubscribeDelegatePtr)
+ * </ul>
+ */
 using SubscribeDelegatePtr = std::shared_ptr<SubscribeDelegate>;
   } // namespace delegate
 } // namespace cbe

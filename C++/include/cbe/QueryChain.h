@@ -1,5 +1,5 @@
 /*
- Copyright © CloudBackend AB 2020 - 2022.
+ Copyright © CloudBackend AB 2020-2023.
  */
 
 #ifndef INCLUDE_CBE_QUERYCHAIN_H_
@@ -99,15 +99,6 @@ public:
 
   QueryChain(cbe::DefaultCtor);
   ~QueryChain();
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-  struct Exception : cbe::util::Exception {
-    // Inherit base class' constructor
-    using cbe::util::Exception::Exception;
-  };
-
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
   explicit operator bool() const;
 private:

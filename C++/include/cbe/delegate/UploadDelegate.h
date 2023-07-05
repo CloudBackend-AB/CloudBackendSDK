@@ -18,12 +18,12 @@ namespace cbe {
 /**
  * Delegate class for the asynchronous version of method:
  * <ul>
- *   <li> cbe::Container::upload(const std::string& path,UploadDelegatePtr)<br>
- *        See @ref anchorEx__cbe__Container__upload
- *                 "Example of creation of a cbe::Object by using Container::upload()"
- *   <li> cbe::Container::upload(const std::string& name,const std::string& path,UploadDelegatePtr)
+ *   <li> cbe::Container::upload(const std::string&,UploadDelegatePtr)<br>
+ *        See @ref anchorEx__cbe__Container__upload_async
+ *                 "Async example of creation of a cbe::Object by using Container::upload()"
+ *   <li> cbe::Container::upload(const std::string&,const std::string&,UploadDelegatePtr)
+ *   <li> cbe::Object::uploadStream(const std::string&,cbe::StreamId,UploadDelegatePtr)
  * </ul>
- *      
  */
   class UploadDelegate {
 public:
@@ -75,7 +75,9 @@ public:
 /**
  * Pointer to UploadDelegate that is passed into:
  * <ul>
- *   <li> cbe::Container::upload(const std::string&,const std::string&,UploadDelegatePtr).
+ *   <li> cbe::Container::upload(const std::string&,UploadDelegatePtr)
+ *   <li> cbe::Container::upload(const std::string&,const std::string&,UploadDelegatePtr)
+ *   <li> cbe::Object::uploadStream(const std::string&,cbe::StreamId,UploadDelegatePtr)
  * </ul>
  */
 using UploadDelegatePtr = std::shared_ptr<UploadDelegate>;

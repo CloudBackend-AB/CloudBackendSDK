@@ -1,9 +1,6 @@
 #ifndef CBE__delegate__DownloadDelegate_h__
 #define CBE__delegate__DownloadDelegate_h__
 
-#include "cbe/delegate/DownloadDelegatePtr.h"
-
-#include "cbe/Object.h"
 #include "cbe/QueryResult.h"
 #include "cbe/Types.h"
 
@@ -22,6 +19,7 @@ class DownloadSuccess;
  * Delegate class for the asynchronous version of method:
  * <ul>
  *   <li> cbe::Object::download(const std::string&, DownloadDelegatePtr)
+ *   <li> cbe::Object::downloadStream(const std::string&,cbe::Stream,DownloadDelegatePtr)
  * </ul>
  */
 class DownloadDelegate {
@@ -61,8 +59,11 @@ public:
 
 #ifndef CBE_NO_SYNC
   /**
-   * @brief exception thrown by
-   * cbe::Object::download(const std::string& path)
+   * @brief exception thrown by:
+   * <ul>
+   *   <li> cbe::Object::download(const std::string&, DownloadDelegatePtr)
+   *   <li> cbe::Object::downloadStream(const std::string&,cbe::Stream,DownloadDelegatePtr)
+   * </ul>
    * if the request fails.
    */
   struct Exception : cbe::util::ExceptionImpl<ErrorInfo> {
@@ -74,19 +75,13 @@ public:
 }; // class DownloadDelegate
 
 /**
- * Convenience type that bundles all parameters passed to method
- * cbe::delegate::DownloadDelegate::onDownloadSuccess.
+ * Pointer to DownloadDelegate that is passed into:
+ * <ul>
+ *   <li> cbe::Object::download(const std::string&,DownloadDelegatePtr)
+ *   <li> cbe::Object::downloadStream(const std::string&,cbe::Stream,DownloadDelegatePtr)
+ * </ul>
  */
-class DownloadSuccess {
-public:
-  cbe::Object object{cbe::DefaultCtor{}};
-  std::string path{};
-  
-  DownloadSuccess();
-  DownloadSuccess(cbe::DefaultCtor);
-  DownloadSuccess(cbe::Object&& object, 
-                  std::string   path);
-};
+using DownloadDelegatePtr = std::shared_ptr<DownloadDelegate>;
 
   } // namespace delegate
 } // namespace cbe

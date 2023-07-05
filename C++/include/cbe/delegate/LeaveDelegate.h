@@ -14,6 +14,7 @@
 
 namespace cbe {
   namespace delegate {
+class LeaveSuccess;
 /**
  * Delegate class for the asynchronous version of method:
  * <ul>
@@ -22,6 +23,7 @@ namespace cbe {
  */
 class LeaveDelegate {
 public:
+  using Success = LeaveSuccess;
   /**
    * Called upon successful leave.
    */
@@ -59,6 +61,22 @@ public:
  * Group::leave(LeaveDelegatePtr).
  */
 using LeaveDelegatePtr = std::shared_ptr<LeaveDelegate>;
+class LeaveSuccess {
+public:
+  std::string memberName{};
+  cbe::MemberId memberId{};
+  
+  LeaveSuccess();
+  LeaveSuccess(cbe::DefaultCtor);
+  LeaveSuccess(std::string&& memberName, cbe::MemberId memberId);
+
+/**
+   * @brief Checks if current instance is valid.
+   * 
+   * @return \c true: is valid
+   */
+  explicit operator bool() const;
+}; // class LeaveSuccess
   } // namespace delegate
 } // namespace cbe
 

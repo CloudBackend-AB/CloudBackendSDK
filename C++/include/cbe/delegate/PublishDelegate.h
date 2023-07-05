@@ -9,6 +9,7 @@
 
 namespace cbe {
   namespace delegate {
+class PublishSuccess;
 /**
  * Delegate class for the asynchronous version of methods:
  * <ul>
@@ -18,7 +19,7 @@ namespace cbe {
  */
 class PublishDelegate {
 public:
-  using Success = cbe::Items;
+  using Success = PublishSuccess;
   /**
    * Called upon successful publish.
    * @param items Instance of items that are being published.

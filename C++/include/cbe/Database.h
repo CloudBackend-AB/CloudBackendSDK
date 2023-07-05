@@ -1,5 +1,5 @@
 /*
-     Copyright © CloudBackend AB 2022.
+     Copyright © CloudBackend AB 2022-2023.
 */
 
 #ifndef _CBE_DATABASE_H_

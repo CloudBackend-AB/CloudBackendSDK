@@ -1,5 +1,5 @@
 /*
-  Copyright © CloudBackend AB 2022.
+  Copyright © CloudBackend AB 2022-2023.
  */
 
 #ifndef INCLUDE_CBE_SUBSCRIBE_H_
@@ -17,8 +17,9 @@ using SubscribePtr = std::shared_ptr<CBI::Subscribe>;
 namespace cbe {
 
 /**
- * @brief to subscribe to a \c published Item.
+ * @brief manages a subscribed Item.
  * 
+ * To inspect the settings of a subscription.
  */
 class Subscribe {
 public:
@@ -40,12 +41,12 @@ public:
   std::string getPassword() const;
   /**
    * Gets the security 
-   * \see Types.h for cbe::PublishAccess enum
+   * see cbe::PublishAccess enum
    */
   cbe::PublishAccess getSecurity() const;
   /**
    * Gets the privacy 
-   * \see Types.h for cbe::PublishVisibility
+   * see cbe::PublishVisibility enum
    */
   cbe::PublishVisibility getPrivacy() const;
   /**
@@ -61,9 +62,9 @@ public:
    */
   cbe::UserId getOwner() const;
   /**
-   * Unsubscribe
+   * unSubscribe to this subscription.
    */
-  void unsubscribe();
+  void unSubscribe();
 
   Subscribe(cbe::DefaultCtor);
   ~Subscribe();

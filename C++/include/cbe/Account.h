@@ -1,5 +1,5 @@
 /*
-      Copyright © CloudBackend AB 2020 - 2022.
+      Copyright © CloudBackend AB 2020-2023.
  */
 
 #ifndef INCLUDE_CBE_ACCOUNT_H_
@@ -26,44 +26,110 @@ namespace cbe
  */
 class Account {
 public:
-  /** Returns the account id of the user. */
+  /**
+   * @brief Returns the account id of the user.
+   * 
+   */
   cbe::UserId userId() const;
 
-  /** Returns the username of the account. */
+  /**
+   * @brief Returns the username of the account.
+   *
+   * Stored in lowercase.
+   */
   std::string username() const;
 
-  /** Returns the password of the account. */
+  /**
+   * @brief Returns the password of the account.
+   *
+   * What was used to login.
+   */
   std::string password() const;
 
-  /** Returns the tenant admin of the account 
-   * and owner of the tenant group database. */
+  /**
+   * @brief Returns the tenant name of the account.
+   *
+   * \note Stored in lowercase.
+   */
   std::string source() const;
 
-  /** Returns the client of the account. */
+  /**
+   * @brief Returns the client of the account.
+   *
+   * If it was set when the account was created.
+   */
   std::string client() const;
 
-  /** Returns the given name of the user. */
+  /**
+   * @brief  Returns the given name of the user.
+   *
+   * Stored in lowercase.
+   */
   std::string firstName() const;
 
-  /** Returns the surname of the user. */
+  /**
+   * @brief Returns the surname of the user.
+   * 
+   */
   std::string lastName() const;
 
-  /** Returns the rootContainer for the account. */
+  /**
+   * @brief Returns the rootContainer for the account.
+   * 
+   */
   cbe::Container rootContainer() const;
 
-  /** Returns the libContainerId for the account. For more information about
-   * libContainers see documentation. */
-  cbe::ContainerId    containerId() const;
+  /**
+   * @brief Returns the tenant ContainerId 
+   * 
+   *  Returns the ContainerId of the tenant database for the account.
+   */
+  cbe::ContainerId tenantContainerId() const;
+  
+  /**
+   * @brief Returns the library ContainerId 
+   * 
+   *  Returns the ContainerId of the library database for the account.
+   */
+  cbe::ContainerId libContainerId() const;
 
-  /** Returns the rootContainerId for the account. */
-  cbe::ContainerId    rootDriveId() const;
+  /**
+   * @brief Returns the DatabaseId for home://
+   * 
+   * Returns the databaseId for root a.k.a. home:// of the account.
+   */
+  cbe::DatabaseId rootDatabase() const;
 
-  /** Returns a std::map of databases available for the account. */
+  /**
+   * @brief Returns the Databases available.
+   * 
+   * Returns a std::map of databases available for the account.
+   */
   cbe::DataBases databases() const;
 
+  /**
+   * @brief Default constructor.
+   * 
+   * Construct a new object with 
+   * the \c DefaultCtor to enable the
+   * @ref operator bool()
+   * test
+   */
   Account(cbe::DefaultCtor);
   ~Account();
 
+  /**
+   * @brief Checks if the current instance is real.
+   * 
+   * An "unreal" instance implies typically a failed event.
+   * 
+   * Relies on the \c Default \c constructor
+   * Account(cbe::DefaultCtor)
+   * 
+   * @return \c true  : is real
+   * @return \c false : unreal; got nullptr; if current instance is unbound/undefined. I.e., if it is
+   *         only default constructed.
+   */
   explicit operator bool() const;
 private:
   struct Impl;

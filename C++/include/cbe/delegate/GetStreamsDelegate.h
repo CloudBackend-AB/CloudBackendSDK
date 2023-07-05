@@ -2,6 +2,7 @@
 #define CBE__delegate__GetStreamsDelegate_h__
 
 #include "cbe/QueryResult.h"
+#include "cbe/Stream.h"
 #include "cbe/Types.h"
 
 #include "cbe/delegate/Error.h"
@@ -18,25 +19,26 @@ namespace cbe {
  * Delegate class for the asynchronous version of method:
  * <ul>
  *   <li> cbe::Object::getStreams()<br>
- *        See @ref anchorEx__cbe__Object__getStreams 
+ *        See @ref anchorEx__cbe__Object__getStreams_async 
  *                 "Example of retrieving the Stream attached to a cbe::Object with Object::getStreams()"
  * </ul>
  */
 class GetStreamsDelegate {
 public:
-  using Success = cbe::Object;
+  using Success = cbe::Streams;
   /**
-   * Called upon successful GetStreams.
-   * @param object Instance of object that is being streamed.
+   * Called upon successful Object::GetStreams.
+   * @param streams The currently loaded @ref cbe::Stream "stream(s) attached to
+   *                the  requested object.
    */
-  virtual void onGetStreamsSuccess(cbe::Object&& object) = 0;
+  virtual void onGetStreamsSuccess(cbe::Streams&& streams) = 0;
   
   using Error = delegate::Error;
   /**
    * Called if an error is encountered.
    */
-  virtual void onGetStreamsError(Error&&                error, 
-                                  cbe::util::Context&&  context) = 0;
+  virtual void onGetStreamsError(Error&&              error, 
+                                 cbe::util::Context&& context) = 0;
 
   /**
    * Contains all information about a failed GetStreams.

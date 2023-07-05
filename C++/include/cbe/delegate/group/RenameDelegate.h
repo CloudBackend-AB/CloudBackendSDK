@@ -1,6 +1,5 @@
 #ifndef CBE__delegate__group__RenameDelegate_h__
 #define CBE__delegate__group__RenameDelegate_h__
-
 #include "cbe/QueryResult.h"
 #include "cbe/Types.h"
 
@@ -15,6 +14,7 @@
 namespace cbe {
   namespace delegate {
     namespace group {
+class RenameSuccess;
 /**
  * Delegate class for the asynchronous version of method:
  * <ul>
@@ -23,6 +23,7 @@ namespace cbe {
  */
 class RenameDelegate {
 public:
+  using Success = RenameSuccess;
   /**
    * Called upon successful rename.
    */

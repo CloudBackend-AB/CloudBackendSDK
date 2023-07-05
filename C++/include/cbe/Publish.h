@@ -1,5 +1,5 @@
 /*
-     Copyright © CloudBackend AB 2022.
+     Copyright © CloudBackend AB 2022-2023.
 */
 
 #ifndef INCLUDE_CBE_PUBLISH_H_
@@ -17,61 +17,60 @@ using PublishPtr = std::shared_ptr<CBI::Publish>;
 namespace cbe {
 
 /**
- * @brief manages a \c published Object.
+ * @brief manages a \c published Item.
  * 
  */
 class Publish {
 public:
   /**
-   * Invites users
-   */
-  void invite();
-  /**
-   * Blocks users
-   */
-  void block();
-  /**
-   * Sets the title
+   * @brief Set the Title of this publication
    * 
-   * @param title a name describing this
+   * @param title name
    */
   void setTitle(const std::string &title);
+
   /**
-   * Sets the privacy
-   * \see Types.h for cbe::PublishVisibility
-   *
-   * @param privacy New privacy (cbe::PublishVisibility)
+   * @brief Set the Security of this publication
+   * 
+   * @param security of type cbe::PublishAccess enum
+   */
+  void setSecurity(cbe::PublishAccess security);
+
+  /**
+   * @brief Set the Privacy of this publication
+   * 
+   * @param privacy of type cbe::PublishVisibility enum
    */
   void setPrivacy(cbe::PublishVisibility privacy);
+
   /**
-   * Sets the security
-   * \see Types.h for cbe::Access
-  *
-  * @param security New security (cbe::Access)
-  */
-  void setSecurity(cbe::PublishAccess security);
-  /**
-   * Sets the password
+   * @brief Set the Password of this publication
+   * 
+   * @param password text
    */
   void setPassword(const std::string &password);
+
   /**
-   * Sets the description
+   * @brief Set the Description of this publication
+   * 
+   * @param description free text
    */
   void setDescription(const std::string &description);
+
   /**
    * Gets the title
    */
   std::string getTitle() const;
   /**
-   * Gets the privacy (PublishVisibility)
-   * \see Types.h for cbe::PublishVisibility
-   */
-  cbe::PublishVisibility getPrivacy() const;
-  /**
-   * Gets the security (cbe::Access)
-   * \see Types.h for cbe::Access
+   * Gets the security setting,
+   * see cbe::PublishAccess enum
    */
   cbe::PublishAccess getSecurity() const;
+  /**
+   * Gets the privacy setting,
+   * see cbe::PublishVisibility enum
+   */
+  cbe::PublishVisibility getPrivacy() const;
   /**
    * Gets the password if applicable
    */
@@ -84,18 +83,30 @@ public:
    * Gets the publish id number
    */
   cbe::PublishId getPublishId() const;
-  /**
-   * Gets the subscribers
-   */
-  void getSubscribers();
-  /**
-   * Gets the QR code
-   */
-  void getQRCode();
 
+  /**
+   * @brief Default constructor.
+   * 
+   * Construct a new object with 
+   * the \c DefaultCtor to enable the
+   * @ref operator bool()
+   * test
+   */
   Publish(cbe::DefaultCtor);
   ~Publish();
 
+  /**
+   * @brief Checks if the current instance is real.
+   * 
+   * An "unreal" instance implies typically a failed event.
+   * 
+   * Relies on the \c Default \c constructor
+   * Publish(cbe::DefaultCtor)
+   * 
+   * @return \c true  : is real
+   * @return \c false : unreal; got nullptr; if current instance is unbound/undefined. I.e., if it is
+   *         only default constructed.
+   */
  explicit operator bool() const;
 private:
   struct Impl;

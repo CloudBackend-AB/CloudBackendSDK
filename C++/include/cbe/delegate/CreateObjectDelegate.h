@@ -25,7 +25,7 @@ public:
   using Success = cbe::Object;
   /**
    * Called upon successful CreateObject.
-   * @param object Instance of object that is being CreateObjectd.
+   * @param object Instance of Object that is being created.
    */
   virtual void onCreateObjectSuccess(cbe::Object&& object) = 0;
   

@@ -69,6 +69,7 @@ public:
 using KickDelegatePtr = std::shared_ptr<KickDelegate>;
 
 /**
+ * @brief
  * Convenience type that bundles all parameters passed to method
  * cbe::delegate::KickDelegate::onKickSuccess.
  */

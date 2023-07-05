@@ -18,6 +18,7 @@ namespace cbe {
  */
 class SearchGroupsDelegate {
 public:
+  using Success = cbe::GroupQueryResult;
   /**
    * Called upon successful search.
    * @param queryResult Ref. instance of cbe::GroupQueryResult holding the result of

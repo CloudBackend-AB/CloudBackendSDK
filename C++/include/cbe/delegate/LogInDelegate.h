@@ -17,7 +17,9 @@ namespace cbe {
 /**
  * Delegate class for the asynchronous version of method:
  * <ul>
- *   <li> cbe::CloudBackend::logIn()
+ *   <li> cbe::CloudBackend::logIn(const std::string&,const std::string&,const std::string&,cbe::delegate::LogInDelegatePtr)<br>
+ *        See @ref anchorEx__cbe__CloudBackend__logIn_async
+ *                 "Example of asynchronous login"
  * </ul>
  */
 class LogInDelegate {

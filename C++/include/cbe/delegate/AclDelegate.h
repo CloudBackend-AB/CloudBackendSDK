@@ -9,6 +9,7 @@
 
 namespace cbe {
   namespace delegate {
+class AclSuccess;
 /**
  * Delegate class for the asynchronous version of method:
  * <ul>
@@ -23,7 +24,7 @@ public:
   using Success = AclMap;
   /**
     * Called upon successful GetACL.
-    * @param aclMap  The @ref cbe::Permission "permissions" for requested
+    * @param aclMap  The @ref cbe::Permissions "permissions" for requested
     *                cbe::Container or cbe::Object. 
     */
   virtual void onAclSuccess(AclMap&& aclMap) = 0;
@@ -53,7 +54,7 @@ public:
 #endif // #ifndef CBE_NO_SYNC
 
   virtual ~AclDelegate();
-}; // class GetAclDelegate
+}; // class AclDelegate
 
 /**
  * Pointer to AclDelegate that is passed into:
@@ -65,6 +66,30 @@ public:
  * </ul>
  */
 using AclDelegatePtr = std::shared_ptr<AclDelegate>;
+
+/**
+ * @brief
+ * Convenience type that bundles all parameters passed to method
+ * cbe::delegate::AclDelegate::onAclSuccess.
+ */
+#ifdef HAL_INCLUDE
+class AclSuccess {
+  bool success;
+public:
+  AclMap aclMap{};
+  
+  AclSuccess();
+  AclSuccess(cbe::DefaultCtor);
+  AclSuccess(AclMap&& aclMap);
+/**
+   * @brief Checks if current instance is valid.
+   * 
+   * @return \c true: is valid
+   */
+  explicit operator bool() const;
+}; // class AclSuccess
+#endif // #ifdef HAL_INCLUDE
+
   } // namespace delegate
 } // namespace cbe
 #endif //ACLdelegate

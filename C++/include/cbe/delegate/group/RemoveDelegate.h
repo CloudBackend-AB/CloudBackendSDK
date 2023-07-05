@@ -69,6 +69,7 @@ public:
 using RemoveDelegatePtr = std::shared_ptr<RemoveDelegate>;
 
 /**
+ * @brief
  * Convenience type that bundles all parameters passed to method
  * cbe::delegate::group::RemoveDelegate::onRemoveSuccess.
  */

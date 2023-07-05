@@ -9,6 +9,7 @@
 
 namespace cbe {
   namespace delegate {  
+class UnShareSuccess;
 /**
  * Delegate class for the asynchronous version of methods:
  * <ul>
@@ -18,10 +19,10 @@ namespace cbe {
  */
 class UnShareDelegate {
 public:
-  using Success = std::string;
+  using Success = UnShareSuccess;
   /**
    * Called upon successful UnShare.
-   * @param object Instance of object that is being UnShared.
+   * @param message Message of the Unshare.
    */
   virtual void onUnShareSuccess(std::string&& message) = 0;
 
@@ -64,6 +65,26 @@ public:
  */
 using UnShareDelegatePtr = std::shared_ptr<UnShareDelegate>;
 
+/**
+ * @brief
+ * Convenience type that bundles the parameter passed to method
+ * cbe::delegate::ShareDelegate::onShareSuccess.
+ */
+class UnShareSuccess {
+  bool ok = false;
+public:
+  std::string   message{};
+
+  UnShareSuccess();
+  UnShareSuccess(cbe::DefaultCtor);
+  UnShareSuccess(std::string&&   message);
+/**
+   * @brief Checks if current instance is valid.
+   * 
+   * @return \c true: is valid
+   */
+  explicit operator bool() const;
+}; // class UnShareSuccess
   } // namespace delegate
 } // namespace cbe
 #endif

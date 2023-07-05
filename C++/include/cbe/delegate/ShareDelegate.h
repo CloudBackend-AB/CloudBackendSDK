@@ -9,6 +9,7 @@
 
 namespace cbe {
   namespace delegate {
+class ShareSuccess;    
 /**
  * Delegate class for the asynchronous version of methods:
  * <ul>
@@ -18,10 +19,13 @@ namespace cbe {
  */
 class ShareDelegate {
 public:
-  using Success = cbe::ShareId;
+  using Success = ShareSuccess;
   /**
    * Called upon successful share.
-   * @param shareId Id of the share.
+   * @param shareId Id of the share.<br>
+   *                Can be used when unsharing.<br>
+   *                See @ref anchorMr__cbe__Object__unshareAsync
+   *                "Asynchronous version of cbe::Object::unshare()"
    */
   virtual void onShareSuccess(cbe::ShareId shareId) = 0;
 
@@ -65,6 +69,25 @@ public:
  */
 using ShareDelegatePtr = std::shared_ptr<ShareDelegate>;
 
+/**
+ * @brief
+ * Convenience type that bundles the parameter passed to method
+ * cbe::delegate::ShareDelegate::onShareSuccess.
+ */
+class ShareSuccess {
+public:
+  cbe::ShareId shareId = 0;
+
+  ShareSuccess();
+  ShareSuccess(cbe::DefaultCtor);
+  ShareSuccess(cbe::ShareId shareId);
+/**
+   * @brief Checks if current instance is valid.
+   * 
+   * @return \c true: is valid
+   */
+  explicit operator bool() const;
+}; // class ShareSuccess
   } // namespace delegate
 } // namespace cbe
 #endif

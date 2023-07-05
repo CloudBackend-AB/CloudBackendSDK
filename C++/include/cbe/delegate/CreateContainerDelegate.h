@@ -25,7 +25,7 @@ public:
   using Success = cbe::Container;
   /**
    * Called upon successful CreateContainer.
-   * @param object Instance of object that is being Created.
+   * @param container Instance of Container that is being created.
    */
   virtual void onCreateContainerSuccess(cbe::Container&& container) = 0;
 

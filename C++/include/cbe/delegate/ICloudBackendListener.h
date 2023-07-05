@@ -44,7 +44,7 @@ class ICloudBackendListener {
     
     /**
      * Called upon successful Create.
-     * @param conatiner Instance of container that is being created.
+     * @param container Instance of container that is being created.
      */
     virtual void onRemoteContainerAdded(cbe::Container&& container) = 0;
 

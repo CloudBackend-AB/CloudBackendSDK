@@ -1,5 +1,5 @@
 /*
-     Copyright © CloudBackend AB 2020 - 2022.
+     Copyright © CloudBackend AB 2020-2023.
 */
 
 
@@ -55,12 +55,16 @@ public:
    */
   Filter filter() const;
 
+  /**
+   * @brief A vector of items to hold a snapshot.
+   */
   using ItemsSnapshot = std::vector<Item>;
   /**
-   * Returns a copy of a vector containing the items for this QueryResult.
+   * @brief Returns a copy of a vector containing the items for this QueryResult.
+   * 
    * The QueryResult will be updated when new data comes in, but the returned
    * copy will not.
-   * If iterating make sure to create a variable for a local copy.
+   * \note If iterating, make sure to create a variable for a local copy.
    *
    * @return The items matching the query.
    */
@@ -88,7 +92,7 @@ public:
   std::uint64_t containersLoaded() const;
 
   /**
-   * Checks if the Item with id is in the resultset.
+   * Checks if the Item with id is in the result-set.
    * 
    * @param itemId id number of the item asked for
    */
@@ -97,11 +101,28 @@ public:
   friend std::ostream& operator<<(std::ostream&       os,
                                   const QueryResult&  queryResult);
 
+  /**
+   * @brief Default constructor.
+   * 
+   * Construct a new object with 
+   * the \c DefaultCtor to enable the
+   * @ref operator bool()
+   * test
+   */
   QueryResult(cbe::DefaultCtor);
   ~QueryResult();
 
   /**
-   * bool type conversion operator indicating that current QueryResult is valid.
+   * @brief Checks if the current instance is real.
+   * 
+   * An "unreal" instance implies typically a failed event.
+   * 
+   * Relies on the \c Default \c constructor
+   * QueryResult(cbe::DefaultCtor)
+   * 
+   * @return \c true  : is real
+   * @return \c false : unreal; got nullptr; if current instance is unbound/undefined. I.e., if it is
+   *         only default constructed.
    */
   explicit operator bool() const;
 private:
