@@ -19,3 +19,4 @@ echo "Compile and run Java SDK installation test"
 cd Examples/Simple
 bash compile.sh                             # compile the installation test program
 bash run.sh                                 # run the installation test program
+ 
