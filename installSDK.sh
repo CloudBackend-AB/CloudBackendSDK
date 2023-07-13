@@ -1,15 +1,21 @@
 #!/usr/bin/bash
 # installSDK.sh
 # CloudBackend 2022-2023.
-echo "Installing CloudBackend SDK."
+export RELEASE="2.1.0"
+echo "Installing CloudBackend SDK version" ${RELEASE}
+echo    "Minimum   o/s: Ubuntu 20.04"
+echo -n "Installed o/s: "
+cat /etc/issue | cut -d '\' -f1
 mkdir -p ~/cbe                              # if not already created
 mydir=${PWD}
 echo "moving" ${mydir} "to ~/cbe"
-mv ${mydir} ~/cbe/2.0.2
+mv ${mydir} ~/cbe/${RELEASE}
 cd ~/cbe
 ls -l current
 rm -i current                               # remove old symbolic link
-ln -s 2.0.2 current                         # create symbolic link to the current version of the SDK
+ln -s ${RELEASE} current                    # create symbolic link to the current version of the SDK
+cd
+ls -l cbe/current
 echo "done."
 
 echo ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
