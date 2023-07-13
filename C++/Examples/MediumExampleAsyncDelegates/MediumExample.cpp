@@ -12,12 +12,9 @@
 #include "cbe/util/ErrorInfo.h"
 
 #include "MyDelegates.cpp"
+#include "../user_credentials.cpp"
 
 int main(int argc, const char** argv) {
-  static constexpr const char username[] = "zxcvzxcv";
-  static constexpr const char password[] = "zxcvzxcv";
-  static constexpr const char tenant[] = "cbe_githubtesters";
-
   static constexpr const char testObject[] = "testObject";
   static constexpr const char testContainer[] = "testContainer";
 
@@ -29,12 +26,15 @@ int main(int argc, const char** argv) {
   cbe::CloudBackend cloudBackend = cbe::CloudBackend::logIn(username,
                                                             password,
                                                             tenant,
+                                                            client,
                                                             myLogInDelegate);
   myLogInDelegate->waitForRsp();
 
   if (myLogInDelegate->error) {
     std::cout << "Failed to login: error={" << myLogInDelegate->errorInfo << '}'
               << std::endl;
+    cloudBackend.terminate();
+    return 1;
   }
   cloudBackend = myLogInDelegate->cloudBackend;
   rootContainer = cloudBackend.account().rootContainer();
@@ -60,8 +60,7 @@ int main(int argc, const char** argv) {
     myContainer = myCreateContainerDelegate->container;
   }
 // - - - - - - - - - - - - - - -upload_async - - - - - - - - - - - - - - - - - -
-  std::cout << "Uploading object!" << std::endl;
-  constexpr const char* const uploadPath = "/tmp/upload/";
+  constexpr const char* const uploadPath = "/tmp/";
   constexpr const char* const myObjectFileName = "myObject";
   const std::string           qualFile1Name = std::string{uploadPath} +
                                                           myObjectFileName;
@@ -70,6 +69,8 @@ int main(int argc, const char** argv) {
   std::ofstream ofs{qualFile1Name};
   ofs << "Line 11\n"  << "Line 12\n" << "Line 13\n" << std::flush;
   ofs.close();
+  std::cout << "Uploading object!" << std::endl;
+  std::cout << "from: " << qualFile1Name << std::endl;
 
   std::shared_ptr<MyUploadDelegate> myUploadDelegate =
                                            std::make_shared<MyUploadDelegate>();
@@ -89,7 +90,7 @@ int main(int argc, const char** argv) {
   streams = *getStreamsDelegate->streams;
 // - - - - - - - - - - - - - - - uploadStream_async - - - - - - - - - - - - - -
 std::cout << "Uploading stream!" << std::endl;
-  constexpr const char* const myFile2Name = "myStream2";
+  constexpr const char* const myFile2Name = "myObject_Stream2";
   const std::string           qualFile2Name = std::string{uploadPath} +
                                                           myFile2Name;
 
@@ -105,6 +106,7 @@ std::cout << "Uploading stream!" << std::endl;
                                  return stream1.streamId < stream2.streamId;
                                })->streamId + 1;
 
+  std::cout << "from: " << qualFile2Name << std::endl;
   std::shared_ptr<MyUploadStreamDelegate> myUploadStreamDelegate =
                                   std::make_shared<MyUploadStreamDelegate>();
   object.uploadStream(qualFile2Name, nextStreamId, myUploadStreamDelegate);
@@ -112,15 +114,22 @@ std::cout << "Uploading stream!" << std::endl;
   if (myUploadStreamDelegate->errorInfo) {
     std::cout << "Error! " << myLogInDelegate->errorInfo << std::endl;
   }
+  object.getStreams(getStreamsDelegate);
+  getStreamsDelegate->waitForRsp();
+  if (getStreamsDelegate->errorInfo) {
+    std::cout << "Error! " << myLogInDelegate->errorInfo << std::endl;
+  }
+  streams = *getStreamsDelegate->streams;
 // - - - - - - - - - - - - - - - downloadStream_async - - - - - - - - - - - - - 
   std::cout << "Downloading stream!" << std::endl;
   std::shared_ptr<MyDownloadDelegate> myDownloadDelegate =
                                          std::make_shared<MyDownloadDelegate>();
-  constexpr const char* const downloadPath = "/tmp/download/";
+  constexpr const char* const downloadPath = "/tmp/download_stream_";
 
   for (const auto& stream : streams) {
     const auto path = std::string{downloadPath} +
-                                  std::to_string(stream.streamId);
+                                  std::to_string(stream.streamId) + "_";
+    std::cout << "to: " << path << std::endl;
     object.downloadStream(path, stream, myDownloadDelegate);
     myDownloadDelegate->waitForRsp();
     if (!myDownloadDelegate) {

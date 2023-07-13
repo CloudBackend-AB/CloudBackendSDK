@@ -13,5 +13,6 @@
 std::string username = "githubtester2";
 std::string password = "gitHubTester2password";
 std::string tenant   = "cbe_githubtesters";
+std::string client   = "linux_desktop";
 
 #endif  // USER_CREDENTIALS

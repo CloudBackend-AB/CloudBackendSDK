@@ -1,5 +1,5 @@
 /*
-    CloudBackend AB 2022.
+    CloudBackend AB 2022 - 2023.
 */
 
 #include "partition_large_csv_file.h"
@@ -35,7 +35,6 @@ int chunk_size = 50000;     // number of lines per object to write data
 int line_number = 0;        // line number read from input file
 int lines_written = 0;      // number of lines written in this chunk
 int total_lines_written = 0;// total number of all lines written
-std::string username, password, tenant;
 std::ifstream indata_file;  // local file to read from
 std::ofstream outdata_file; // local file to write to
 std::time_t time_begin;     // start time
@@ -51,13 +50,14 @@ std::string object_last;    // title name of last object
 std::string object_col_head = "+";   // title prefix to name of the column header
 std::string cbe_container   = "";
 std::string csv_file        = "./test.csv"; // input file
-std::string uc_dir          = ".cbe/";      // user credentials file in .cbe
-std::string uc_file         = "gh1";        // user credentials file in .cbe
+std::string uc_dir          = "../";        // user credentials directory
+std::string uc_file         = "user_credentials.cpp"; // user credentials file
 std::string local_temp_dir  = "/tmp/"; // directory for temporary files to be uploaded, must end with /
 std::string filename;       // local file name with extension .csv
 std::string recent_file;    // next file to delete
 std::string path_filename;  // full filename with path
 std::string stemp;          // string for temporary manipulation
+std::string username, password, tenant, client;
 
 void waitUntilUploaded() {
   while (!upload_done)
@@ -85,7 +85,7 @@ void this_login() {
   std::size_t found;
   std::size_t pos1;
   std::size_t pos2;
-  std::string temp_username, temp_password, temp_tenant;
+  std::string temp_username, temp_password, temp_tenant, temp_client;
   std::string uc_temp = uc_dir.append(uc_file);
   int wpos;
   int wlength;
@@ -118,7 +118,7 @@ void this_login() {
         uc_found = true;
         if (debug_this) {
           std::cout << "password: ***" << '\n';
-      //  std::cout << "password: " << temp_password << '\n';
+          // std::cout << "password: " << temp_password << '\n';
         }
       }
       found=line.find("tenant");
@@ -131,6 +131,18 @@ void this_login() {
         uc_found = true;
         if (debug_this) {
           std::cout << "tenant  : " << temp_tenant << '\n';
+        }
+      }
+      found=line.find("client");
+      if (found!=std::string::npos) {
+        pos1=line.find('"');
+        wpos=pos1 + 1;
+        pos2=line.find('"',wpos);
+        wlength=pos2-wpos;
+        temp_client=line.substr(wpos,wlength);
+        uc_found = true;
+        if (debug_this) {
+          std::cout << "client  : " << temp_client << '\n';
         }
       }
     }
@@ -166,6 +178,12 @@ void this_login() {
     } else {
       tenant   = temp_tenant;
     }
+    if (temp_client.empty()) {
+      std::cout << "Client  : ";
+      std::getline(std::cin, client);
+    } else {
+      client   = temp_client;
+    }
   } else {
     std::cout << "Login to your CloudBackend tenant user account:" << std::endl;
 
@@ -177,6 +195,9 @@ void this_login() {
 
     std::cout << "Tenant  : ";
     std::getline(std::cin, tenant);
+
+    std::cout << "Client  : ";
+    std::getline(std::cin, client);
   }
 
 }
@@ -472,7 +493,7 @@ int main(int argc, char *argv[]) {
                 << "-chunk max chunk size \te.g. rows per object file, default 50 000 \n"
                 << "-uc user_credentials \tfile in directory .cbe with login to CloudBackend\n"
                 << "-container name \tthe CloudBackend full container path and name to store the data objects\n"
-                << "Example : ./partition_large_csv_file -csv test.csv -chunk 1000 -container myContainer"
+                << "Example : ./partition_large_csv_file -csv test.csv -chunk 1000 -container Choped"
                 << std::endl;
       return 0;
     }
@@ -543,12 +564,13 @@ int main(int argc, char *argv[]) {
     std::cout << "About to login as: " << username << std::endl;
   }
   cbe::CloudBackend::LogInError logInError;
-  auto cloudBackend = cbe::CloudBackend::logIn(username, password, tenant, logInError);
+  auto cloudBackend = cbe::CloudBackend::logIn(username, password, tenant, client, logInError);
   std::cout << "login as: " << cloudBackend.account().username() << std::endl;
 
   if (logInError){
     std::cout << "Error, login failed! \nError info="
               << logInError << std::endl;
+    return 2;
   }
 
   cbe::Container parentContainer = cloudBackend.account().rootContainer();
@@ -570,11 +592,7 @@ void queryContainer(cbe::Container parentContainer, std::string name) {
   auto queryResult = parentContainer.query(queryError);
   if (queryError) {
     std::cout << "Error! " << queryError << std::endl;
-  }
-  
-  // Check if error
-  if (queryError) {
-    std::cout << "Error! " << queryError << std::endl;
+    return;
   }
 
   cbe::QueryResult::ItemsSnapshot resultset = queryResult.getQueryResult().getItemsSnapshot();
@@ -590,7 +608,7 @@ void queryContainer(cbe::Container parentContainer, std::string name) {
                 << _queryName << std::endl;
     }
     if (item.name() == _queryName){
-      std::cout << "Container already exist! " << item.name() << " (" 
+      std::cout << "Container already exist!  " << item.name() << " (" 
                 << item.id() << ")" << std::endl;
       subContainer = cbe::CloudBackend::castContainer(item);
     }
@@ -612,7 +630,10 @@ void uploadToContainer(std::string path, std::string name, cbe::Container contai
   }
   cbe::Container::UploadError uploadError;
   container.upload(name, path, uploadError);
-
+  if (uploadError) {
+    std::cout << "Error! " << uploadError << std::endl;
+    return;
+  }
 }
 
 cbe::Container createContainer(cbe::Container container, std::string name) {

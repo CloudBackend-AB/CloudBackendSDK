@@ -1,5 +1,5 @@
 # compile.sh <excercise>
-# release 2023-07-04
+# release 2023-07-05
 parentscript_path="$(dirname "$0")"
 cd "$parentscript_path"
 
@@ -30,7 +30,7 @@ case "$exercise" in
      ${compiler_command} -o "mediumExample" "${code_path}MediumExample.cpp" ${libcbe} -I "../../include"
     if [ $? -eq 0 ]
     then
-        echo "to run use: ./mediumExample"
+        echo "to run use: sh run.sh"
     fi
     ;;
 

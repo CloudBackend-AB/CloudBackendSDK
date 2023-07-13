@@ -92,195 +92,184 @@ int main() {
   std::string planesName = "Planes";
   Random rand;
 
-  try {
-    myQueryResult = airplanes.query(containerFilter, rootContainer.id());
-    for (const auto& item : myQueryResult.getItemsSnapshot()) {
-      if (item.name() == startContainerName) {
-        simulation=cbe::CloudBackend::castContainer(item);
-        break;
-      }
-    }
-
-    if (simulation) {
-        std::cout << "Using: /"
-                  << simulation.name()
-                  << std::endl;
-    } else {
-      simulation = airplanes.createContainer(rootContainer, startContainerName);
-      std::cout << "Created: /" << simulation.name()
-                << " with id: " << simulation.id()
-                << std::endl;
-    }
-
-    myQueryResult = airplanes.query(containerFilter, simulation.id());
-    myItemsSnapshot = myQueryResult.getItemsSnapshot();
-    std::cout << "Content of: " << simulation.name() << std::endl;
-    for (const auto& item : myItemsSnapshot) {
-      if (item.name() == airportsName) {
-        std::cout << "Found: "
-                  << item.name()
-                  << "  ("
-                  << item.id()
-                  << ")"
-                  << std::endl;
-        airports=cbe::CloudBackend::castContainer(item);
-      } else {
-        // std::cout << "Item : " << item.name() << std::endl;
-      }
-    }
-
-    if (airports) {
-      std::cout << "Using: /" 
-                << simulation.name()
-                << "/"
-                << airports.name()
-                << std::endl;
-    } else {
-      // Create some data points for airports
-      std::cout << "\nLoad " << airportsName << std::endl;
-      airports = airplanes.createContainer(simulation, airportsName);
-      std::cout << "Created: /" 
-                << simulation.name()
-                << "/"
-                << airports.name()
-                << std::endl;
-
-      for (const auto& entry : entries) {
-        cbe::KeyValues keyValues{{"Country", {entry.country,  true}},
-                                 {"Name",    {entry.location, true}}};
-        airplanes.createObject(airports, 
-                              entry.code, 
-                              std::move(keyValues));
-      }
-    }  // Load airports
-
-    // Planes
-    int i = 0;
-    int selection = 0;
-    std::string pName;
-    std::cout << "Content of: " << simulation.name() << std::endl;
-    std::cout << "0 : - none - create a new set" << std::endl;
-    for (const auto& item : myItemsSnapshot) {
-      pName = item.name();
-      if (pName.at(0) == 'P') {
-        std::cout << i << " : " << item.name() << std::endl;
-      }
-      i++;
-    }
-    int maxVal = myItemsSnapshot.size();
-    // std::cout << "max: " << maxVal << std::endl;
-    do {
-      selection = inquireInt("Which Planes do you want to reuse", 0);
-    } while (selection >= maxVal);
-    if (selection > 0) {
-      planes = cbe::CloudBackend::castContainer(myItemsSnapshot[selection]);
-      std::cout << "Using " << planes.name()
-                << "  ("    << planes.id() << ")"
-                << std::endl;
-    } else {
-      std::string numbers;
-      while (numbers.length() < 12 ) {
-        numbers = std::to_string(rand.nextInt());
-      }
-      std::string myPlanesName = planesName + "_" + numbers.substr(1,10);
-      std::cout << "\nLoad planes" << '\n';
-      planes = airplanes.createContainer(simulation, myPlanesName);
-      std::cout << "Created: /" 
-                << simulation.name()
-                << "/"
-                << planes.name()
-                << std::endl;
-
-      static const char* aircraftModels[] = { "Boeing_737", "Airbus_A220",
-                                              "Boeing_747", "Airbus_A320",
-                                              "Boeing_777", "Airbus_A340",
-                                              "Boeing_787", "Airbus_A350" };
-      constexpr auto aircraftModelsSize = sizeof(aircraftModels) /
-                                          sizeof(aircraftModels[0]);
-      static const char* airLines[] = { "AF", "AY", "AZ", "BA", "DY", "IB",
-                                        "KL", "LH", "LX", "SK", "TP", "UX" };
-      constexpr auto airLinesSize = sizeof(airLines) / sizeof(airLines[0]);
-
-      for (auto index=100U; index<160U; index++) {
-        const auto location = entries[rand.nextInt(entriesSize)].location;
-        cbe::KeyValues keyValues{
-          {"Location", {location, true}},
-          {"Model",    {aircraftModels[rand.nextInt(aircraftModelsSize)], true}},
-          {"ACID",     {std::to_string(rand.nextInt(9000)+1000), true}}};
-        const auto flight = airLines[rand.nextInt(airLinesSize)] +
-                            std::to_string(index);
-        airplanes.createObject(planes, flight, std::move(keyValues));
-      } // for ( ...
-    }  // if
-
-    // query.join for Airports with Planes.
-    std::string queryFor;
-    std::string queryPrefix = "Country:";
-    cbe::Filter countryFilter{};
-    cbe::Filter modelFilter{};
-
-    do {
-      queryFor = inquireString(queryPrefix,"Sweden");
-      countryFilter.setDataType(cbe::ItemType::Object);
-      countryFilter.setQuery(queryPrefix+queryFor);
-      modelFilter.setDataType(cbe::ItemType::Object);
-      modelFilter.setQuery("Model:Boeing*");
-      std::cout << "\n  Filter " << countryFilter.getQuery() << " and "
-                << modelFilter.getQuery()
-                << "\n  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                << std::endl;
-
-      cbe::Filter containerFilter;
-      containerFilter.setDataType(cbe::ItemType::Object);
-
-      // queries joining tables airports and planes
-      cbe::Container::QueryJoinError queryJoinError;
-      auto result1 = airports.query(countryFilter, queryJoinError).join(planes, 
-                                                                        "Name", 
-                                                                        "Location", 
-                                                                        modelFilter);
-      if (queryJoinError){
-        std::cout << "Error!"   << std::endl 
-                  << queryJoinError << std::endl;
-
-      }
-
-      printItems(result1.getQueryResult().getItemsSnapshot(), 
-                "Boeing in "+queryFor);
-
-      modelFilter.setQuery("Model:Airbus*");
-      std::cout << "\n  Filter " << countryFilter.getQuery() << " and "
-                << modelFilter.getQuery()
-                << "\n  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-                << std::endl;
-      auto result2 = airports.query(countryFilter, queryJoinError).join(planes, 
-                                                         "Name", 
-                                                         "Location", 
-                                                         modelFilter);
-      if (queryJoinError){
-        std::cout << "Error!"   << std::endl 
-                  << queryJoinError << std::endl;
-
-      }
-      printItems(result1.getQueryResult().getItemsSnapshot(),
-                "Airbus in "+queryFor);
-    } while (inquireBool("\nAnother country search", "y"));
-
-    std::cout << std::endl;
-
-    if (inquireBool("Delete "+planes.name(),false)) {
-      airplanes.removeContainer(planes);
-      std::cout << "\nRemoved " + planes.name() << std::endl;
+  myQueryResult = airplanes.query(containerFilter, rootContainer.id());
+  for (const auto& item : myQueryResult.getItemsSnapshot()) {
+    if (item.name() == startContainerName) {
+      simulation=cbe::CloudBackend::castContainer(item);
+      break;
     }
   }
-  catch (std::invalid_argument& e) {
-    std::cout << "\nException I caught after " << e.what() << " failed." << std::endl;
+
+  if (simulation) {
+      std::cout << "Using: /"
+                << simulation.name()
+                << std::endl;
+  } else {
+    simulation = airplanes.createContainer(rootContainer, startContainerName);
+    std::cout << "Created: /" << simulation.name()
+              << " with id: " << simulation.id()
+              << std::endl;
   }
-  catch (std::runtime_error& e) {
-    std::cout << "\nException R caught after " << e.what() << " failed." << std::endl;
+
+  myQueryResult = airplanes.query(containerFilter, simulation.id());
+  myItemsSnapshot = myQueryResult.getItemsSnapshot();
+  std::cout << "Content of: " << simulation.name() << std::endl;
+  for (const auto& item : myItemsSnapshot) {
+    if (item.name() == airportsName) {
+      std::cout << "Found: "
+                << item.name()
+                << "  ("
+                << item.id()
+                << ")"
+                << std::endl;
+      airports=cbe::CloudBackend::castContainer(item);
+    } else {
+      // std::cout << "Item : " << item.name() << std::endl;
+    }
   }
-  catch (...) {
-    std::cout << "\nException O caught." << std::endl;
+
+  if (airports) {
+    std::cout << "Using: /" 
+              << simulation.name()
+              << "/"
+              << airports.name()
+              << std::endl;
+  } else {
+    // Create some data points for airports
+    std::cout << "\nLoad " << airportsName << std::endl;
+    airports = airplanes.createContainer(simulation, airportsName);
+    std::cout << "Created: /" 
+              << simulation.name()
+              << "/"
+              << airports.name()
+              << std::endl;
+
+    for (const auto& entry : entries) {
+      cbe::KeyValues keyValues{{"Country", {entry.country,  true}},
+                                {"Name",    {entry.location, true}}};
+      airplanes.createObject(airports, 
+                            entry.code, 
+                            std::move(keyValues));
+    }
+  }  // Load airports
+
+  // Planes
+  int i = 0;
+  int selection = 0;
+  std::string pName;
+  std::cout << "Content of: " << simulation.name() << std::endl;
+  std::cout << "0 : - none - create a new set" << std::endl;
+  for (const auto& item : myItemsSnapshot) {
+    pName = item.name();
+    if (pName.at(0) == 'P') {
+      std::cout << i << " : " << item.name() << std::endl;
+    }
+    i++;
+  }
+  int maxVal = myItemsSnapshot.size();
+  // std::cout << "max: " << maxVal << std::endl;
+  do {
+    selection = inquireInt("Which Planes do you want to reuse", 0);
+  } while (selection >= maxVal);
+  if (selection > 0) {
+    planes = cbe::CloudBackend::castContainer(myItemsSnapshot[selection]);
+    std::cout << "Using " << planes.name()
+              << "  ("    << planes.id() << ")"
+              << std::endl;
+  } else {
+    std::string numbers;
+    while (numbers.length() < 12 ) {
+      numbers = std::to_string(rand.nextInt());
+    }
+    std::string myPlanesName = planesName + "_" + numbers.substr(1,10);
+    std::cout << "\nLoad planes" << '\n';
+    planes = airplanes.createContainer(simulation, myPlanesName);
+    std::cout << "Created: /" 
+              << simulation.name()
+              << "/"
+              << planes.name()
+              << std::endl;
+
+    static const char* aircraftModels[] = { "Boeing_737", "Airbus_A220",
+                                            "Boeing_747", "Airbus_A320",
+                                            "Boeing_777", "Airbus_A340",
+                                            "Boeing_787", "Airbus_A350" };
+    constexpr auto aircraftModelsSize = sizeof(aircraftModels) /
+                                        sizeof(aircraftModels[0]);
+    static const char* airLines[] = { "AF", "AY", "AZ", "BA", "DY", "IB",
+                                      "KL", "LH", "LX", "SK", "TP", "UX" };
+    constexpr auto airLinesSize = sizeof(airLines) / sizeof(airLines[0]);
+
+    for (auto index=100U; index<160U; index++) {
+      const auto location = entries[rand.nextInt(entriesSize)].location;
+      cbe::KeyValues keyValues{
+        {"Location", {location, true}},
+        {"Model",    {aircraftModels[rand.nextInt(aircraftModelsSize)], true}},
+        {"ACID",     {std::to_string(rand.nextInt(9000)+1000), true}}};
+      const auto flight = airLines[rand.nextInt(airLinesSize)] +
+                          std::to_string(index);
+      airplanes.createObject(planes, flight, std::move(keyValues));
+    } // for ( ...
+  }  // if
+
+  // query.join for Airports with Planes.
+  std::string queryFor;
+  std::string queryPrefix = "Country:";
+  cbe::Filter countryFilter{};
+  cbe::Filter modelFilter{};
+
+  do {
+    queryFor = inquireString(queryPrefix,"Sweden");
+    countryFilter.setDataType(cbe::ItemType::Object);
+    countryFilter.setQuery(queryPrefix+queryFor);
+    modelFilter.setDataType(cbe::ItemType::Object);
+    modelFilter.setQuery("Model:Boeing*");
+    std::cout << "\n  Filter " << countryFilter.getQuery() << " and "
+              << modelFilter.getQuery()
+              << "\n  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+              << std::endl;
+
+    cbe::Filter containerFilter;
+    containerFilter.setDataType(cbe::ItemType::Object);
+
+    // queries joining tables airports and planes
+    cbe::Container::QueryJoinError queryJoinError;
+    auto result1 = airports.query(countryFilter, queryJoinError).join(planes, 
+                                                                      "Name", 
+                                                                      "Location", 
+                                                                      modelFilter);
+    if (queryJoinError){
+      std::cout << "Error!"   << std::endl 
+                << queryJoinError << std::endl;
+
+    }
+
+    printItems(result1.getQueryResult().getItemsSnapshot(), 
+              "Boeing in "+queryFor);
+
+    modelFilter.setQuery("Model:Airbus*");
+    std::cout << "\n  Filter " << countryFilter.getQuery() << " and "
+              << modelFilter.getQuery()
+              << "\n  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+              << std::endl;
+    auto result2 = airports.query(countryFilter, queryJoinError).join(planes, 
+                                                        "Name", 
+                                                        "Location", 
+                                                        modelFilter);
+    if (queryJoinError){
+      std::cout << "Error!"   << std::endl 
+                << queryJoinError << std::endl;
+
+    }
+    printItems(result2.getQueryResult().getItemsSnapshot(),
+              "Airbus in "+queryFor);
+  } while (inquireBool("\nAnother country search", "y"));
+
+  std::cout << std::endl;
+
+  if (inquireBool("Delete "+planes.name(),false)) {
+    airplanes.removeContainer(planes);
+    std::cout << "\nRemoved " + planes.name() << std::endl;
   }
 
   airplanes.cloudBackend.terminate();

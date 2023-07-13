@@ -7,3 +7,9 @@ echo "Not for production use."
 
 export LD_LIBRARY_PATH="../../lib/Linux_x86"
 ./mediumExample
+
+if [ $? -eq 0 ]; then
+    date
+    echo "List files"
+    ls -l /tmp/download_* /tmp/myObject*
+fi

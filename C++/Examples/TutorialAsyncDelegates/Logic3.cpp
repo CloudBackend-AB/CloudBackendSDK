@@ -11,6 +11,7 @@
 
 #include "MyDelegates.cpp"
 #include "MyGenericFunctions.cpp"
+#include "../user_credentials.cpp"
 
 // - - - - - - - - - - - - - - - - - FUNCTIONS - - - - - - - - - - - - - - - - - 
 
@@ -304,6 +305,7 @@ void Exercise::logic() {
   myCloudBackend = cbe::CloudBackend::logIn(username, 
                                             password, 
                                             tenant,
+                                            client,
                                             logInDelegate);
 
   // Wait for delegate to finish

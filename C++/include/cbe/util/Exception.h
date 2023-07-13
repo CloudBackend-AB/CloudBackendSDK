@@ -2,16 +2,18 @@
 #define CBE__util__Exception_h__
 
 #include <stdexcept>
-
+#include <string>
 namespace cbe {
   namespace util {
 
 
 /**
  * X
- */struct Exception : std::runtime_error {
+ */
+struct Exception : std::runtime_error {
   template <typename... Ts>
   Exception(Ts&&... args);
+  std::string typeAsString() const;
 };
 
 /**

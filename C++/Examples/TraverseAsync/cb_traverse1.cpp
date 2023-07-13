@@ -3,9 +3,6 @@
 #include "cbe/CloudBackend.h"
 #include "cbe/QueryChain.h"
 
-#include "cbe/delegate/LogInDelegate.h"
-#include "cbe/delegate/QueryDelegate.h"
-
 #include <chrono>
 #include <condition_variable>
 #include <exception>          // std::set_terminate
@@ -115,7 +112,7 @@ int main(void) {
                                               std::make_shared<LogInDelegate>();
 
   cbe::CloudBackend::logIn("githubtester1", "gitHubTester1password", 
-                           "cbe_githubtesters", logInDelegate);
+                           "cbe_githubtesters", "linux_desktop", logInDelegate);
   logInDelegate->waitForRsp();
   auto cloudBackend = logInDelegate->cloudBackend;
   
@@ -125,6 +122,7 @@ int main(void) {
   }
   
   auto account = cloudBackend.account();
+  std::cout << "username=\"" << account.username() << std::endl;
   std::cout << "firstName=\"" << account.firstName()
             << "\", lastName=\"" << account.lastName() << "\"" 
             << "\troot=" << account.rootContainer().id()
@@ -170,4 +168,5 @@ int main(void) {
     std::cout << elem.first << " " << elem.second << '\n';
   }
   cloudBackend.terminate();
+  return 0;
 }  // main

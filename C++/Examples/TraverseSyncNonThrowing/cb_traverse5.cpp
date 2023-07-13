@@ -23,8 +23,11 @@ int main(void) {
 
   std::cout << "about to log in" << std::endl;
   cbe::CloudBackend::LogInError logInError;
-  auto cloudBackend = cbe::CloudBackend::logIn("githubtester2", "gitHubTester2password", 
-                           "cbe_githubtesters", logInError);
+  auto cloudBackend = cbe::CloudBackend::logIn("githubtester2", 
+                                               "gitHubTester2password", 
+                                               "cbe_githubtesters", 
+                                               "linux_desktop",
+                                               logInError);
   if (logInError) {
     std::cout << "Error! " << logInError << std::endl;
   }
@@ -103,7 +106,7 @@ int main(void) {
     }
   }; // function processContainer() lambda
 
-  std::cout << "***** listing shares *****";
+  std::cout << "***** listing shares ***** ";
   auto shareManager = cloudBackend.shareManager();
   cbe::ShareManager::ListSharesError listSharesError;
   auto shares = *shareManager.listAvailableShares(listSharesError);

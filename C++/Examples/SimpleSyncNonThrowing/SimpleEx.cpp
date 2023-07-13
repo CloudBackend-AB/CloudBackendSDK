@@ -40,6 +40,7 @@ int main(void) {
   cloudBackend = cbe::CloudBackend::logIn(username, 
                                           password,
                                           tenant, 
+                                          client,
                                           logInError);
 
   // Check if error
@@ -47,7 +48,7 @@ int main(void) {
     // Print info about error
     std::cout << "Error, login failed! \nError info="
               << logInError << std::endl;
-    cloudBackend.terminate();
+    return 1;
   } else {
     std::cout << "Logged in:" << std::endl;
     std::cout << "SDK version = " << cloudBackend.version()             << std::endl;
@@ -61,8 +62,10 @@ int main(void) {
   //----------------------------------------------------------------------------
   // Ask for name of new container.
   std::string containerName;
-  std::cout << "Name for a new Container to be created: ";
-  std::getline(std::cin, containerName);
+  do {
+    std::cout << "Name for a new Container to be created: ";
+    std::getline(std::cin, containerName);
+  } while (containerName < "A");
 
   //----------------------------------------------------------------------------
   // Check if the name the user wants to create
@@ -78,7 +81,7 @@ int main(void) {
   // Check if error
   if (queryError) {
     std::cout << "Error!" << std::endl << logInError << std::endl;
-    cloudBackend.terminate();
+    return 2;
   } else {
     // Look through the parent container to check
     // if the name has already been used.
@@ -91,7 +94,7 @@ int main(void) {
                   << std::endl;
         std::cout << "Exiting." << std::endl;
         cloudBackend.terminate();
-        return 2;
+        return 3;
       }
     }
   }
@@ -106,6 +109,7 @@ int main(void) {
   if (createContainerError) {
     std::cout << "Error!" << std::endl << logInError << std::endl;
     cloudBackend.terminate();
+    return 4;
   } else {
     std::cout << "/" << newContainer.name()
               << "\t\tcreated" 
@@ -127,6 +131,7 @@ int main(void) {
   if (uploadError) {
     std::cout << "Error!" << std::endl << logInError << std::endl;
     cloudBackend.terminate();
+    return 5;
   } else {
     std::cout << "/" << newContainer.name() << "/" << newObject.name()
               << "\tuploaded"
@@ -146,6 +151,7 @@ int main(void) {
   if (queryError) {
     std::cout << "Error!" << std::endl << logInError << std::endl;
     cloudBackend.terminate();
+    return 6;
   } else {
     std::cout << "Content of /" << newContainer.name() << std::endl;
     std::cout << "---------------------------" << std::endl;
@@ -175,6 +181,7 @@ int main(void) {
       if (removeError) {
         std::cout << "Error!" << std::endl << logInError << std::endl;
         cloudBackend.terminate();
+        return 7;
       } else {
         std::cout << "Container was deleted successfully!" << std::endl;
       }

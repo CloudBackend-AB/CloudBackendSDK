@@ -4,10 +4,6 @@
 #include "cbe/QueryChain.h"
 #include "cbe/ShareManager.h"
 
-#include "cbe/delegate/LogInDelegate.h"
-#include "cbe/delegate/QueryDelegate.h"
-#include "cbe/delegate/ListSharesDelegate.h"
-
 #include <cassert>
 #include <chrono>
 #include <condition_variable>
@@ -155,7 +151,7 @@ int main(void) {
   std::shared_ptr<LogInDelegate> logInDelegate = 
                                               std::make_shared<LogInDelegate>();
   cbe::CloudBackend::logIn("githubtester1", "gitHubTester1password", 
-                           "cbe_githubtesters", logInDelegate);
+                           "cbe_githubtesters", "linux_desktop", logInDelegate);
   logInDelegate->waitForRsp();
   auto cloudBackend = logInDelegate->cloudBackend; 
   if (!cloudBackend) {
@@ -163,6 +159,7 @@ int main(void) {
     return -1;
   }
   auto account = cloudBackend.account();
+  std::cout << "username=\"" << account.username() << std::endl;
   std::cout << "firstName=\"" << account.firstName()
             << "\", lastName=\"" << account.lastName() << "\"" 
             << "\troot=" << account.rootContainer().id()
@@ -236,7 +233,7 @@ int main(void) {
     }
   }; // function processContainer() lambda
 
-  std::cout << "***** listing shares *****";
+  std::cout << "***** listing shares ***** ";
   auto shareManager = cloudBackend.shareManager();
   std::shared_ptr<ListSharesDelegate> listSharesDelegate = 
                                          std::make_shared<ListSharesDelegate>();
@@ -271,4 +268,5 @@ int main(void) {
     std::cout << elem.first << " " << elem.second.path() << '\n';
   }
   cloudBackend.terminate();
+  return 0;
 }

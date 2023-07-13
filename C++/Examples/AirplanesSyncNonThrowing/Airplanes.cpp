@@ -14,7 +14,6 @@
 #include "user_credentials.cpp"
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 Airplanes::Airplanes() : cloudBackend{cbe::DefaultCtor{}}, 
                          account{cbe::DefaultCtor{}} {
 
@@ -22,6 +21,7 @@ Airplanes::Airplanes() : cloudBackend{cbe::DefaultCtor{}},
   cloudBackend = cbe::CloudBackend::logIn(username, 
                                           password, 
                                           tenant, 
+                                          client,
                                           logInError);
   if (logInError){
     std::cout << "Error, login failed! \nError info="
@@ -30,7 +30,6 @@ Airplanes::Airplanes() : cloudBackend{cbe::DefaultCtor{}},
     account = cloudBackend.account();
   }
 } // Airplanes ctor
-
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 cbe::QueryResult Airplanes::query(cbe::Filter      filter,

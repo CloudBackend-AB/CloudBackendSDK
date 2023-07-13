@@ -9,6 +9,10 @@ CloudBackend AB 2021-2023.
 Release notes
 =============
 
+Release 2023-07-11
+------------------
+* The source code has been updated to the current version of the SDK C++.
+
 Release 2023-02-03
 ------------------
 * Updated for SDK version 2.0.1

@@ -25,10 +25,13 @@ bash installC++SDK.sh                       # install script
 
 #### SDK C++ version: **2.1.0*
 
-- Minimum operating system: Linux Ubuntu 22.
+- Minimum operating system: Linux Ubuntu 20.04 LTS.
 - Added synchronous api.
+  Methods with same name but slight change in parameters compared to the async call.
+- Account::tenantContainerId() added.
 - Container::createObject() change in the order of the parameters.
 - Object::updateKeyValues() change in the order of the parameters.
+- Additional example programs.
 
 ### Older versions
 #### SDK C++ version: **2.0.2**

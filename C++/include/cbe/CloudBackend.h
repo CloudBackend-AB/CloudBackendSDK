@@ -65,8 +65,12 @@ public:
    *
    * @param username  Name of the user to be signed in.
    * @param password  Password for the user to be signed in.
-   * @param tenant    The identifier for the tenant, formerly known as
-   *                  \c source.
+   * @param tenant    The identifier for the tenant,
+   *                  formerly known as \c source.
+   * @param client    Identifier of what type of client the program is running
+   *                  on. This is used by the tenant for statistics and
+   *                  selective communication with the users.
+   *                  The tenant administrator defines what client names to use.
    * @param delegate  Pointer to a be::CloudBackend::LogInDelegate() instance
    *                  that is implemented by the user to receive the response
    *                  of this login request.<br>
@@ -85,6 +89,7 @@ public:
   static cbe::CloudBackend logIn(const std::string&       username,
                                  const std::string&       password,
                                  const std::string&       tenant,
+                                 const std::string&       client,
                                  LogInDelegatePtr         delegate);
 
 #ifndef CBE_NO_SYNC
@@ -94,14 +99,14 @@ public:
   using LogInException = delegate::LogInDelegate::Exception;
   /**
    * @anchor anchorEx__cbe__CloudBackend__logIn_syncExcept
-   * @brief Synchronous [exception] logIn.
+   * @brief Synchronous [exception] logIn
    * 
    * <b>Synchronous</b> version of
    * @ref
-   * logIn(const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
+   * logIn(const std::string&,const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
    * "logIn()",
-   * and <b>throws an exception</b>, #LogInException,
-   * in case of a failed login.
+   * and <b>throws an exception</b>, #LogInException, in case of a failed
+   * login.
    *
    * @return A %CloudBackend instance &mdash; if login was successful.
    * @throws #LogInException
@@ -112,7 +117,9 @@ public:
    */
   static cbe::CloudBackend logIn(const std::string&  username,
                                  const std::string&  password,
-                                 const std::string&  tenant);
+                                 const std::string&  tenant,
+                                 const std::string&  client);
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   /**
    * Forms the type of the \p error return parameter for the synchronous version
@@ -128,7 +135,7 @@ public:
    * 
    * <b>Synchronous</b> version of
    * @ref
-   * logIn(const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
+   * logIn(const std::string&,const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
    * "logIn()",
    * and <b>throws <u>no</u> exception</b> on error, instead the out/return
    * parameter \p error is used to provide the error information.
@@ -144,7 +151,6 @@ public:
    * @return If empty, <code><b>false</b></code>, an error has occurred.
    *         I.e., the login has failed, and the error information has been
    *         passed out via the \p error out/return parameter.
-   *
    * @par Example
    *      Synchronous [non-throwing] logIn
    * @include example/login_syncNoThrow.cpp
@@ -152,6 +158,7 @@ public:
   static cbe::CloudBackend logIn(const std::string& username,
                                  const std::string& password,
                                  const std::string& tenant,
+                                 const std::string& client,
                                  LogInError&        error);
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #endif // #ifndef CBE_NO_SYNC
@@ -573,6 +580,7 @@ public:
   cbe::QueryResult search(cbe::Filter         filter,
                           cbe::ContainerId    containerId,
                           QueryDelegatePtr    delegate);
+
 
   /**
    * @brief Casts an item to a container

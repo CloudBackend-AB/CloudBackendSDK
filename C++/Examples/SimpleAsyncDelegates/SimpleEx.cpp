@@ -48,6 +48,7 @@ int main(void) {
   cloudBackend = cbe::CloudBackend::logIn(username, 
                                           password,
                                           tenant, 
+                                          client,
                                           logInDelegate);
   // Wait until the delegate has received a response from the cloud service.
   logInDelegate->waitForRsp();
@@ -79,8 +80,10 @@ int main(void) {
   //----------------------------------------------------------------------------
   // Ask for name of new container.
   std::string containerName;
-  std::cout << "Name for a new Container to be created: ";
-  std::getline(std::cin, containerName);
+  do {
+    std::cout << "Name for a new Container to be created: ";
+    std::getline(std::cin, containerName);
+  } while (containerName < "A");
 
   //----------------------------------------------------------------------------
   // Check if the name the user wants to create

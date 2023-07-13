@@ -24,6 +24,7 @@ Airplanes::Airplanes() : cloudBackend{cbe::DefaultCtor{}},
   logInDelegate->cloudBackend = cbe::CloudBackend::logIn(username, 
                                                          password, 
                                                          tenant, 
+                                                         client,
                                                          logInDelegate);
   logInDelegate->waitForRsp();
 

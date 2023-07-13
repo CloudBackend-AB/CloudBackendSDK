@@ -26,6 +26,7 @@ int main(void) {
   auto cloudBackend = cbe::CloudBackend::logIn("githubtester2", 
                                                "gitHubTester2password", 
                                                "cbe_githubtesters", 
+                                               "linux_desktop",
                                                logInError);
   if (logInError) {
     std::cout << "Error! " << logInError << std::endl;

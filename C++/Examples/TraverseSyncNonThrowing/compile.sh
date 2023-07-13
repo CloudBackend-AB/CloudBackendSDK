@@ -39,7 +39,7 @@ case "$exercise" in
      ${COMPILER_COMMAND} ${WARNINGS} -o "cb_traverse1" "${CODE_PATH}cb_traverse1.cpp" ${libCBE} -I "../../include/"
     if [ $? -eq 0 ]
     then
-        echo "to run use: ./cb_traverse1"
+        echo "to run use: sh run.sh 1"
     fi
     ;;
   "2")
@@ -48,7 +48,7 @@ case "$exercise" in
      ${COMPILER_COMMAND} ${WARNINGS} -o "cb_traverse2" "${CODE_PATH}cb_traverse2.cpp" ${libCBE} -I "../../include/"
     if [ $? -eq 0 ]
     then
-        echo "to run use: ./cb_traverse2"
+        echo "to run use: sh run.sh 2"
     fi
     ;;
   "3")
@@ -57,7 +57,7 @@ case "$exercise" in
      ${COMPILER_COMMAND} ${WARNINGS} -o "cb_traverse3" "${CODE_PATH}cb_traverse3.cpp" ${libCBE} -I "../../include/"
     if [ $? -eq 0 ]
     then
-        echo "to run use: ./cb_traverse3"
+        echo "to run use: sh run.sh 3"
     fi
     ;;
   "4")
@@ -66,7 +66,7 @@ case "$exercise" in
      ${COMPILER_COMMAND} ${WARNINGS} -o "cb_traverse4" "${CODE_PATH}cb_traverse4.cpp" ${libCBE} -I "../../include/"
     if [ $? -eq 0 ]
     then
-        echo "to run use: ./cb_traverse4"
+        echo "to run use: sh run.sh 4"
     fi
     ;;
 
@@ -76,7 +76,7 @@ case "$exercise" in
      ${COMPILER_COMMAND} ${WARNINGS} -o "cb_traverse5" "${CODE_PATH}cb_traverse5.cpp" ${libCBE} -I "../../include/"
     if [ $? -eq 0 ]
     then
-        echo "to run use: ./cb_traverse5"
+        echo "to run use: sh run.sh 5"
     fi
     ;;
 
