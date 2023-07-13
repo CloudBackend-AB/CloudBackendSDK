@@ -47,14 +47,6 @@ bash installC++SDK.sh                       # install script
 
 - The Protocols shared pointers have been replaced with object classes and more detailed Delegate classes.
 
-#### SDK C++ version: **2.0.1**
-
-- New installation script
-
-#### SDK C++ version: **2.0.0**
-
-- The Protocols shared pointers have been replaced with object classes and more detailed Delegate classes.
-
 #### SDK C++ version: 1.4.6.4
 
 - Support for < and > in filter.
@@ -101,4 +93,4 @@ bash installC++SDK.sh                       # install script
 - New CLI with new extended Readme. 
 
 ----
-#### Copyright © CloudBackend AB 2020-2022.
+#### Copyright © CloudBackend AB 2020-2023.
