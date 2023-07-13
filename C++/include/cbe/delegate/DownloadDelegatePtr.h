@@ -10,7 +10,8 @@ class DownloadDelegate;
 /**
  * Pointer to DownloadDelegate that is passed into:
  * <ul>
- *   <li> cbe::Object::download(const std::string&,DownloadDelegate)
+ *   <li> cbe::Object::download(const std::string&,DownloadDelegatePtr)
+ *   <li> cbe::Object::downloadStream(const std::string&,cbe::Stream,DownloadDelegatePtr)
  * </ul>
  */
 using DownloadDelegatePtr = std::shared_ptr<DownloadDelegate>;

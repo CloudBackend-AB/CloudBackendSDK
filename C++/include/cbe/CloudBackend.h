@@ -1,6 +1,5 @@
-
 /*
-     Copyright © CloudBackend AB 2020 - 2022.
+     Copyright © CloudBackend AB 2020-2023.
 */
 
 #ifndef INCLUDE_CBE_CLOUDBACKEND_H_
@@ -47,9 +46,9 @@ class SubscribeManager;
 class CloudBackend {
 public:
   /**
-   * Pointer to cbe::CloudBackend::LogInDelegate() that is passed into method
-   * @ref logIn(const std::string&,const std::string&,const std::string&,
-   *            LogInDelegatePtr) 
+   * Pointer to cbe::delegate::LogInDelegate() that is passed into asynchronous
+   * version of method
+   * @ref logIn(const std::string&,const std::string&,const std::string&,LogInDelegatePtr) 
    * "logIn()"
    */
   using LogInDelegatePtr = delegate::LogInDelegatePtr;
@@ -60,13 +59,18 @@ public:
    * method CloudBackend::terminate() in all cases.
    * 
    * The authentication to the account is determined by \p username,
-   * \p password and \p tenant.<br>
+   * \p password and \p tenant.
+   * 
    * <b>Asynchronous</b> version of this service function.
    *
    * @param username  Name of the user to be signed in.
    * @param password  Password for the user to be signed in.
-   * @param tenant    The identifier for the tenant, formerly known as
-   *                  \c source.
+   * @param tenant    The identifier for the tenant,
+   *                  formerly known as \c source.
+   * @param client    Identifier of what type of client the program is running
+   *                  on. This is used by the tenant for statistics and
+   *                  selective communication with the users.
+   *                  The tenant administrator defines what client names to use.
    * @param delegate  Pointer to a be::CloudBackend::LogInDelegate() instance
    *                  that is implemented by the user to receive the response
    *                  of this login request.<br>
@@ -77,222 +81,69 @@ public:
    *                  @ref delegate::LogInDelegate::onLogInError(LogInDelegate::Error&&,cbe::util::Context&&)
    *                       "onLogInError()".
    *
-   * @anchor anchorEx__cbe__CloudBackend__logIn 
-   * @par Example of asynchronous login
-   * @code
-  #include "cbe/CloudBackend.h"
-  ~~~
-  #include <condition_variable>
-  #include <mutex>
-  ~~~
-  int main() {
-    // First, declare and implement a LogInDelegate class
-    class MyLogInDelegate : public cbe::delegate::LogInDelegate {
-      std::mutex              mutex{};
-      std::condition_variable conditionVariable{};
-      // Indicates operation completed - success or failure
-      bool                    called{};
-    public:
-      // Default construct this CloudBackend member. If the method
-      // onLogInSuccess() will not not be called, this default constructed state
-      // implies that this cloudBackend object is not valid due to a successful
-      // log in
-      cbe::CloudBackend cloudBackend{ cbe::DefaultCtor{} };
-
-      // Default construct this cbe::delegate::Error member, If the method
-      // onLogInError() will not not be called, this default constructed state
-      // implies no error. Otherwise, thus error object will contain the error
-      // information. 
-      cbe::delegate::Error error{};
-      // Implement the cbe::delegate::LogInDelegate interface callbacks (private
-      // cause they are only used by the SDK):
-    private:
-      // Called upon successful login.
-      void onLogInSuccess(cbe::CloudBackend&& cloudBackend) final {
-        {
-          std::lock_guard<std::mutex> lock(mutex);
-          // Put error member into the default constructed state to
-          // indicate success (i.e., no error)
-          error = cbe::delegate::Error{};
-          // Change state of cloudBackend member to indicate success
-          this->cloudBackend = std::move(cloudBackend);
-          // Indicate operation completed, member cloudBackend non-default
-          // constructed state indicates success
-          called = true;
-        }
-        conditionVariable.notify_one();
-      }
-      // Called upon a failed login.
-      void onLogInError(Error&& error, cbe::util::Context&& context) final {
-        {
-          std::lock_guard<std::mutex> lock(mutex);
-          // Put cloudBackend member into the default constructed state to
-          // indicate no-success
-          cloudBackend = cbe::CloudBackend{ cbe::DefaultCtor{} };
-          // Change state of error member to indicate failure
-          this->error = std::move(error);
-          // Indicate operation completed, member member cloudBackend default
-          // constructed state indicates failure 
-          called = true;
-        }
-        conditionVariable.notify_one();
-      }
-      // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    public:
-      void wait() {
-        std::unique_lock<std::mutex> lock(mutex);
-        conditionVariable.wait(lock, [this]{ return called; });
-        // Reset called flag, so current delegate instance can be reused
-        called = false;
-      }
-    }; // struct MyLogInDelegate
-    ~~~
-    // Then,  carry out the login:
-    static constexpr const char* const username = "~~~";
-    static constexpr const char* const password = "~~~";
-    static constexpr const char* const tenant   = "~~~";
-    ~~~
-    std::shared_ptr<MyLogInDelegate> myLogInDelegate =
-                                      std::make_shared<MyLogInDelegate>();
-    // Invoke the login (cast to return value to void to indicate is deliberately 
-    // discarded)                                     
-    (void) cbe::CloudBackend::logIn(username, password, tenant, myLogInDelegate);
-    // Await the login procedure to run to completion
-    myLogInDelegate->wait();
-
-    // Test if login failed
-    if (myLogInDelegate->error) {
-      // Failed to login!
-      std::cout << "Failed to login: error={" << myLogInDelegate->error << '}'
-                << std::endl;
-      //  Bail out!
-      ~~~
-    }
-    // Since we have a complete CloudBackend object now, copy it from the delegate 
-    cbe::CloudBackend cloudBackend = myLogInDelegate->cloudBackend;
-    // Dispose the delegate object, not needed anymore
-    myLogInDelegate.reset();
-    // Do your stuff
-    ~~~
-    // End of session, tell cbe that you are terminating
-    cloudBackend.terminate();
-  }
-   * @endcode
-   */
-  static cbe::CloudBackend logIn(const std::string&       username,
-                                 const std::string&       password,
-                                 const std::string&       tenant,
-                                 LogInDelegatePtr         delegate);
-  /**
-   * @brief Logs in to the CloudBackend service
-   * The authentication to the account is determined by \p username,
-   * \p password, \p tenant and \p client.<br>
-   * <b>Asynchronous</b> version of this service function.
-   *
-   * @param username  Name of the user to be signed in.
-   * @param password  Password for the user to be signed in.
-   * @param tenant    The identifier for the tenant, formerly known as
-   *                  \c source.
-   * @param client    The identifier for the client or an empty string
-   * @param delegate  Pointer to a LogInDelegate instance that is
-   *                  implemented by the user to receive the response of this
-   *                  login request.<br>
-   *                  This is accomplished in terms of the LogInDelegate
-   *                  callback functions
-   *                  @ref delegate::LogInDelegate::onLogInSuccess(CloudBackend&&)
-   *                       "onLogInSuccess()" and
-   *                  @ref delegate::LogInDelegate::onLogInError(LogInDelegate::Error&&,cbe::util::Context&&)
-   *                       "onLogInError()".
-   *
-   * @par Example of asynchronous login
-   * @code
-  #include "cbe/CloudBackend.h"
-
-  int main() {
-    static constexpr const char* const username = "~~~";
-    static constexpr const char* const password = "~~~";
-    static constexpr const char* const tenant   = "~~~";
-    static constexpr const char* const client   = "~~~";
-
-    struct MyDelegate : cbe::CloudBackend::LogInDelegate {
-      void onLogInSuccess(cbe::CloudBackend&& cloudBackend) final {
-        // ~~~
-      }
-      void onLogInError(Error&& error, cbe::util::Context&& context) final {
-        // Type of parameter error actually is:
-        // cbe::CloudBackend::LogInDelegate::Error&&
-        // ~~~
-      }
-    }; // struct MyDelegate
-
-    const auto delegate = std::make_shared<MyDelegate>();
-    auto cloudBackend =
-        cbe::CloudBackend::logIn(username, password, tenant, client, delegate);
-    // ~~~
-  }
-   * @endcode
+   * @anchor anchorEx__cbe__CloudBackend__logIn_async 
+   * @par Example
+   *      Async login
+   * @include example/login_async.cpp
    */
   static cbe::CloudBackend logIn(const std::string&       username,
                                  const std::string&       password,
                                  const std::string&       tenant,
                                  const std::string&       client,
                                  LogInDelegatePtr         delegate);
+
 #ifndef CBE_NO_SYNC
   /**
-   * \see LogInDelegate::Exception
+   * \see delegate::LogInDelegate::Exception
    */
   using LogInException = delegate::LogInDelegate::Exception;
   /**
+   * @anchor anchorEx__cbe__CloudBackend__logIn_syncExcept
+   * @brief Synchronous [exception] logIn
+   * 
    * <b>Synchronous</b> version of
-   * logIn(const std::string&,const std::string&,const std::string&,
-   *       LogInDelegatePtr)
-   * , and <b>throws an exception</b>, #LogInException, in case of a failed
+   * @ref
+   * logIn(const std::string&,const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
+   * "logIn()",
+   * and <b>throws an exception</b>, #LogInException, in case of a failed
    * login.
-   * \see logIn(const std::string&,const std::string&,const std::string&,
-   *            LogInDelegatePtr)
    *
-   * @return A CloudBackend instance \- if login was successful.
+   * @return A %CloudBackend instance &mdash; if login was successful.
    * @throws #LogInException
-   */
-  static cbe::CloudBackend logIn(const std::string&  username,
-                                 const std::string&  password,
-                                 const std::string&  tenant);
-  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  /**
-   * <b>Synchronous</b> version of
-   * logIn(const std::string&,const std::string&,const std::string&,
-   *       const std::string&,LogInDelegatePtr)
-   * , and <b>throws an exception</b>, #LogInException, in case of a failed
-   * login.
-   * \see logIn(const std::string&,const std::string&,const std::string&,
-   *            const std::string&,LogInDelegatePtr)
    *
-   * @return A CloudBackend instance \- if login was successful.
-   * @throws #LogInException
+   * @par Example
+   *      Synchronous [exception] logIn
+   * @include example/login_syncExcept.cpp
    */
   static cbe::CloudBackend logIn(const std::string&  username,
                                  const std::string&  password,
                                  const std::string&  tenant,
                                  const std::string&  client);
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   /**
-   * Forms the type of the \p error parameter in synchronous method
-   * logIn(const std::string&,const std::string&,const std::string&,LogInError&)
-   * \see LogInDelegate::ErrorInfo
+   * Forms the type of the \p error return parameter for the synchronous version
+   * of method
+   * @ref logIn(const std::string&,const std::string&,const std::string&,LogInError&)
+   * "logIn()"
+   * \see delegate::LogInDelegate::ErrorInfo
    */
   using LogInError = delegate::LogInDelegate::ErrorInfo;
   /**
+   * @anchor anchorEx__cbe__CloudBackend__logIn_syncNoExcept
+   * @brief Synchronous [non-throwing] logIn
+   * 
    * <b>Synchronous</b> version of
-   * logIn(const std::string&,const std::string&,
-   *       const std::string&,
-   *       LogInDelegatePtr)
-   * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
-   * parameter \c error is used to provide the error information.
+   * @ref
+   * logIn(const std::string&,const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
+   * "logIn()",
+   * and <b>throws <u>no</u> exception</b> on error, instead the out/return
+   * parameter \p error is used to provide the error information.
    *
    * @param[out] error
    *              Return parameter containing the error information in case
    *              of a failed login. <br>
-   *              The return value, of type #CloudBackendOpt, will indicate
+   *              The return value, of type #CloudBackend, will indicate
    *              <code><b>false</b></code> on a failed login, and the
    *              LogInError object passed in will we be populated with the
    *              error information.
@@ -300,58 +151,44 @@ public:
    * @return If empty, <code><b>false</b></code>, an error has occurred.
    *         I.e., the login has failed, and the error information has been
    *         passed out via the \p error out/return parameter.
-   */
-  static cbe::CloudBackend logIn(const std::string& username,
-                                 const std::string& password,
-                                 const std::string& tenant,
-                                 LogInError&        error);
-  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  /**
-   * <b>Synchronous</b> version of
-   * logIn(const std::string&,const std::string&,
-   *       const std::string&,const std::string&,
-   *       LogInDelegatePtr)
-   * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
-   * parameter \c error is used to provide the error information.
-   *
-   * @param[out] error
-   *              Return parameter containing the error information in case
-   *              of a failed login. <br>
-   *              The return value, of type #CloudBackendOpt, will indicate
-   *              <code><b>false</b></code> on a failed login, and the
-   *              LogInError object passed in will we be populated with the
-   *              error information.
-   *
-   * @return If empty, <code><b>false</b></code>, an error has occurred.
-   *         I.e., the login has failed, and the error information has been
-   *         passed out via the \p error out/return parameter.
+   * @par Example
+   *      Synchronous [non-throwing] logIn
+   * @include example/login_syncNoThrow.cpp
    */
   static cbe::CloudBackend logIn(const std::string& username,
                                  const std::string& password,
                                  const std::string& tenant,
                                  const std::string& client,
                                  LogInError&        error);
-
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #endif // #ifndef CBE_NO_SYNC
+
   /**
-   * Pointer to CreateAccountDelegate that is passed into method 
+   * Pointer to
+   * delegate::CreateAccountDelegate
+   * that is passed into asynchronous version of method 
    * @ref createAccount()
-   * 
    */
   using CreateAccountDelegatePtr = delegate::CreateAccountDelegatePtr;
   /**
-  * @brief Creates a user account 
-  * @param username   Username for the new account
-  * @param password   Password for the new account
-  * @param email      Email address to owner of the new account
-  * @param firstName  First name of the owner of the new account
-  * @param lastName   Last name of the owner of the new account
-  * @param tenant     The identifier for the tenant, formerly known as
-  *                   \c source.
-  * @param client     Tenant client or an empty string
-  * @param delegate   Pointer to a delegate::CreateAccountDelegate instance 
-  *                   that is implemented by the user.
-  */
+   * @brief Creates a user account.
+   * 
+   * This method is only granted to the tenant administrator.
+   * 
+   * <b>Asynchronous</b> version of this service function.
+   * @param username   Username for the new account
+   * @param password   Password for the new account
+   * @param email      Email address to owner of the new account
+   * @param firstName  First name of the owner of the new account
+   * @param lastName   Last name of the owner of the new account
+   * @param tenant     The identifier for the tenant, formerly known as
+   *                   \c source.
+   * @param client     Tenant client or an empty string.
+   *                   Used by CloudMe and CloudTop.
+   * @param delegate   Pointer to a delegate::CreateAccountDelegate instance 
+   *                   that is implemented by the user.
+   * 
+   */
   static cbe::CloudBackend createAccount(const std::string&       username,
                                          const std::string&       password,
                                          const std::string&       email,
@@ -360,9 +197,43 @@ public:
                                          const std::string&       tenant,
                                          const std::string&       client,
                                          CreateAccountDelegatePtr delegate);
+#ifndef CBE_NO_SYNC
+  /**
+   * See delegate::CreateAccountDelegate::Exception
+   */
+  using CreateAccountException = delegate::CreateAccountDelegate::Exception;
+  /**
+   * @brief Synchronous [exception] Creates a user account.
+   * 
+   * <b>Synchronous</b> version of
+   * @ref
+   * createAccount(const std::string&,const std::string&,const std::string&,const std::string&,const std::string&,const std::string&,const std::string&,CreateAccountDelegatePtr)
+   * "createAccount()",
+   * and <b>throws an exception</b>, #CreateAccountException,
+   * in case of a failed account creation.
+   * 
+   * See @ref createAccount(const std::string&,const std::string&,const std::string&,const std::string&,const std::string&,const std::string&,const std::string&,CreateAccountDelegatePtr)
+   * "createAccount()"
+   *
+   * @return A CloudBackend instance associated with the created account &mdash;
+   *         if account creation was successful.
+   * @throws #CreateAccountException
+   */
+  static cbe::CloudBackend createAccount(const std::string&       username,
+                                         const std::string&       password,
+                                         const std::string&       email,
+                                         const std::string&       firstName,
+                                         const std::string&       lastName,
+                                         const std::string&       tenant,
+                                         const std::string&       client);
+#endif // #ifndef CBE_NO_SYNC
+
 
   /**
-   * Pointer to delegate::CloudBackendListenerDelegate.
+   * Pointer to
+   * delegate::CloudBackendListenerDelegate
+   * that is passed into asynchronous version of method 
+   * addListener(CloudBackendListenerDelegatePtr)
    */
   using CloudBackendListenerDelegatePtr =
                         std::shared_ptr<delegate::CloudBackendListenerDelegate>;
@@ -371,31 +242,47 @@ public:
    */
   using ListenerHandle = std::uint64_t;
   /**
-  * Adds a listener that will receive updates as changes occur on the account.  
-  * removeListener should always be called when you stop using the delegate.<br>
-  * @param listener Delegate is a shared pointer to the class
-  *                 delegate::CloudBackendListenerDelegate
-  *                 that the user has implemented
-  * @return Handle identifying the registration of the listener.<br>
-  *         Used when deregistering with method removeListener(ListenerHandle).
-  */
+   * @brief Listen for changes to specific items.
+   * 
+   * Adds a listener that will receive updates as changes occur on the account.  
+   * \note removeListener()
+   *       should always be called when no longer using the delegate.
+   * @param listener Delegate is a shared pointer to the class
+   *                 delegate::CloudBackendListenerDelegate
+   *                 that the user has implemented
+   * @return Handle identifying the registration of the listener.<br>
+   *         To be used when de-registering with method
+   *         removeListener(ListenerHandle).
+   */
   ListenerHandle addListener(CloudBackendListenerDelegatePtr listener);
 
   /**
-  * removes a listener that will receive updates as changes occur on the account
-  * @param handle  Handle previously retrieved from method
-  *                addListener(CloudBackendListenerDelegatePtr).
-  */
+   * @brief Delete a specific listener.
+   * 
+   * Removes a listener that will receive updates as changes occur on the account
+   * @param handle  Handle previously retrieved from method
+   *                addListener(CloudBackendListenerDelegatePtr).
+   */
   void removeListener(ListenerHandle handle);
 
   /**
-   * Pointer to QueryDelegate that is passed into method 
-   * @ref query()
-   * 
+   * Pointer to 
+   * delegate::QueryDelegate 
+   * that is passed into asynchronous version of methods:
+   * <ul>
+   *   <li> query(ContainerId,QueryDelegatePtr),
+   *   <li> query(ContainerId,Filter,QueryDelegatePtr),
+   *   <li> queryWithPath(std::string, QueryDelegatePtr)
+   *   <li> queryWithPath(std::string, cbe::ContainerId, QueryDelegatePtr),
+   *   <li> search(std::string,cbe::ContainerId,QueryDelegatePtr),
+   *   <li> search(Filter,cbe::ContainerId,QueryDelegatePtr)
+   * </ul>
    */  
   using QueryDelegatePtr = delegate::QueryDelegatePtr; 
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   /**
+   * @brief Select %Item's of a container (table).
+   * 
    * Inquires for a set of @ref Item "Item"s from the provided %Container,
    * identified by \p containerId.
    * Response is delivered asynchronously via the delegate::QueryDelegate
@@ -404,21 +291,24 @@ public:
    * This overload of join() accepting a
    * @ref delegate::QueryDelegate "QueryDelegate"-pointer as parameter has two
    * use cases:
-   * <ul>
-   * <li> To make a solely query() call <b>without</b> an additional chained
+   * <ol>
+   *   <li> To make a solely query() call <b>without</b> an additional chained
    *      @ref QueryChain::join(Container,std::string,std::string,delegate::JoinDelegatePtr) "join()"-call.
-   * <li> To make a
+   *   <li> To make a
    *      @ref query(ContainerId,delegate::QueryJoinDelegatePtr) "query()" call
    *      <b>with</b> a desired chained join() call.<br>
    *      In this latter case, the overloaded 
    *      @ref query(ContainerId,delegate::QueryJoinDelegatePtr)
-   *      "query()"-functions, \n 
-   *      query(ContainerId,delegate::QueryJoinDelegatePtr) and \n 
-   *      query(ContainerId,Filter,delegate::QueryJoinDelegatePtr) , \n 
+   *      "query()"-functions:
+   *   <ul>
+   *     <li> query(ContainerId,delegate::QueryJoinDelegatePtr)
+   *     <li> query(ContainerId,Filter,delegate::QueryJoinDelegatePtr)
+   *   </ul>
    *      both accepting a 
    *      @ref delegate::QueryJoinDelegate "QueryJoinDelegate" 
    *      as \p delegate argument, must be used.
-   * </ul>
+   * </ol>
+   * 
    * <b>Asynchronous</b> version of this service function.
    *
    * @param containerId
@@ -430,48 +320,36 @@ public:
    *   I.e., either the
    *   @ref delegate::QueryDelegate "QueryDelegate"
    *   callback function 
-   *   @ref delegate::QueryDelegate::onQuerySuccess(delegate::QueryDelegate::Success&&) "onQuerySuccess()" or
-   *   @ref delegate::QueryDelegate::onQueryError(delegate::QueryDelegate::Error&&,cbe::util::Context&&) "onQueryError()"
+   *   @ref delegate::QueryDelegate::onQuerySuccess(delegate::QueryDelegate::Success&&)
+   *   "onQuerySuccess()"
+   *   or
+   *   @ref delegate::QueryDelegate::onQueryError(delegate::QueryDelegate::Error&&,cbe::util::Context&&)
+   *   "onQueryError()"
    *   will be called in the event of success, or failure respectively.
    *
-   * @anchor anchorEx__cbe__CloudBackend__query 
-   * @par Example of asynchronous query
-   * To use the code below, we must first login, and then declare a
+   * @anchor anchorEx__cbe__CloudBackend__query_async 
+   * @par Example
+   *      Async query
+   * @include example/cloudbackend_query_async.cpp
+   * To use the code above, we must first login and then declare a
    * @ref cbe::delegate::QueryDelegate "QueryDelegate" class.<br>
-   * See:
+   * See also:
    * <ul>
-   *   <li> @ref anchorEx__cbe__CloudBackend__logIn
-   *             "Example of asynchronous login"<br>
+   *   <li> @ref anchorEx__cbe__CloudBackend__logIn_async
+   *             "Async login"<br>
    *             Here, we retrieve the \c cloudBackend object. 
    *   <li> @ref anchorEx__cbe__delegate_QueryDelegate
-   *             "Example of a QueryDelegate implementation class"<br>
+   *             "Example QueryDelegatePtr of a QueryDelegate implementation class"<br>
    *             Here, class MyQueryDelegate is defined. 
    * </ul> 
-   * @code
-  ~~~
-  std::shared_ptr<MyQueryDelegate> queryDelegate =
-                                     std::make_shared<MyQueryDelegate>();
-  const cbe::ContainerId myContainerId =
-                                    cloudBackend.account().rootContainer().id();
-  cloudBackend.query(myContainerId, queryDelegate);
-  queryDelegate->wait();
-  if (queryDelegate->errorInfo) {
-    std::cout << "Query failed:" << std::endl;
-    std::cout << "ErrorInfo = " << queryDelegate->errorInfo << std::endl;
-  } else {
-    cbe::QueryResult::ItemsSnapshot itemsSnapshot = queryDelegate->queryResult.getItemsSnapshot();
-    for (auto& item : itemsSnapshot) {
-        std::cout << item.name() << std::endl;
-    }
-  }
-  ~~~
-   * @endcode
    */
   QueryChain query(ContainerId      containerId,
                    QueryDelegatePtr queryDelegate);
   /**
-   * Same as query(ContainerId,delegate::QueryDelegatePtr), but with an
-   * additional filter parameter \p filter.
+   * @brief Select %Item's of a container (table) with a filter (where).
+   * 
+   * Same as query(ContainerId,QueryDelegatePtr),
+   * but with an additional parameter \p filter.
    *
    * @param filter Filter specifying the constraints of the requested items.
    */
@@ -480,12 +358,18 @@ public:
                    QueryDelegatePtr queryDelegate);
 
   /**
-   * Pointer to QueryJoinDelegate that is passed into method 
-   * @ref query()
-   * 
+   * Pointer to 
+   * delegate::QueryJoinDelegate
+   * that is passed into asynchronous version of methods 
+   * <ul>
+   *   <li> query(ContainerId,QueryJoinDelegatePtr)
+   *   <li> query(ContainerId,Filter,QueryJoinDelegatePtr)
+   * </ul>
    */  
   using QueryJoinDelegatePtr = delegate::QueryJoinDelegatePtr;                   
   /**
+   * @brief Join multiple tables.
+   * 
    * Same as query(ContainerId,delegate::QueryDelegatePtr), but with a
    * @ref delegate::QueryJoinDelegate "QueryJoinDelegate" as delegate,
    * \p queryJoinDelegate.
@@ -495,22 +379,18 @@ public:
    * Pointer to a @ref delegate::QueryJoinDelegate "QueryJoinDelegate"
    * instance, implemented by the user, that receives the response of
    * this query request.<br>
-   * I.e., either the 
-   * @ref delegate::QueryJoinDelegate "QueryJoinDelegate"
-   * callback function
-   * @ref delegate::QueryJoinDelegate::onSuccess(
-   *                                     delegate::QueryJoinDelegate::Success&&)
-   *      "onSuccess()", \n 
-   * or
-   * @ref delegate::QueryJoinDelegate::onError(
-   *                                       delegate::QueryJoinDelegate::Error&&,
-   *                                       cbe::util::Context&&)
-   *      "onError()".
-   * will be called in the event of success, or failure respectively.
+   * I.e., either its callback function 
+   * @ref delegate::QueryJoinDelegate::onQueryJoinSuccess(cbe::QueryResult&&)
+   *      "onQueryJoinSuccess()" or 
+   * @ref delegate::QueryJoinDelegate::onQueryJoinError(QueryJoinError &&, cbe::util::Context &&)
+   *      "onQueryJoinError()" 
+   * will be called in the event of success or failure respectively.
    */
   QueryChainExt query(ContainerId           containerId,
                       QueryJoinDelegatePtr  queryJoinDelegate);
   /**
+   * @brief Join multiple tables using filter (where).
+   * 
    * Same as query(ContainerId,delegate::QueryJoinDelegatePtr), but with an
    * additional Filter parameter \p filter.
    *
@@ -525,18 +405,32 @@ public:
   /*! \see delegate::QueryDelegate::Exception */
   using QueryException = delegate::QueryDelegate::Exception;
   /**
+   * @brief Synchronous [exception]
+   * 
    * <b>Synchronous</b> version of
    * query(ContainerId,delegate::QueryDelegatePtr), and <b>throws an
    * exception</b>, #QueryException, in case of a failed query.
-   * \see query(ContainerId,delegate::QueryDelegatePtr)
    *
    * @return Upon success, a QueryResult object - in fact an instance of
    *         QueryChainSync that is a subclass of QueryResult.
    * @throws #QueryException
+   * @anchor anchorEx__cbe__CloudBackend__query_syncExcept
+   * @par Example
+   *      Sync [exception] query
+   * @include example/cloudbackend_query_syncExcept.cpp
+   * To use the code above, we must first login.<br>
+   * See also:
+   * <ul>
+   *   <li> @ref anchorEx__cbe__CloudBackend__logIn_syncExcept
+   *             "Sync [exception] login"<br>
+   *             Here, we retrieve the \c cloudBackend class object. 
+   * </ul> 
    */
   QueryChainSync query(ContainerId  containerId);
 
   /**
+   * @brief Synchronous [exception] filtered
+   * 
    * Extended version of query(ContainerId) with an  additional filter parameter
    * \p filter.
    *
@@ -548,8 +442,10 @@ public:
   /*! \see delegate::QueryJoinDelegate::ErrorInfo */
   using QueryJoinError = delegate::QueryJoinDelegate::ErrorInfo;
   /**
+   * @brief Synchronous [non-throwing]
+   * 
    * In line with synchronous query(ContainerId), but <b>throws
-   * <u>no</u> exception</b> on error, instead the out/return parameter \c error
+   * <u>no</u> exception</b> on error, instead the out/return parameter \p error
    * is used to provide the error information.
    *
    * @param[out] error
@@ -568,14 +464,27 @@ public:
    *         If empty - i.e., <code><b>false</b></code> an error has occurred,
    *         i.e., a failed query, and the error information has been passed out
    *         via the \p error out/return parameter.
+   * @anchor anchorEx__cbe__CloudBackend__query_syncNoExcept
+   * @par Example
+   *      Sync [non-throwing] query
+   * @include example/cloudbackend_query_syncNoThrow.cpp
    */
   QueryChainSync query(ContainerId      containerId,
                        QueryJoinError&  error);
 
   /**
+   * @brief Synchronous [non-throwing] filtered
+   * 
    * Extended version of query(ContainerId,QueryJoinError&) with an  additional
    * filter parameter \p filter.
    * \see query(ContainerId,QueryJoinError&)
+   * To use the code above, we must first login.<br>
+   * See also:
+   * <ul>
+   *   <li> @ref anchorEx__cbe__CloudBackend__logIn_syncNoExcept
+   *             "Sync [non-throwing] login"<br>
+   *             Here, we retrieve the \c cloudBackend class object. 
+   * </ul> 
    */
   QueryChainSync query(ContainerId      containerId,
                        Filter           filter,
@@ -588,10 +497,13 @@ public:
 #endif // #ifndef CBE_NO_SYNC
 
   /**
-   * @brief Queries for a container with a given path.
-   * \note <code>..</code> or <code>.</code> relative path options are not
-   *       permitted. Only top down search from start point, \p queryRoot id, to
-   *       downwards path in container tree.
+   * @brief Queries items of a container with a given path.
+   * 
+   * \note <code>..</code> or <code>.</code>
+   *       relative path options are not
+   *       permitted. <br>
+   *       Only top down search from start point, \p queryRoot id
+   *       to downwards path in container tree.
    * @param relativePath The relative path from the \p queryRoot.<br> 
    *                     E.g.: 
    *                     <code>/Documents/Pictures</code><br>
@@ -605,7 +517,7 @@ public:
                                 cbe::ContainerId    queryRoot,
                                 QueryDelegatePtr    delegate);
   /**
-   * @brief Queries for a container with a given path relative the home root
+   * @brief Queries items of a container with a given path relative the home root
    *        container.
    * 
    * Same as queryWithPath(std::string, cbe::ContainerId, QueryDelegatePtr),
@@ -616,6 +528,8 @@ public:
                                 QueryDelegatePtr    delegate);
    
   /**
+   * @brief Select Object's with specified key/values.
+   * 
    * Search the whole container for tags related to
    * @ref Object "Objects" in the container structure.<br>
    * E.g., <c> Key = Name, Value Contract/Object/Song => Name:Contract1 </c>.
@@ -640,18 +554,22 @@ public:
                           QueryDelegatePtr    delegate);
 
   /**
+   * @brief Select Object's with specified key/values using filter.
+   * 
    * Search the whole container for tags related to Objects in the container 
    * structure. \n 
    * E.g., <c>Key = Name, Value Contract/Object/Song => Name:Contract1 </c>.
    *
    * Search handles tags in combination / conjunction of keys and/or key values
-   * seperated by |. \n 
+   * separated by |. \n 
    * E.g., Name:*|Country:Sweden|Country:Norway, this would search for objects
    * with key Name but any value and where key Country is either Sweden or 
    * Norway.
+   * 
+   * See Filter.
    * @param filter is a cbe::Filter on which you can set how you want data to be 
-   * ordered when searching, remember to set the queryString to be keys/tags or 
-   * key:value pairs that are seperated by |.
+   * ordered when searching. Remember to set the queryString to be keys/tags or 
+   * key:value pairs that are separated by |.
    * @param containerId is the ContainerId of the rootContainer to start the 
    * search of Objects in. \n 
    * E.g., if starting in the rootContainer, the whole 
@@ -663,42 +581,10 @@ public:
                           cbe::ContainerId    containerId,
                           QueryDelegatePtr    delegate);
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-  /**
-  * Send REST API request:
-  * @param uri set uri with request E.g., /v1/users/{user_id}
-  * @param requestType set the request type e.g: GET, POST, PUT, DELETE.
-  * @param contentType e.g.: text/xml, application/octet-stream, 
-  * application/x-www-form-urlencoded; charset=utf-8, application/xml.
-  * @param delegate is the callback pointer to where the API returns from 
-  * server/edge node. \n 
-  * Implement APIEventProtocol and the callback 
-  * onAPIRespons(std::string respons).
-  */
-  // void restRequest(std::string          uri,
-  //                  cbe::http_t          requestType,
-  //                  std::string          contentType,
-  //                  cbe::APIDelegatePtr  delegate);
-
-  /**
-  * Send SOAP API request:
-  * \note No need to add SOAP prefix or suffix, this is handled by the sdk. 
-  * only the body and request action/call is needed here.
-  * @param body set the body of the request.
-  * @param soapAction set api call ex queryFolder
-  * @param delegate is the callback pointer to where the API returns from 
-  * server/edge node. \n 
-  * Implement APIEventProtocol and the callback 
-  * onAPIRespons(std::string respons).
-  */
-
-  // void soapRequest(std::string          body,
-  //                  std::string          soapAction,
-  //                  cbe::APIDelegatePtr  delegate);
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
   /**
    * @brief Casts an item to a container
+   * 
    * If the provided cbe::Item "item" is not a cbe::Container "container", an
    * empty container instance is returned
    */
@@ -706,13 +592,16 @@ public:
 
   /**
    * @brief Casts an item to an object
+   * 
    * If the provided cbe::Item "item" is not a cbe::Object "object", an
    * empty object instance is returned
    */
   static cbe::Object castObject(cbe::Item item);
 
   /**
-   * Clears the cache if you are having memory issues.
+   * @brief Clear the local cache.
+   * 
+   * Use if there is a local SDK memory issue.
    * 
    * @return true  success
    * @return false failed
@@ -720,7 +609,7 @@ public:
   bool clearCache();
 
   /**
-   * @brief Returns an account objct with information on the user
+   * @brief Returns an account object with information on the user.
    * 
    * @return cbe::Account 
    */
@@ -728,28 +617,28 @@ public:
 
 
   /**
-   * @brief Returns the version number of the SDK
+   * @brief Returns the version number of the SDK.
    * 
    * @return std::string 
    */
   std::string version() const;
 
   /**
-   * @brief Gives the groups available
+   * @brief Gets the group manager.
    * 
    * @return cbe::GroupManager 
    */
   cbe::GroupManager     groupManager();  // Group - NYI
 
   /**
-   * gives the shares available
+   * @brief Gets the share manager.
    * 
    * @return cbe::ShareManager 
    */
   cbe::ShareManager     shareManager(); // Shares
 
   /**
-   * gives the published web shares
+   * @brief Gets the publish manager.
    * 
    * @return cbe::PublishManager 
    */
@@ -765,27 +654,34 @@ public:
   void terminate(); 
 
   /**
-   * gives the subscriptions being followed
+   * @brief Gets the subscribe manager.
    * 
    * @return cbe::SubscribeManager 
    */
   cbe::SubscribeManager subscribeManager(); // Subscribe (following)
 
   /**
-   * Construct a new \c CloudBackend object with 
-   * the \c DefaultCtor to enable the @c bool() test
+   * @brief Default constructor.
+   * 
+   * Construct a new object with 
+   * the \c DefaultCtor to enable the
+   * @ref operator bool()
+   * test
    */
   CloudBackend(cbe::DefaultCtor);
   ~CloudBackend();
 
   /**
-   * @brief Checks if current \c CloudBackend instance is real.
+   * @brief Checks if the current instance is real.
    * 
-   * An "unreal" \c CloudBackend instance implies typically the event of a 
-   * failed login.
+   * An "unreal" instance implies typically a failed login event.
    * 
-   * @return true  : is real
-   * @return false : got nullptr
+   * Relies on the \c Default \c constructor
+   * CloudBackend(cbe::DefaultCtor)
+   * 
+   * @return \c true  : is real
+   * @return \c false : unreal; got nullptr; if current instance is unbound/undefined. I.e., if it is
+   *         only default constructed.
    */
   explicit operator bool() const;
 private:

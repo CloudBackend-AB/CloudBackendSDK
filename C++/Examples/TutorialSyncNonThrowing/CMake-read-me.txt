@@ -1,0 +1,3 @@
+cmake . -B ../../build/cbe-tutorial # -B requires cmake version 3.16, or later
+cd ../../build/cbe-tutorial
+make run-3
