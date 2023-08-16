@@ -19,7 +19,7 @@
 bool debug_this = false;    // if to print trace output
 bool finished = false;      // if the whole program work is finished 
 bool upload_done = false;   // if the file upload has been confirmed
-bool upload_error = false;  // error occured during upload
+bool upload_error = false;  // error occurred during upload
 float per_upload;           // time per upload
 float per_row;              // time per row uploaded in chunks
 int line_header = 0;        // csv line containing the column header, first is 0
@@ -28,7 +28,7 @@ int data_add  = 100000000;  // addition to representing the data set
 int data_mult = 1000000;    // multiplier representing the data set
 int data_set  = 0;          // csv file can contain multiple data sets where the row label numbers starts over
 int row_begin = 0;          // csv row number after the header to start uploading, first is 0
-int row_count = 999999;    // number of rows to upload
+int row_count = 999999;     // number of rows to upload
 int objects_written = 0;    // count of number of objects written
 int object_number;          // calculate numeric title of object
 int chunk_size = 50000;     // number of lines per object to write data
@@ -462,122 +462,133 @@ int main(int argc, char *argv[]) {
   bool next_has_value;
   int arg_check = argc - 1;
   std::string this_arg, next_arg;
+  try {
+    for (int i = 0; i < argc; ++i) {
+      this_arg = std::string(argv[i]);
+      if (i < arg_check) {
+        next_arg = std::string(argv[i+1]);
+        if (next_arg.at(0) == '-') {
+          next_has_value = false;
+        } else {
+          next_has_value = true;
+        }
+      }
+      if(this_arg == "-?" || this_arg == "--help") {
+        std::cout << "\n"
+                  << "usage: " << argv[0] 
+                  << " -csv data_file"
+                  << " -header line"
+                  << " -from row"
+                  << " -n maximum_rows_written"
+                  << " -chunk size"
+                  << " -uc user_credentials_file"
+                  << " -container store"
+                  << "\n\n"
+                  << "-csv data_file \t\t.csv file name to read as indata, for current directory use prefix ./ \n"
+                  << "-header line_number \tline with csv column headings, default 0 \n"
+                  << "-from row_number \trow to begin with, skip rows until, default 0 \n"
+                  << "\t\t\tfirst line should contain the column headings \n"
+                  << "\t\t\tsecond line is row number 0 \n"
+                  << "-n number_of_rows\tthe number of rows to upload, default is all to the end of the csv-file \n"
+                  << "-chunk max chunk size \te.g. rows per object file, default 50 000 \n"
+                  << "-uc user_credentials \tfile in directory .cbe with login to CloudBackend\n"
+                  << "-container name \tthe CloudBackend full container path and name to store the data objects\n"
+                  << "Example : ./partition_large_csv_file -csv test.csv -chunk 1000 -container Choped"
+                  << std::endl;
+        return 0;
+      }
+      if(argv[i] == std::string("-csv")) {
+        if (next_has_value) {
+          csv_file = next_arg;
+        }
+      }
+      if(argv[i] == std::string("-header")) {
+        if (next_has_value) {
+          line_header = std::stoi(next_arg);
+        }
+      }
+      if(argv[i] == std::string("-from")) {
+        if (next_has_value) {
+          row_begin = std::stoi(next_arg);
+        }
+      }
+      if(argv[i] == std::string("-n")) {
+        if (next_has_value) {
+          row_count = std::stoi(next_arg);
+        }
+      }
+      if(argv[i] == std::string("-chunk")) {
+        if (next_has_value) {
+          chunk_size = std::stoi(next_arg);
+        }
+      }
+      if(argv[i] == std::string("-uc")) {
+        if (next_has_value) {
+          uc_file = next_arg;
+        }
+      }
+      if(argv[i] == std::string("-container")) {
+        if (next_has_value) {
+          cbe_container = next_arg;
+        }
+      }
+      if(this_arg == "-d" || this_arg == "--debug") {
+        debug_this = true;
+      }
 
-  for (int i = 0; i < argc; ++i) {
-    this_arg = std::string(argv[i]);
-    if (i < arg_check) {
-      next_arg = std::string(argv[i+1]);
-      if (next_arg.at(0) == '-') {
-        next_has_value = false;
-      } else {
-        next_has_value = true;
-      }
-    }
-    if(this_arg == "-?" || this_arg == "--help") {
-      std::cout << "\n"
-                << "usage: " << argv[0] 
-                << " -csv data_file"
-                << " -header line"
-                << " -from row"
-                << " -n maximum_rows_written"
-                << " -chunk size"
-                << " -uc user_credentials_file"
-                << " -container store"
-                << "\n\n"
-                << "-csv data_file \t\t.csv file name to read as indata, for current directory use prefix ./ \n"
-                << "-header line_number \tline with csv column headings, default 0 \n"
-                << "-from row_number \trow to begin with, skip rows until, default 0 \n"
-                << "\t\t\tfirst line should contain the column headings \n"
-                << "\t\t\tsecond line is row number 0 \n"
-                << "-n number_of_rows\tthe number of rows to upload, default is all to the end of the csv-file \n"
-                << "-chunk max chunk size \te.g. rows per object file, default 50 000 \n"
-                << "-uc user_credentials \tfile in directory .cbe with login to CloudBackend\n"
-                << "-container name \tthe CloudBackend full container path and name to store the data objects\n"
-                << "Example : ./partition_large_csv_file -csv test.csv -chunk 1000 -container Choped"
-                << std::endl;
-      return 0;
-    }
-    if(argv[i] == std::string("-csv")) {
-      if (next_has_value) {
-        csv_file = next_arg;
-      }
-    }
-    if(argv[i] == std::string("-header")) {
-      if (next_has_value) {
-        line_header = std::stoi(next_arg);
-      }
-    }
-    if(argv[i] == std::string("-from")) {
-      if (next_has_value) {
-        row_begin = std::stoi(next_arg);
-      }
-    }
-    if(argv[i] == std::string("-n")) {
-      if (next_has_value) {
-        row_count = std::stoi(next_arg);
-      }
-    }
-    if(argv[i] == std::string("-chunk")) {
-      if (next_has_value) {
-        chunk_size = std::stoi(next_arg);
-      }
-    }
-    if(argv[i] == std::string("-uc")) {
-      if (next_has_value) {
-        uc_file = next_arg;
-      }
-    }
-    if(argv[i] == std::string("-container")) {
-      if (next_has_value) {
-        cbe_container = next_arg;
-      }
-    }
-    if(this_arg == "-d" || this_arg == "--debug") {
-      debug_this = true;
     }
 
-  }
+    if (debug_this) {
+      std::cout << "user credentials: \t'" << uc_file       << "'" << std::endl;
+      std::cout << "csv file: \t\t'"       << csv_file      << "'" << std::endl;
+      std::cout << "container: \t\t'"      << cbe_container << "'" << std::endl;
+      std::cout << "line_header: \t\t'"    << line_header   << "'" << std::endl;
+      std::cout << "row_begin: \t\t'"      << row_begin     << "'" << std::endl;
+      std::cout << "row_count: \t\t'"      << row_count     << "'" << std::endl;
+    }
+    if (cbe_container.empty()) {
+      std::cout << "Error: CloudBackend container with full path has to be specified. "
+      << "help: " << argv[0] << " -?"
+      << std::endl;
+      return 1;
+    }
+    if (cbe_container == "/") {
+      std::cout << "Error: container for this usage may not be the root container." << std::endl;
+      return 1;
+    }
 
-  if (debug_this) {
-    std::cout << "user credentials: \t'" << uc_file       << "'" << std::endl;
-    std::cout << "csv file: \t\t'"       << csv_file      << "'" << std::endl;
-    std::cout << "container: \t\t'"      << cbe_container << "'" << std::endl;
-    std::cout << "line_header: \t\t'"    << line_header   << "'" << std::endl;
-    std::cout << "row_begin: \t\t'"      << row_begin     << "'" << std::endl;
-    std::cout << "row_count: \t\t'"      << row_count     << "'" << std::endl;
-  }
-  if (cbe_container.empty()) {
-    std::cout << "Error: CloudBackend container with full path has to be specified. "
-    << "help: " << argv[0] << " -?"
-    << std::endl;
-    return 1;
-  }
-  if (cbe_container == "/") {
-    std::cout << "Error: container for this usage may not be the root container." << std::endl;
-    return 1;
-  }
+    time_begin = std::time(nullptr);
+    this_login();
 
-  time_begin = std::time(nullptr);
-  this_login();
+    if (debug_this) {
+      std::cout << "About to login as: " << username << std::endl;
+    }
+    cbe::CloudBackend cloudBackend{cbe::DefaultCtor{}};
+    try
+    {
+      cloudBackend = cbe::CloudBackend::logIn(username, password, tenant, client);
+    }
+    catch (cbe::CloudBackend::LogInException& e)
+    {
+      std::cout << "Error! Login failed..." << e.what() << std::endl;
+      return 1;
+    }
+    std::cout << "login as: " << cloudBackend.account().username() << std::endl;
 
-  if (debug_this) {
-    std::cout << "About to login as: " << username << std::endl;
-  }
-  cbe::CloudBackend::LogInError logInError;
-  auto cloudBackend = cbe::CloudBackend::logIn(username, password, tenant, client, logInError);
-  std::cout << "login as: " << cloudBackend.account().username() << std::endl;
+    cbe::Container parentContainer = cloudBackend.account().rootContainer();
+    queryContainer(parentContainer, cbe_container);
 
-  if (logInError){
-    std::cout << "Error, login failed! \nError info="
-              << logInError << std::endl;
+    // waitUntilFinished();
+    std::cout << "Goodbye." << std::endl;
+    cloudBackend.terminate();
+  } catch (cbe::util::Exception& e) {
+    std::cout << "Error! "  << e.what() 
+              << "\nType: " << e.typeAsString()<< std::endl;
     return 2;
+  } catch (...) {
+    std::cout << "Error, caught unknown exception!" << std::endl;
+    return 9;
   }
-
-  cbe::Container parentContainer = cloudBackend.account().rootContainer();
-  queryContainer(parentContainer, cbe_container);
-
-  std::cout << "Goodbye." << std::endl;
-  cloudBackend.terminate();
   return 0;
 }
 
@@ -588,21 +599,13 @@ int main(int argc, char *argv[]) {
 void queryContainer(cbe::Container parentContainer, std::string name) {
   std::cout << "About to query container." << std::endl;
   _queryName = name;
-  cbe::Container::QueryError queryError;
-  auto queryResult = parentContainer.query(queryError);
-  if (queryError) {
-    std::cout << "Error! " << queryError << std::endl;
-    return;
-  }
-
-  cbe::QueryResult::ItemsSnapshot resultset = queryResult.getQueryResult().getItemsSnapshot();
+  auto queryResult = parentContainer.query().getQueryResult();
+  cbe::QueryResult::ItemsSnapshot resultset = queryResult.getItemsSnapshot();  
   // Look through the parent container to check if the name has already been 
   // used.
   cbe::Container subContainer{cbe::DefaultCtor{}};
   for (cbe::Item& item : resultset)
   {
-    // std::cout << item.name() << std::endl;
-
     if (debug_this) {
       std::cout << "comparing " << item.name() << " " 
                 << _queryName << std::endl;
@@ -628,22 +631,12 @@ void uploadToContainer(std::string path, std::string name, cbe::Container contai
   if (debug_this) {
     std::cout << "About to upload to container: " << container.name() << std::endl;
   }
-  cbe::Container::UploadError uploadError;
-  container.upload(name, path, uploadError);
-  if (uploadError) {
-    std::cout << "Error! " << uploadError << std::endl;
-    return;
-  }
+  container.upload(name, path);
 }
 
 cbe::Container createContainer(cbe::Container container, std::string name) {
   std::cout << "Create container: " << name << " located in container: " << container.name() << " (" << container.id() <<")" << std::endl;
-  cbe::Container::CreateContainerError createContainerError;
-  auto newContainer = container.createContainer(name, createContainerError);
-  if (createContainerError) {
-    std::cout << "Error! " << createContainerError << std::endl;
-  }
-  return *newContainer;
+  return container.createContainer(name);
 }
 
 
