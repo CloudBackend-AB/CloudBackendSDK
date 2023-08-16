@@ -19,7 +19,7 @@
 bool debug_this = false;    // if to print trace output
 bool finished = false;      // if the whole program work is finished 
 bool upload_done = false;   // if the file upload has been confirmed
-bool upload_error = false;  // error occured during upload
+bool upload_error = false;  // error occurred during upload
 float per_upload;           // time per upload
 float per_row;              // time per row uploaded in chunks
 int line_header = 0;        // csv line containing the column header, first is 0
@@ -28,7 +28,7 @@ int data_add  = 100000000;  // addition to representing the data set
 int data_mult = 1000000;    // multiplier representing the data set
 int data_set  = 0;          // csv file can contain multiple data sets where the row label numbers starts over
 int row_begin = 0;          // csv row number after the header to start uploading, first is 0
-int row_count = 999999;    // number of rows to upload
+int row_count = 999999;     // number of rows to upload
 int objects_written = 0;    // count of number of objects written
 int object_number;          // calculate numeric title of object
 int chunk_size = 50000;     // number of lines per object to write data
