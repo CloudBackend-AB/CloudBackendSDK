@@ -80,7 +80,7 @@ int main(void) {
 
   // Check if error
   if (queryError) {
-    std::cout << "Error!" << std::endl << logInError << std::endl;
+    std::cout << "Error!" << std::endl << queryError << std::endl;
     return 2;
   } else {
     // Look through the parent container to check
@@ -107,7 +107,7 @@ int main(void) {
 
   // Check if error
   if (createContainerError) {
-    std::cout << "Error!" << std::endl << logInError << std::endl;
+    std::cout << "Error!" << std::endl << createContainerError << std::endl;
     cloudBackend.terminate();
     return 4;
   } else {
@@ -129,7 +129,7 @@ int main(void) {
 
   // Check if error
   if (uploadError) {
-    std::cout << "Error!" << std::endl << logInError << std::endl;
+    std::cout << "Error!" << std::endl << uploadError << std::endl;
     cloudBackend.terminate();
     return 5;
   } else {
@@ -149,7 +149,7 @@ int main(void) {
 
   // Check if error
   if (queryError) {
-    std::cout << "Error!" << std::endl << logInError << std::endl;
+    std::cout << "Error!" << std::endl << queryError << std::endl;
     cloudBackend.terminate();
     return 6;
   } else {
@@ -179,7 +179,7 @@ int main(void) {
       newContainer.remove(removeError);
 
       if (removeError) {
-        std::cout << "Error!" << std::endl << logInError << std::endl;
+        std::cout << "Error!" << std::endl << removeError << std::endl;
         cloudBackend.terminate();
         return 7;
       } else {
