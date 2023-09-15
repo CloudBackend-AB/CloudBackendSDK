@@ -1,4 +1,4 @@
-![version](https://badgen.net/badge/version/2.1.0/green)
+![version](https://badgen.net/badge/version/2.1.1/green)
 ![platform](https://badgen.net/badge/platform/ubuntu)
 ![languages](https://badgen.net/badge/language/C++,Java,Android,iOS/purple?list=|)
 # CloudBackendSDK 2.1
@@ -71,3 +71,4 @@ Previous script calls
 - See each language folder
 ----
 #### Copyright © CloudBackend AB 2020-2023.
+
