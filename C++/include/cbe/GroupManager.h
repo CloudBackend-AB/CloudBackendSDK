@@ -25,8 +25,7 @@ class GroupManager;
 namespace cbe {
 
 /**
- * @brief to manage the users own Group.
- *
+ * @brief For managing the groups.
  */
 class GroupManager {
 public:
@@ -69,7 +68,7 @@ public:
    */
   using ListGroupsError = delegate::ListGroupsDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing]
    * <b>Synchronous</b> version of
    * listGroups(ListGroupsDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -147,7 +146,7 @@ public:
    */
   using SearchGroupsError = delegate::SearchGroupsDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing]
    * <b>Synchronous</b> version of
    * searchGroups(filter, parentGroupId, SearchGroupsDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return

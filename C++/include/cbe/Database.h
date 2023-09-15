@@ -18,7 +18,7 @@ namespace cbe {
 
 /**
  * @anchor anchorEx__cbe__Databases
- * @brief list of available databases.
+ * @brief A database.
  * 
  * @par Example
  *      Get the tenant Container object

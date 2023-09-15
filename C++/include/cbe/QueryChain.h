@@ -20,15 +20,22 @@ using QueryChainPtr = std::shared_ptr<CBI::QueryChain>;
 namespace cbe {
 
 /**
- * @brief to do a search for Object combining more than one Container table.
+ * @brief To do a search for Object combining more than one Container table.
  * 
+ * [Async] QueryChain is used when a query()
+ * is carried out with a solely
+ * \ref cbe::delegate::QueryDelegate "QueryDelegate".<br>
+ * Anyway, if a subsequent join() will be used, an additional
+ * \ref cbe::delegate::JoinDelegate "JoinDelegate"
+ * is required in the join()-call.
  */
 class QueryChain {
 public:
   using JoinDelegatePtr = delegate::JoinDelegatePtr;
   /**
    * Performs a join request in conjunction with a query, or previous join, 
-   * to get related items from another container.<br>
+   * to get related items from another container.
+   * 
    * <b>Asynchronous</b> version of this service function.
    *
    * @param containerToQuery
@@ -54,7 +61,8 @@ public:
                   std::string     key2,
                   JoinDelegatePtr joinDelegate);
   /**
-   * Same as join(Container,std::string,std::string,delegate::JoinDelegatePtr),
+   * Same as
+   * join(Container,std::string,std::string,delegate::JoinDelegatePtr),
    * but with an additional Filter parameter \p constraints .
    *
    * @param constraints A filter that provides any constraints for the query.
@@ -65,7 +73,8 @@ public:
                   Filter          constraints,
                   JoinDelegatePtr joinDelegate);
   /**
-   * Same as join(Container,std::string,std::string,delegate::JoinDelegatePtr),
+   * Same as
+   * join(Container,std::string,std::string,delegate::JoinDelegatePtr),
    * but with an additional Container parameter \p containerForResults .
    *
    * @param containerForResults Can be the Container from the previous query if
@@ -77,7 +86,8 @@ public:
                   Container       containerForResults,
                   JoinDelegatePtr joinDelegate);
   /**
-   * Same as join(Container,std::string,std::string,Container,delegate::JoinDelegatePtr),
+   * Same as
+   * join(Container,std::string,std::string,Container,delegate::JoinDelegatePtr),
    * but with an additional Filter parameter \p constraints .
    *
    * @param constraints A filter that provides any constraints for the query.
@@ -92,8 +102,8 @@ public:
   /**
    * Returns the QueryResult provided to the delegate after the the last query()
    * or join() call.
-   * If this method is called before the delegate call, an empty QueryResult is
-   * returned.
+   * If this method is called before the delegate call,
+   * an empty QueryResult is returned.
    */
   QueryResult getQueryResult() const;
 
@@ -118,20 +128,24 @@ private:
 }; // class QueryChain
 
 /**
- * @brief Extension of class QueryChain
+ * @brief Extension of class QueryChain.
  * 
- * Extension of class QueryChain offering join() methods that do not require
- * a delegate.<br>
- * Instead, the delegate passed as argument in previous invocation in the
- * call chain - i.e.:
+ * [Async] QueryChainExt is used when the query is carried out
+ * with subsequent intended join in mind.<br>
+ * I.e., we have passed a
+ * \ref cbe::delegate::QueryJoinDelegate "QueryJoinDelegate"
+ * to the previous call and that will then be reused in the trailing join()-call.
+ * It is an extension of class QueryChain offering join() methods
+ * that do not require a new delegate.<br>
+ * Instead, these will use the delegate passed as argument in the previous
+ * invocation in the call chain &mdash; i.e.:
  * <ul>
  *   <li> CloudBackend::query(ContainerId,delegate::QueryJoinDelegatePtr) and
  *        overloads.
  *   <li> Container::query(delegate::QueryJoinDelegatePtr) and overloads.
- *   <li> QueryChain::join(join(Container,std::string,std::string,JoinDelegatePtr)
+ *   <li> QueryChain::join(Container,std::string,std::string,JoinDelegatePtr)
  *        and overloads.
  * </ul>
- * will be used.
  */
 class QueryChainExt : public QueryChain {
 public:

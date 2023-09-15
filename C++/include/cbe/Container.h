@@ -1,5 +1,5 @@
 /*
-     Copyright © CloudBackend AB 2020-2023.
+     Copyright © CloudBackend AB 2020 - 2023.
 */
 
 #ifndef INCLUDE_CBE_CONTAINER_H_
@@ -57,8 +57,7 @@ namespace delegate {
 class Filter;
 
 /**
- * @brief collection of Item, can represent a table.
- * 
+ * @brief A collection of Item, can also represent a table or folder.
  */
 class Container : public cbe::Item
 {
@@ -70,6 +69,8 @@ public:
    */
   using CreateContainerDelegatePtr = delegate::CreateContainerDelegatePtr;
   /**
+   * @brief Create a container.
+   * 
    * Creates a container inside this container to be used for adding objects.
    * @param name Name of the container to be created.
    * @param delegate Pointer to a delegate::CreateContainerDelegate
@@ -83,7 +84,8 @@ public:
   */
   using CreateContainerException = delegate::CreateContainerDelegate::Exception;
   /**
-   * @brief Synchronous [exception]
+   * @brief Synchronous [exception] createContainer
+   * 
    * <b>Synchronous</b> version of
    * createContainer(const std::string&, CreateContainerDelegatePtr), 
    * and <b>throws an exception</b>, #CreateContainerException, in case of a 
@@ -105,7 +107,8 @@ public:
    */
   using CreateContainerError = delegate::CreateContainerDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing] createContainer
+   * 
    * <b>Synchronous</b> version of
    * createContainer(const std::string&, CreateContainerDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -136,8 +139,10 @@ public:
    */
   using MoveDelegatePtr = delegate::container::MoveDelegatePtr;
   /**
-   * Move is used to move container with its content to user specified location 
-   * e.g. other container or to root container.
+   * @brief Move a container to a different parent.
+   * 
+   * Used to move container with its content to user specified location 
+   * e.g., other container or to root container.
    * @param dstId id of the container to which it should be moved to.
    * @param delegate Pointer to a delegate::container::MoveDelegate instance 
    *                 that is implemented by the user.
@@ -150,7 +155,8 @@ public:
   */
   using MoveException = delegate::container::MoveDelegate::Exception;
   /**
-   * @brief Synchronous [exception]
+   * @brief Synchronous [exception] move
+   * 
    * <b>Synchronous</b> version of
    * move(cbe::ContainerId, MoveDelegatePtr)
    * , and <b>throws an exception</b>, #MoveException, in case of a failed
@@ -172,7 +178,8 @@ public:
    */
   using MoveError = delegate::container::MoveDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing] move
+   * 
    * <b>Synchronous</b> version of
    * move(dstId, MoveDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -203,6 +210,8 @@ public:
    */
   using RenameDelegatePtr = delegate::container::RenameDelegatePtr;
   /**
+   * @brief Change the name of the container.
+   * 
    * Rename the container.
    * @param name New name of the container.
    * @param delegate Pointer to a delegate::container::RenameDelegate instance
@@ -216,7 +225,8 @@ public:
   */
   using RenameException = delegate::container::RenameDelegate::Exception;
   /**
-   * @brief Synchronous [exception]
+   * @brief Synchronous [exception] rename
+   * 
    * <b>Synchronous</b> version of
    * rename(const std::string&, RenameDelegatePtr)
    * , and <b>throws an exception</b>, #RenameException, in case of a failed
@@ -238,7 +248,8 @@ public:
    */
   using RenameError = delegate::container::RenameDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing] rename
+   * 
    * <b>Synchronous</b> version of
    * rename(name, RenameDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -268,7 +279,10 @@ public:
    */
   using RemoveDelegatePtr = delegate::container::RemoveDelegatePtr;
   /**
+   * @brief Delete the container.
+   * 
    * Removes/deletes the container and all its content.
+   * 
    * @param delegate Pointer to a delegate::container::RemoveDelegate instance
    *                 that is implemented by the user.
    */
@@ -279,7 +293,8 @@ public:
   */
   using RemoveException = delegate::container::RemoveDelegate::Exception;
   /**
-   * @brief Synchronous [exception]
+   * @brief Synchronous [exception] remove/delete
+   * 
    * <b>Synchronous</b> version of
    * remove(RemoveDelegatePtr)
    * , and <b>throws an exception</b>, #RemoveException, in case of a failed
@@ -301,7 +316,8 @@ public:
    */
   using RemoveError = delegate::container::RemoveDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing] remove/delete
+   * 
    * <b>Synchronous</b> version of
    * remove(RemoveDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -327,16 +343,21 @@ public:
   /**
    * Pointer to cbe::delegate::CreateObjectDelegate that is passed into
    * asynchronous version of method
-   * @ref createObject(CreateObjectDelegatePtr) createObject()"
+   * @ref createObject(CreateObjectDelegatePtr) "createObject()"
    */
   using CreateObjectDelegatePtr = delegate::CreateObjectDelegatePtr;
   /**
-   * Creates an object with indexed tags or indexed tags + non indexed tags.
+   * @brief Create a new object.
+   * 
+   * Creates an object with indexed tags or indexed tags + non indexed tags
+   * a.k.a. metadata, key/value pairs.
    * @param name      Name of the object.
    * @param keyValues Optional map of key/value pairs (metadata).
    * @param delegate  Pointer to a delegate::CreateObjectDelegate instance
    *                  that is implemented by the user.
-   * \note The object name may not contain characters < & : / <br>
+   * \note If an old object with the same name already exists
+   * that will be removed.<br>
+   * The object name may not contain characters < & : / <br>
    * Any key name must start with a letter or _ <br>
    * The following key names are reserved and should not be used:
    * category, content, id, link and date <br>
@@ -358,7 +379,8 @@ public:
   */
   using CreateObjectException = delegate::CreateObjectDelegate::Exception;
   /**
-   * @brief Synchronous [exception]
+   * @brief Synchronous [exception] createObject
+   * 
    * <b>Synchronous</b> version of
    * createObject(std::string, cbe::KeyValues, CreateObjectDelegatePtr)
    * , and <b>throws an exception</b>, #CreateObjectException, in case of a 
@@ -381,7 +403,8 @@ public:
    */
   using CreateObjectError = delegate::CreateObjectDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing] createObject
+   * 
    * <b>Synchronous</b> version of
    * createObject(name, keyValues, CreateObjectDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -435,8 +458,9 @@ public:
                      UploadDelegatePtr  delegate);
 
   /**
-   * @brief Create an object in current container by uploading a file, named by
-   *        \p name, residing at \p path.
+   * @brief Create an object in current container by uploading a file.
+   * 
+   * Object is named by \p name, residing at \p path.
    * 
    * The @ref cbe::Object "object" being created is instantly returned with 
    * a temporary id. When the response is retrieved from from the server,
@@ -485,6 +509,8 @@ public:
    */
   using UploadException = delegate::UploadDelegate::Exception;
   /**
+   * @brief Synchronous [exception] upload.
+   * 
    * <b>Synchronous</b> version of
    * upload(const std::string&,UploadDelegatePtr)
    * , and <b>throws an exception</b>, #UploadException, in case of a failed
@@ -517,6 +543,8 @@ public:
                     delegate::ProgressEventFn&& progressEventFn);
 
   /**
+   * @brief Synchronous [exception] upload.
+   * 
    * Same as
    * upload(const std::string&,delegate::ProgressEventFn&&), but
    * without the parameter, \p progressEventFn.
@@ -525,6 +553,8 @@ public:
                     const std::string& filePath);
 
   /**
+   * @brief Synchronous [exception] upload with progress.
+   * 
    * <b>Synchronous</b> version of
    * upload(const std::string&,const std::string&,UploadDelegatePtr)
    * , and <b>throws an exception</b>, #UploadException, in case of a failed
@@ -544,6 +574,8 @@ public:
                     const std::string&          path,
                     delegate::ProgressEventFn&& progressEventFn);
   /**
+   * @brief Synchronous [exception] upload.
+   * 
    * Same as
    * upload(const std::string&, const std::string&, delegate::ProgressEventFn&&, 
    *        UploadError&)
@@ -554,6 +586,8 @@ public:
                     const std::string&          path);
 
   /**
+   * @brief Synchronous [exception] upload from memory with progress.
+   * 
    * <b>Synchronous</b> version of
    * upload(const std::string&,std::uint64_t,const char*,UploadDelegatePtr)
    * , and <b>throws an exception</b>, #UploadException, in case of a failed
@@ -574,6 +608,8 @@ public:
                     const char*                 byteData,
                     delegate::ProgressEventFn&& progressEventFn);
   /**
+   * @brief Synchronous [exception] upload from memory.
+   * 
    * Same as
    * upload(const std::string&,std::uint64_t,const char*,delegate::ProgressEventFn&&)
    * , but without the parameter, \p progressEventFn.
@@ -598,6 +634,8 @@ public:
   using UploadError = delegate::UploadDelegate::ErrorInfo;
 
   /**
+   * @brief Synchronous [non-throwing] upload with progress.
+   * 
    * Similar to synchronous method 
    * upload(const std::string&,delegate::ProgressEventFn&&)
    * , but <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -632,6 +670,8 @@ public:
                                     delegate::ProgressEventFn&& progressEventFn,
                                     UploadError&                error);
   /**
+   * @brief Synchronous [non-throwing] upload.
+   * 
    * Same as
    * upload(const std::string&,delegate::ProgressEventFn&&,UploadError&)
    * , but without the parameter, \p progressEventFn.
@@ -641,6 +681,8 @@ public:
                                     UploadError&                error);
 
   /**
+   * @brief Synchronous [non-throwing] upload with progress.
+   * 
    * Similar to synchronous method 
    * upload(const std::string&,const std::string&,delegate::ProgressEventFn&&)
    * , but <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -664,6 +706,8 @@ public:
                                     delegate::ProgressEventFn&& progressEventFn,
                                     UploadError&                error);
   /**
+   * @brief Synchronous [non-throwing] upload.
+   * 
    * Same as
    * upload(const std::string&, const std::string&, delegate::ProgressEventFn&&, 
    *        UploadError&)
@@ -675,6 +719,8 @@ public:
                                     UploadError&                error);
 
   /**
+   * @brief Synchronous [non-throwing] upload from memory with progress.
+   * 
    * Similar to synchronous method 
    * upload(const std::string&, std::uint64_t, const char*, delegate::ProgressEventFn&&)
    * , but <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -694,6 +740,8 @@ public:
                                     delegate::ProgressEventFn&& progressEventFn,
                                     UploadError&                error);
   /**
+   * @brief Synchronous [non-throwing] upload from memory.
+   * 
    * Same as
    * upload(const std::string&, std::uint64_t, const char*, 
    *        delegate::ProgressEventFn&&, UploadError&)
@@ -706,44 +754,64 @@ public:
                                     UploadError&                error);
 #endif // #ifndef CBE_NO_SYNC
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  /**
+   * Pointer to cbe::delegate::QueryDelegatePtr that is passed into
+   * asynchronous version of method
+   * @ref query(QueryDelegatePtr) "query()"
+   */
   using QueryDelegatePtr = delegate::QueryDelegatePtr;
   /**
+   * @brief Select list of objects.
+   * 
    * In line with function
    * CloudBackend::query(ContainerId, QueryDelegatePtr), but with
    * its \p ContainerId parameter excluded.
    * \see CloudBackend::query(ContainerId, QueryDelegatePtr)
    */
-    QueryChain query(QueryDelegatePtr  queryDelegate);
+  cbe::QueryChain query(QueryDelegatePtr  queryDelegate);
   /**
+   * @brief Select list of objects using filter.
+   * 
    * In line with function
    * CloudBackend::query(ContainerId, Filter, QueryDelegatePtr), but
    * with its \p ContainerId parameter excluded.
    * \see CloudBackend::query(ContainerId, Filter, QueryDelegatePtr)
    */
-  QueryChain query(Filter           filter,
+  cbe::QueryChain query(Filter           filter,
                    QueryDelegatePtr delegate);
                    
+  /**
+   * Pointer to cbe::delegate::QueryJoinDelegate that is passed into
+   * asynchronous version of method
+   * @ref query(QueryJoinDelegatePtr) "query()"
+   */
   using QueryJoinDelegatePtr = std::shared_ptr<delegate::QueryJoinDelegate>;
   /**
+   * @brief Select list of objects, for join.
+   * 
    * In line with function
    * CloudBackend::query(ContainerId, delegate::QueryJoinDelegatePtr), but with
    * its \p ContainerId parameter excluded.
    * \see CloudBackend::query(ContainerId, delegate::QueryJoinDelegatePtr)
    */
-  QueryChainExt query(delegate::QueryJoinDelegatePtr delegate);
+  cbe::QueryChainExt query(delegate::QueryJoinDelegatePtr delegate);
   /**
+   * @brief Select list of objects using filter, for join.
+   * 
    * In line with function
    * CloudBackend::query(ContainerId, Filter, delegate::QueryJoinDelegatePtr),
    * but with its \p ContainerId parameter excluded.
    * \see CloudBackend::query(ContainerId, Filter, delegate::QueryJoinDelegatePtr)
    */
-  QueryChainExt query(Filter                          filter,
+  cbe::QueryChainExt query(Filter                          filter,
                       delegate::QueryJoinDelegatePtr  delegate);
 
 #ifndef CBE_NO_SYNC
   /*! \see delegate::QueryDelegate::Exception */
   using QueryException = delegate::QueryDelegate::Exception;
   /**
+   * @brief Synchronous [exception] Select list of objects.
+   * 
    * In line with function
    * CloudBackend::query(ContainerId),
    * but with its \p ContainerId parameter excluded.
@@ -751,8 +819,10 @@ public:
    *
    * @throws #QueryException
    */
-  QueryChainSync query();
+  cbe::QueryChainSync query();
   /**
+   * @brief Synchronous [exception] Select list of objects using filter.
+   * 
    * In line with function
    * CloudBackend::query(ContainerId, Filter),
    * but with its \p ContainerId parameter excluded.
@@ -760,25 +830,29 @@ public:
    *
    * @throws #QueryException
    */
-  QueryChainSync query(Filter filter);
+  cbe::QueryChainSync query(Filter filter);
 
   /*! \see delegate::QueryJoinDelegate::ErrorInfo */
   using QueryJoinError = delegate::QueryJoinDelegate::ErrorInfo;
 
   /**
+   * @brief Synchronous [non-throwing] Select list of objects, for join.
+   * 
    * In line with function
    * CloudBackend::query(ContainerId, QueryJoinError&),
    * but with its \p ContainerId parameter excluded.
    * \see CloudBackend::query(ContainerId, QueryJoinError&)
    */
-  QueryChainSync query(QueryJoinError&  error);
+  cbe::QueryChainSync query(QueryJoinError&  error);
   /**
+   * @brief Synchronous [non-throwing] Select list of objects using filter, for join.
+   * 
    * In line with function
    * CloudBackend::query(ContainerId, Filter, QueryJoinError&),
    * but with its \p ContainerId parameter excluded.
    * \see CloudBackend::query(ContainerId, Filter, QueryJoinError&)
    */
-  QueryChainSync query(Filter           filter,
+  cbe::QueryChainSync query(Filter           filter,
                        QueryJoinError&  error);
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   /*! \see delegate::QueryDelegate::ErrorInfo */
@@ -792,6 +866,8 @@ public:
    */
 
   /**
+   * @brief Select list of objects in hierarchy.
+   * 
    * Queries the container with a given relative path, returns container with 
    * objects. \n 
    * E.g. /Documents/Pictures will return objects and subContainers for 
@@ -810,7 +886,8 @@ public:
   */
   using queryWithPathException = delegate::QueryDelegate::Exception;
   /**
-   * @brief Synchronous [exception]
+   * @brief Synchronous [exception] queryWithPath.
+   * 
    * <b>Synchronous</b> version of
    * queryWithPath(relativePath, queryWithPathDelegatePtr)
    * , and <b>throws an exception</b>, #queryWithPathException, in case of a 
@@ -832,7 +909,8 @@ public:
    */
   using queryWithPathError = delegate::QueryDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing] queryWithPath.
+   * 
    * <b>Synchronous</b> version of
    * queryWithPath(relativePath, queryWithPathDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -862,6 +940,8 @@ public:
    * @ref search(std::string, QueryDelegatePtr) "search()"
    */
   /**
+   * @brief Search by tags.
+   * 
    * Search the whole container for tags related to Objects in the container 
    * structure. \n 
    * E.g. Key = Name, Value Contract/Object/Song => Name:Contract1.
@@ -884,7 +964,8 @@ public:
   */
   using SearchException = delegate::QueryDelegate::Exception;
   /**
-   * @brief Synchronous [exception]
+   * @brief Synchronous [exception] search.
+   * 
    * <b>Synchronous</b> version of
    * search(std::string, QueryDelegatePtr)
    * , and <b>throws an exception</b>, #SearchException, in case of a failed
@@ -906,7 +987,8 @@ public:
    */
   using SearchError = delegate::QueryDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing] search.
+   * 
    * <b>Synchronous</b> version of
    * search(tags, QueryDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -930,6 +1012,8 @@ public:
 #endif // #ifndef CBE_NO_SYNC
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   /**
+   * @brief Search using filter.
+   * 
    * Search the whole container for tags related to Objects in the container 
    * structure. \n 
    * E.g. Key = Name, Value Contract/Object/Song => Name:Contract1.
@@ -955,7 +1039,8 @@ public:
 
 #ifndef CBE_NO_SYNC
   /**
-   * @brief Synchronous [exception]
+   * @brief Synchronous [exception] search using filter.
+   * 
    * <b>Synchronous</b> version of
    * search(cbe::Filter, SearchDelegatePtr)
    * , and <b>throws an exception</b>, #SearchException, in case of a failed
@@ -970,7 +1055,8 @@ public:
   cbe::QueryResult search(cbe::Filter);
   
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing] search.
+   * 
    * <b>Synchronous</b> version of
    * search(filter, SearchDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -1000,6 +1086,8 @@ public:
    */
   using SetAclDelegatePtr = delegate::AclDelegatePtr;
   /**
+   * @brief set ACL.
+   * 
    * Set the Access Control List \c ACL for the container. 
    * For containers set does set the whole container tree, 
    * so all its sub items as well. 
@@ -1019,7 +1107,8 @@ public:
   */
   using SetAclException = delegate::AclDelegate::Exception;
   /**
-   * @brief Synchronous [exception]
+   * @brief Synchronous [exception] setAcl.
+   * 
    * <b>Synchronous</b> version of
    * setAcl(cbe::AclMap, SetAclDelegatePtr)
    * , and <b>throws an exception</b>, #SetAclException, in case of a failed
@@ -1041,7 +1130,8 @@ public:
    */
   using SetAclError = delegate::AclDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing] setAcl.
+   * 
    * <b>Synchronous</b> version of
    * setAcl(aclMap, SetAclDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -1072,6 +1162,8 @@ public:
    */
   using GetAclDelegatePtr = delegate::AclDelegatePtr;
   /**
+   * @brief Retrieves its ACL map.
+   * 
    * get the Access Control List \c ACL of the Container.
    * @param delegate  Pointer to a delegate::AclDelegate instance
    *                  that is implemented by the user.
@@ -1084,7 +1176,8 @@ public:
   */
   using GetAclException = delegate::AclDelegate::Exception;
   /**
-   * @brief Synchronous [exception]
+   * @brief Synchronous [exception] getAcl.
+   * 
    * <b>Synchronous</b> version of
    * getAcl(GetAclDelegatePtr)
    * , and <b>throws an exception</b>, #GetAclException, in case of a failed
@@ -1106,7 +1199,8 @@ public:
    */
   using GetAclError = delegate::AclDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing] getAcl.
+   * 
    * <b>Synchronous</b> version of
    * getAcl(GetAclDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -1135,6 +1229,8 @@ public:
    */
   using ShareDelegatePtr = delegate::ShareDelegatePtr;
   /**
+   * @brief Make accessible by other user.
+   * 
    * Shares a container and its content to a user.  This provides the user the 
    * ability to access what has been shared to them via the listAvailableShares
    * command.  To allow users to view and change shared information see \c ACL .
@@ -1155,7 +1251,8 @@ public:
   */
   using ShareException = delegate::ShareDelegate::Exception;
   /**
-   * @brief Synchronous [exception]
+   * @brief Synchronous [exception] share.
+   * 
    * <b>Synchronous</b> version of
    * share(cbe::UserId, std::string, ShareDelegatePtr)
    * , and <b>throws an exception</b>, #ShareException, in case of a failed
@@ -1178,7 +1275,8 @@ public:
    */
   using ShareError = delegate::ShareDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing] share.
+   * 
    * <b>Synchronous</b> version of
    * share(toUserGroup, description, ShareDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -1210,6 +1308,8 @@ public:
    */
   using UnShareDelegatePtr = std::shared_ptr<delegate::UnShareDelegate>;
   /**
+   * @brief Revoke a previous share.
+   * 
    * unShare the container to a specific shareId created when sharing. Each 
    * share is unique between user/group and the one sharing. This is represented
    * with a unique share id.
@@ -1226,7 +1326,8 @@ public:
   */
   using UnShareException = delegate::UnShareDelegate::Exception;
   /**
-   * @brief Synchronous [exception]
+   * @brief Synchronous [exception] unShare.
+   * 
    * <b>Synchronous</b> version of
    * unShare(UnShareDelegatePtr)
    * , and <b>throws an exception</b>, #UnShareException, in case of a failed
@@ -1248,7 +1349,8 @@ public:
    */
   using UnShareError = delegate::UnShareDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing] unShare.
+   * 
    * <b>Synchronous</b> version of
    * unShare(UnShareDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -1304,7 +1406,8 @@ public:
   */
   using PublishException = delegate::PublishDelegate::Exception;
   /**
-   * @brief Synchronous [exception]
+   * @brief Synchronous [exception] publish.
+   * 
    * <b>Synchronous</b> version of
    * publish(cbe::PublishAccess, cbe::PublishVisibility, std::string,
    *         std::string, PublishDelegatePtr)
@@ -1331,7 +1434,8 @@ public:
    */
   using PublishError = delegate::PublishDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing] publish.
+   * 
    * <b>Synchronous</b> version of
    * publish(security, privacy, description, password, PublishDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -1360,6 +1464,11 @@ public:
 #endif // #ifndef CBE_NO_SYNC
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+  /**
+   * Pointer to cbe::delegate::UnPublishDelegatePtr that is passed into
+   * asynchronous version of method
+   * @ref unPublish(UnPublishDelegatePtr) "unPublish()"
+   */
   using UnPublishDelegatePtr = delegate::UnPublishDelegatePtr;
   /**
    * @brief UnPublishes this container.
@@ -1384,7 +1493,8 @@ public:
   */
   using UnPublishException = delegate::UnPublishDelegate::Exception;
   /**
-   * @brief Synchronous [exception]
+   * @brief Synchronous [exception] unPublish.
+   * 
    * <b>Synchronous</b> version of
    * unPublish(UnPublishDelegatePtr)
    * , and <b>throws an exception</b>, #UnPublishException, in case of a failed
@@ -1406,7 +1516,8 @@ public:
    */
   using UnPublishError = delegate::UnPublishDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing] unPublish.
+   * 
    * <b>Synchronous</b> version of
    * unPublish(UnPublishDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -1454,7 +1565,8 @@ public:
   */
   using UnSubscribeException = delegate::UnSubscribeDelegate::Exception;
   /**
-   * @brief Synchronous [exception]
+   * @brief Synchronous [exception] unSubscribe.
+   * 
    * <b>Synchronous</b> version of
    * unSubscribe(UnSubscribeDelegatePtr)
    * , and <b>throws an exception</b>, #UnSubscribeException, in case of a failed
@@ -1476,7 +1588,8 @@ public:
    */
   using UnSubscribeError = delegate::UnSubscribeDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing] unSubscribe.
+   * 
    * <b>Synchronous</b> version of
    * unSubscribe(UnSubscribeDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return

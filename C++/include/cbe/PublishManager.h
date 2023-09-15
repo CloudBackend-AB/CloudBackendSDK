@@ -16,7 +16,7 @@ class PublishManager;
 namespace cbe {
 
 /** 
- * @brief list of web shares.
+ * @brief Managing the list of web shares.
  */ 
 class PublishManager {
 public:

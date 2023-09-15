@@ -52,7 +52,7 @@ namespace cbe
 {
 
 /**
- * @brief holder of a set of data, can represent a table row.
+ * @brief Holder of a set of data, can represent a table row.
  * 
  * \note The object name may not contain characters < & : / <br>
  * Any key name must start with a letter or _ <br>
@@ -399,8 +399,11 @@ public:
    * 
    * @param delegate  Pointer to a delegate::DownloadBinaryDelegate instance
    *                  that is implemented by the user.
+   * @param sizeLimit Blocks anything larger than the size limit the 
+   *                  user inputs. Prevents accidental downloads of 
+   *                  too large objects on to the device.
    */ 
-  void download(
+  void download(std::size_t&& sizeLimit,
                 DownloadBinaryDelegatePtr delegate);
 #ifndef CBE_NO_SYNC
   /**
@@ -427,14 +430,14 @@ public:
    *
    * @throws #DownloadBinaryException
    */
-  delegate::DownloadBinarySuccess download(
+  delegate::DownloadBinarySuccess download(std::size_t&& sizeLimit,
                                   delegate::ProgressEventFn&& progressEventFn);
   /**
    * Same as
    * download(delegate::ProgressEventFn&&)
    * , but without the parameter, \p progressEventFn.
    */
-  delegate::DownloadBinarySuccess download();
+  delegate::DownloadBinarySuccess download(std::size_t&& sizeLimit);
 
   /**
    * Forms the type of the \p error return parameter for the synchronous version
@@ -468,6 +471,7 @@ public:
    *         \p error out/return parameter.
    */
   cbe::util::Optional<delegate::DownloadBinarySuccess> download(
+                                    std::size_t&& sizeLimit,
                                     delegate::ProgressEventFn&& progressEventFn,
                                     DownloadBinaryError&        error);
   /**
@@ -476,6 +480,7 @@ public:
    * , but without the parameter, \p progressEventFn.
    */
   cbe::util::Optional<delegate::DownloadBinarySuccess> download(
+                                    std::size_t&& sizeLimit,
                                     DownloadBinaryError&        error);
 #endif // #ifndef CBE_NO_SYNC
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -731,8 +736,10 @@ public:
    */
 using UpdateKeyValuesDelegatePtr = delegate::UpdateKeyValuesDelegatePtr;
   /**
-   * Adds key/value pair data to the object.
-   * \note Existing key will be overwritten, otherwise created. <br>
+   * @brief  Adds key/value pair data to the object.
+   * 
+   * <b>Asynchronous</b> version of this service function.
+   * \note All existing key will be overwritten, new created. <br>
    * Any key name must start with a letter or _ <br>
    * The following key names are reserved and should not be used:
    * category, content, id, link and date <br>
@@ -746,10 +753,12 @@ using UpdateKeyValuesDelegatePtr = delegate::UpdateKeyValuesDelegatePtr;
                        UpdateKeyValuesDelegatePtr delegate);
 
   /**
+   * @brief  Deletes all key/value pairs of data to the object.
+   * 
    * Same as
-   * updateKeyValues(KeyValues,UpdateKeyValuesDelegatePtr), but without
-   * the \p keyValues parameter.
-   * \note Any existing key/values will be erased.
+   * updateKeyValues(KeyValues,UpdateKeyValuesDelegatePtr),
+   * but without the \p keyValues parameter.
+   * \note Any and all existing key/values will be erased.
    */
   void updateKeyValues(
                        UpdateKeyValuesDelegatePtr delegate);
@@ -759,10 +768,12 @@ using UpdateKeyValuesDelegatePtr = delegate::UpdateKeyValuesDelegatePtr;
    */
   using UpdateKeyValuesException = delegate::UpdateKeyValuesDelegate::Exception;
   /**
+   * @brief Synchronous [exception] Adds key/value pair data to the object.
+   * 
    * <b>Synchronous</b> version of
    * updateKeyValues(KeyValues,UpdateKeyValuesDelegatePtr)
-   * , and <b>throws an exception</b>, #UpdateKeyValuesException, in case of a failed
-   * call.
+   * , and <b>throws an exception</b>, #UpdateKeyValuesException,
+   * in case of a failed call.
    * <br>See updateKeyValues(UpdateKeyValuesDelegatePtr)
    *
    * @return Current object that was uploaded
@@ -774,6 +785,9 @@ using UpdateKeyValuesDelegatePtr = delegate::UpdateKeyValuesDelegatePtr;
   cbe::Object updateKeyValues(
                               KeyValues keyValues);
   /**
+   * @brief Synchronous [exception] Deletes all key/value pairs of data
+   *        to the object.
+   * 
    * Same as
    * updateKeyValues(KeyValues), but without
    * the \p keyValues parameter.
@@ -788,6 +802,8 @@ using UpdateKeyValuesDelegatePtr = delegate::UpdateKeyValuesDelegatePtr;
    */
   using UpdateKeyValuesError = delegate::UpdateKeyValuesDelegate::ErrorInfo;
   /**
+   * @brief Synchronous [non-throwing] Adds key/value pair data to the object.
+   * 
    * <b>Synchronous</b> version of
    * updateKeyValues(KeyValues,UpdateKeyValuesDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -810,6 +826,9 @@ using UpdateKeyValuesDelegatePtr = delegate::UpdateKeyValuesDelegatePtr;
                                               KeyValues             keyValues,
                                               UpdateKeyValuesError& error);
   /**
+   * @brief Synchronous [non-throwing] Deletes all key/value pairs of data
+   *        to the object.
+   * 
    * Same as
    * updateKeyValues(KeyValues,UpdateKeyValuesError&), but without
    * the \p keyValues parameter.

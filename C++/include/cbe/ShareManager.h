@@ -20,9 +20,8 @@ class ShareManager;
 
 namespace cbe {
 /**
- * @brief a list of shares.
+ * @brief Managing Shares.
  * 
- * For Managing Shares.
  * This class represents a list of Shares.
  */
 class ShareManager {
@@ -76,7 +75,7 @@ public:
    */
   using ListSharesError = delegate::ListSharesDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing]
    * <b>Synchronous</b> version of
    * listAvailableShares(ListSharesDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -141,7 +140,7 @@ public:
    */
   using ListMySharesError = delegate::ListSharesDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing]
    * <b>Synchronous</b> version of
    * listMyShares(ListSharesDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return

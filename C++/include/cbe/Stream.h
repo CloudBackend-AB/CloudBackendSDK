@@ -17,8 +17,9 @@ class Stream;
 namespace cbe {
 
 /**
- * @brief binary data attached to Object
+ * @brief A data file attached to Object.
  * 
+ * An object kan have zero, one or many streams.
  */
 class Stream {
 public:

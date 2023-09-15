@@ -17,7 +17,7 @@ using SubscribePtr = std::shared_ptr<CBI::Subscribe>;
 namespace cbe {
 
 /**
- * @brief manages a subscribed Item.
+ * @brief Managing a subscribed Item.
  * 
  * To inspect the settings of a subscription.
  */

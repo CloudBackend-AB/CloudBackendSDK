@@ -28,7 +28,7 @@ namespace cbe
 {
 
 /** 
- * @brief set made up of Container and Object
+ * @brief A set made up of Container and Object.
  * 
  * Class for an Item.
  * This is class is the base class of Objects and Containers.

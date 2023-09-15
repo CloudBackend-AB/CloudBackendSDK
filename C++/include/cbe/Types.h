@@ -16,20 +16,57 @@
  * @brief Root namespace for the %CloudBackend SDK API.
  * 
  * Located in Types.h
- * that should be included.
+ * that should be included in programs.
  */
 namespace cbe {
 
+  class Account;
+  class CloudBackend;
+  class Container;
+  class Database;
+  class Filter;
+  class Group;
+  class GroupFilter;
+  class GroupManager;
+  class GroupQueryResult;
+  class Item;
+  class Member;
+  class Object;
+  class Publish;
+  class PublishManager;
+  class QueryChain;
+  class QueryChainSync;
+  class QueryResult;
+  class Role;
+  class ShareManager;
+  class Stream;
+  class Subscribe;
+  class SubscribeManager;
+
   // Type definitions for ids, enums, settings and failure codes
 
+  /**
+   * @brief Identifies ACL-group.
+   * 
+   * Representation that can be a UserId or GroupId.
+   * 
+   * I.e., the union set: \n 
+   * AclGroupId = UserId &cup; GroupId.
+   */
+  using AclGroupId  = std::uint64_t;
   /**
    * @brief Unique Id of a cbe::Container
    */ 
   using ContainerId = std::uint64_t;
   /**
-   * @brief time-stamp in the unix epoch format.
+   * @brief The id of a Database.
+   */
+  using DatabaseId  = std::uint64_t;
+  /**
+   * @brief A time-stamp in the unix epoch format.
    * 
-   * A.k.a. POSIX time or time-stamp. \n 
+   * A.k.a. POSIX time or time-stamp.
+   * 
    * The equivalent in Linux shell can be found using e.g.,
    * \code {.sh}
    * date +%s --utc --date='now'
@@ -42,41 +79,29 @@ namespace cbe {
    */
   using Date        = std::uint64_t;
   /**
-   * @brief The id of a database.
-   */
-  using DatabaseId  = std::uint64_t;
-  /**
  * @brief Uniquely identifies the Group.
    */
   using GroupId     = std::uint64_t;
-  /**
-   * @brief Uniquely identifies the Group.
-   */
-  using RoleId      = std::uint64_t;
   /**
    * @brief Id of a cbe::Container or cbe::Object
    */ 
   using ItemId      = std::uint64_t;
   /**
+   * @brief Represents the cbe::Group membership id. 
+   */
+  using MemberId    = std::uint64_t;
+  /**
    * @brief Unique Id of a cbe::Object
    */ 
   using ObjectId    = std::uint64_t;
   /**
-   * @brief Uniquely identifies the CBE user.
-   */
-  using UserId      = std::uint64_t;
-  /**
-   * @brief Represents the cbe::Group membership. 
-   */
-  using MemberId    = std::uint64_t;
-  /**
-   * @brief Id of a cbe::Container or cbe::Object
-   */ 
-  using SubscribeId = std::uint64_t;
-  /**
    * @brief Id of a subscribed cbe::Container or cbe::Object.
    */ 
   using PublishId   = std::uint64_t;
+  /**
+   * @brief Uniquely identifies the Role.
+   */
+  using RoleId      = std::uint64_t;
   /**
    * @brief Uniquely identifies a sharing of a cbe::Container or cbe::Object
    * 
@@ -87,35 +112,124 @@ namespace cbe {
    * 
    */
   using StreamId    = std::uint64_t;
+  /**
+   * @brief Id of a subscription of a cbe::Container or cbe::Object
+   */ 
+  using SubscribeId = std::uint64_t;
+  /**
+   * @brief Uniquely identifies the CBE user number.
+   */
+  using UserId      = std::uint64_t;
 
   using account_status_t      = std::uint32_t;
   using failed_status_t       = std::uint32_t;
   using http_t                = std::uint32_t;
+  using publish_access_t      = std::uint32_t;
+  using publish_visibility_t  = std::uint32_t;
   using sync_direction_t      = std::uint32_t;
   using sync_status_t         = std::uint32_t;
   using transfer_t            = std::uint32_t;
-  using publish_access_t      = std::uint32_t;
-  using publish_visibility_t  = std::uint32_t;
+  /**
+    * @brief Mimics the general error code encoding in the www.
+    * 
+    * see [Wikipedia: List of HTTP status codes]
+    *      (https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
+    */
+  using ErrorCode             = std::uint32_t;
 
-  using permission_status_t   = int;
+  using application_t         = int;
   using item_t                = int;
+  using object_t              = int;
+  using permission_status_t   = int;
   using stream_t              = int;
   using visibility            = int;
-  using application_t         = int;
-  using object_t              = int;
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
   /**
-   * ApplicationType is not used in this version of groups but will be added
-   * later.
+   * Callback for login returns one of these three in callback.
+   * <ol>
+   *   <li>NotLoggedIn </li>
+   *   <li>LoggedIn </li>
+   *   <li>Failed </li>
+   * </ol>
    */
-  enum class ApplicationType : application_t {
-    Open   = 1,
-    Invite = 2,
-    Review = 3,
-    Closed = 4
+  enum class AccountStatus : cbe::account_status_t {
+    NotLoggedIn = 1,
+    LoggedIn    = 2,
+    Failed      = 3
   };
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+  /**
+   * Enum that determines different ACL categories
+  */
+  enum class AclScope : uint64_t {
+    User = 1,
+    Group = 2,
+    Role = 3,
+  };
+
+  /**
+   * @brief Default constructor marker.
+   * 
+   * To default construct objects from most of the %CloudBackend classes, this
+   * marker type is required.
+   * \par Example use
+   * \code {.cpp}
+     ~~~
+     // Conceptually, a default construction of an instance of cbe::Container 
+     cbe::Container myContainer{ cbe::DefaultCtor{} }; 
+     // Ditto
+     cbe::Object    myObject{ cbe::DefaultCtor{} };
+     ~~~
+   * \endcode
+   * 
+   */
+  enum DefaultCtor {};
+
+  /**
+   * Set the filter order in which the search or query will be sorted after.
+   * 
+   * <ol>
+   *   <li>Title </li>
+   *   <li>Relevance </li>
+   *   <li>Published </li>
+   *   <li>Updated </li>
+   *   <li>Length </li>
+   *   <li>S1 </li>
+   *   <li>S2 </li>
+   *   <li>S3 </li>
+   *   <li>S4 </li>
+   * </ol>
+  */
+  enum class FilterOrder : uint32_t {
+    Title     = 1,
+    Relevance = 2,    //Note* group Searches does not use Relevance as order.
+    Published = 3,
+    Updated   = 4,
+    Length    = 5,
+    S1        = 6,
+    S2        = 7,
+    S3        = 8,
+    S4        = 9
+  };
+
+  /**
+   * ItemType can be used to sort out cbe objects if the user would like to
+   * create a container to put all different kinds of cbe objects in. E.g.,
+   * <ul>
+   *   <li>Object </li>
+   *   <li>Container </li>
+   *   <li>Group </li>
+   * </ul>
+  */
+  enum class ItemType : cbe::item_t  {
+    Unapplicable =  1,
+    Unknown      =  2,
+    Object       =  4,
+    Container    =  8,
+    Tag          = 16,
+    Group        = 32
+  };
 
   /**
    * Type of invite. 
@@ -126,42 +240,10 @@ namespace cbe {
     ShareInvite  = 3
   };
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-  /**
-   * HttpType is used when you want to call rest requests directly.
-   * 
-   * CloudMe test.
-   * \note This might in the future be taken out since we may parse 
-   * the URI string where the request type would be present instead.
-  */
-  enum class HttpType : http_t {
-    GET    = 1,
-    POST   = 2,
-    PUT    = 3,
-    DELETE = 4,
-    HEAD   = 5
-  };
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
-  /**
-   * Visibility is used for both groups and members, in this version 
-   * the member visibility will be Public for all members who join a group.
-   * 
-   * Members will in the future also have the option of visibility friends.
-   * 
-   * <ol>
-   *   <li>Public </li>
-   *   <li>Private </li>
-   * </ol>
-  */
-  enum class Visibility : visibility {
-    Public  = 1,
-    Private = 2
-  }; 
-
   /**
    * @brief Represents the access permission that can be set for any
    * cbe::Object or cbe::Container.
+   * 
    * Forms the the possible different combinations of:
    * <ul>
    *   <li> 1: Read
@@ -215,53 +297,6 @@ namespace cbe {
   };
 
   /**
-   * Set the filter order in which the search or query will be sorted after.
-   * 
-   * <ol>
-   *   <li>Title </li>
-   *   <li>Relevance </li>
-   *   <li>Published </li>
-   *   <li>Updated </li>
-   *   <li>Length </li>
-   *   <li>S1 </li>
-   *   <li>S2 </li>
-   *   <li>S3 </li>
-   *   <li>S4 </li>
-   * </ol>
-  */
-  enum class FilterOrder : uint32_t {
-    Title     = 1,
-    Relevance = 2,    //Note* group Searches does not use Relevance as order.
-    Published = 3,
-    Updated   = 4,
-    Length    = 5,
-    S1        = 6,
-    S2        = 7,
-    S3        = 8,
-    S4        = 9
-  };
-  
-
-  /**
-   * ItemType can be used to sort out cbe objects if the user would like to
-   * create a container to put all different kinds of cbe objects in.
-   * <ul>
-   *   <li>Object </li>
-   *   <li>Container </li>
-   *   <li>Tag </li>
-   *   <li>Group </li>
-   * </ul>
-  */
-  enum class ItemType : cbe::item_t  {
-    Unapplicable =  1,
-    Unknown      =  2,
-    Object       =  4,
-    Container    =  8,
-    Tag          = 16,
-    Group        = 32
-  };
-
-  /**
    * Access permission for publish
    * 
    * <ol>
@@ -293,54 +328,47 @@ namespace cbe {
   };
 
   /**
-   * Callback for login returns one of these three in callback.
+   * Visibility is used for both groups and members, in this version 
+   * the member visibility will be Public for all members who join a group.
+   * 
+   * Members will in the future also have the option of visibility friends.
+   * 
    * <ol>
-   *   <li>NotLoggedIn </li>
-   *   <li>LoggedIn </li>
-   *   <li>Failed </li>
+   *   <li>Public </li>
+   *   <li>Private </li>
    * </ol>
-   */
-  enum class AccountStatus : cbe::account_status_t {
-    NotLoggedIn = 1,
-    LoggedIn    = 2,
-    Failed      = 3
-  };
+  */
+  enum class Visibility : visibility {
+    Public  = 1,
+    Private = 2
+  }; 
+
 
   /**
-   * @brief Default constructor marker.
+   * @brief ACL map (<b>Access</b> <b>Control</b> <b>List</b>)
+   * relating to users and groups.
    * 
-   * To default construct objects from most of the %CloudBackend classes, this
-   * marker type is required.
-   * \par Example use
-   * \code {.cpp}
-     ~~~
-     // Conceptually, a default construction of an instance of cbe::Container 
-     cbe::Container myContainer{ cbe::DefaultCtor{} }; 
-     // Ditto
-     cbe::Object    myObject{ cbe::DefaultCtor{} };
-     ~~~
-   * \endcode
+   * Map of a specific user or group,
+   * in terms of cbe::UserId or cbe::GroupId
+   * and its cbe::Permission on a Container or Object,
+   * to represent access permissions for specific users or groups.
+   */
+  using AclMap = std::map<cbe::AclGroupId, std::pair<cbe::Permissions, AclScope>>;
+
+  /**
+   * @brief @ref cbe::Database "Databases" available for the
+   * @ref cbe::Account "account".
+   */
+  using DataBases = std::map<std::string, cbe::Database>;
+
+  /**
+   * @brief Collection of @ref cbe::Item "items".
+   */
+  using Items = std::vector<cbe::Item>;
+
+  /**
+   * @brief Map with key/value pairs, a.k.a. metadata.
    * 
-   */
-  enum DefaultCtor {};
-
-  /**
-    * @brief Mimics the general error code encoding in the www.
-    * see [Wikipedia: List of HTTP status codes]
-    *      (https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
-    */
-  using ErrorCode = std::uint32_t;
-
-  /**
-   * @brief ACL map (<b>Access</b> <b>Control</b> <b>List</b>) of users and
-   * groups.
-   * Map of a specific user, in terms of cbe::UserId, and its cbe::Permission,
-   * to represent permissions for specific users.
-   */
-  using AclMap = std::map<cbe::UserId, cbe::Permissions>;
-
-  /**
-   * @brief Map with key/value pairs, a.k.a. metadata.<br>
    * Can be applied on @ref cbe::Object but not on @ref cbe::Container.<br>
    * <ul>
    *   <li> <b>key</b> uniquely identifies the value; name must start with a letter or _
@@ -354,48 +382,11 @@ namespace cbe {
    */ 
   using KeyValues = std::map<std::string, std::pair<std::string, bool>>;
 
-  class Account;
-  class CloudBackend;
-  class Container;
-  class Database;
-  class Filter;
-  class Group;
-  class GroupFilter;
-  class GroupManager;
-  class GroupQueryResult;
-  class Item;
-  class Member;
-  class Object;
-  class Publish;
-  class PublishManager;
-  class QueryChain;
-  class QueryResult;
-  class Role;
-  class ShareManager;
-  class Stream;
-  class Subscribe;
-  class SubscribeManager;
-
-  /**
-   * @brief @ref cbe::Database "Databases" available for the
-   * @ref cbe::Account "account".
-   */
-  using DataBases = std::map<std::string, cbe::Database>;
-
-  /**
-   * @brief Collection of @ref cbe::Item "items".
-   */
-  using Items = std::vector<cbe::Item>;
-
-  struct ShareData;
-  /**
-   * @brief Map of cbe::ShareData for a specific cbe::ShareId.
-   */
-  using ShareIds = std::map<cbe::ShareId, std::vector<cbe::ShareData>>;
-
   /**
    * @brief Map of a pair of @ref cbe::Member "members", associated with ban
-   *        information, where:
+   *        information.
+   * 
+   * Structure:
    * <ul>
    *   <li> <b>Key</b> is formed by a [<b><c>std::pair</c></b>]
    *        (https://en.cppreference.com/w/cpp/utility/pair) of
@@ -410,9 +401,19 @@ namespace cbe {
    *     <ul>
    *       <li> @ref cbe::Date "date" of the ban
    *       <li> a free text reason message.
+   *     </ul>
    */
   using MemberBanInfo = std::map<std::pair<cbe::MemberId, cbe::MemberId>,
                                  std::pair<cbe::Date, std::string>>;
+
+  struct ShareData;
+  /**
+   * @brief Map of cbe::ShareData for a specific cbe::ShareId.
+   */
+  using ShareIds = std::map<cbe::ShareId, std::vector<cbe::ShareData>>;
+
+
+
 
   /**
    * @brief Root namespace for the delegate interfaces.
@@ -436,13 +437,11 @@ namespace cbe {
   } // namespace delegate
 
   /**
-   * @brief general utilities
+   * @brief General support program utilities.
    */
   namespace util {}
 
 }// namespace cbe
-
-
 
 
 #endif // INCLUDE_CBE_TYPES_H_

@@ -36,7 +36,7 @@ using GroupDelegatePtr = std::shared_ptr<GroupEventProtocol>;
 namespace cbe {
 
 /**
- * @brief list of memberships to Group
+ * @brief A group of members.
  * 
  */
 class Group {
@@ -222,7 +222,7 @@ public:
    */
   using JoinError = delegate::group::JoinDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception] Ask to join a group.
+   * @brief Synchronous [non-throwing] Ask to join a group.
    * <b>Synchronous</b> version of
    * join(alias, memberVisibility, applicationComment, JoinError&,JoinDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -290,7 +290,7 @@ public:
    */
   using LeaveError = delegate::LeaveDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception] leaves the specified group.
+   * @brief Synchronous [non-throwing] leaves the specified group.
    * <b>Synchronous</b> version of
    * leave(LeaveDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -358,7 +358,7 @@ public:
    */
   using RemoveError = delegate::group::RemoveDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception] removes the specified group.
+   * @brief Synchronous [non-throwing] removes the specified group.
    * <b>Synchronous</b> version of
    * remove(RemoveDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -423,7 +423,7 @@ public:
    */
   using RenameError = delegate::group::RenameDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception] renames a group
+   * @brief Synchronous [non-throwing] renames a group
    * <b>Synchronous</b> version of
    * rename(newName,RenameDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -492,7 +492,7 @@ public:
    */
   using ListMembersError = delegate::ListMembersDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception] list members of the specifed group.
+   * @brief Synchronous [non-throwing] list members of the specifed group.
    * <b>Synchronous</b> version of
    * listMembers(ListMembersDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -557,7 +557,7 @@ public:
    */
   using ListBannedMembersError = delegate::ListMembersDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception] list the banned members of the specified 
+   * @brief Synchronous [non-throwing] list the banned members of the specified 
    * group. <b>Synchronous</b> version of
    * listBannedMembers(ListMembersDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -622,7 +622,7 @@ public:
    */
   using ListRolesError = delegate::ListRolesDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception] list roles of a group.
+   * @brief Synchronous [non-throwing] list roles of a group.
    * <b>Synchronous</b> version of
    * listRoles(ListRolesDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -688,7 +688,7 @@ public:
    */
   using CreateRoleError = delegate::CreateRoleDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception] creates a new role in the specified group.
+   * @brief Synchronous [non-throwing] creates a new role in the specified group.
    * <b>Synchronous</b> version of
    * createRole(name,CreateRoleDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -754,7 +754,7 @@ that is implemented by the user.
    */
   using RemoveRoleError = delegate::RemoveRoleDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception] removes a role in the specified group.
+   * @brief Synchronous [non-throwing] removes a role in the specified group.
    * <b>Synchronous</b> version of
    * removeRole(roleId, RemoveRoleDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return

@@ -24,7 +24,7 @@ class SubscribeManager;
 
 namespace cbe {
 /**
- * @brief Class for managing subscriptions.
+ * @brief For managing subscriptions.
  * 
  */
 class SubscribeManager {
@@ -81,7 +81,7 @@ public:
    */
   using GetSubscriptionsError = delegate::GetSubscriptionsDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing]
    * <b>Synchronous</b> version of
    * getSubscriptions(GetSubscriptionsDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -194,7 +194,7 @@ public:
    */
   using SubscribeError = delegate::SubscribeDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing]
    * <b>Synchronous</b> version of
    * subscribe(sharingUserId, 
    *           sharingUserName, 

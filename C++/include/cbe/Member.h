@@ -24,6 +24,9 @@ using GroupDelegatePtr = std::shared_ptr<GroupEventProtocol>;
 
 namespace cbe {
 
+/**
+ * Contains information on a request for a Member to join a group.
+ */
 struct Request {
   cbe::UserId userId{};
   std::string alias{};
@@ -37,8 +40,7 @@ struct Request {
 };
 
 /**
- * @brief list of members of a Group.
- * 
+ * @brief A of member of a Group.
  */
 class Member {
 public:
@@ -92,7 +94,7 @@ public:
    */
   using KickError = delegate::KickDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing]
    * <b>Synchronous</b> version of
    * kick(kickComment, KickDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -167,7 +169,7 @@ public:
    */
   using BanError = delegate::BanDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing]
    * <b>Synchronous</b> version of
    * ban(banComment,BanDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -239,7 +241,7 @@ public:
    */
   using UnBanError = delegate::UnBanDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing]
    * <b>Synchronous</b> version of
    * unBan(UnBanDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return

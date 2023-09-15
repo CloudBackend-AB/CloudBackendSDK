@@ -17,7 +17,7 @@ using PublishPtr = std::shared_ptr<CBI::Publish>;
 namespace cbe {
 
 /**
- * @brief manages a \c published Item.
+ * @brief Managing a \c published Item.
  * 
  */
 class Publish {

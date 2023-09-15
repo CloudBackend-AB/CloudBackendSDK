@@ -15,8 +15,6 @@
 namespace cbe {
 
 /**
- * @brief data used from shares(shareId)
- * 
  * This is the data used from shares(shareId) 
  * to keep track of user/group-id relating to a shareid
  */
@@ -31,7 +29,7 @@ struct ShareData {
 };
 
 /**
- * @brief search lists with ID.
+ * @brief Search lists with ID.
  * 
  * Example:
  * \code bool alreadyExists = std::find_if(vector.begin(), vector.end(), 

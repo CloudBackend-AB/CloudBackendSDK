@@ -25,7 +25,7 @@ class SearchGroupDelegate;
   } // namespace delegate
 
 /**
- * @brief to filter when searching a list of Group.
+ * @brief To filter when searching a list of Group.
  * 
  */
 class GroupFilter {

@@ -16,6 +16,7 @@
 #include "cbe/util/Context.h"
 #include "cbe/util/ErrorInfo.h"
 #include "cbe/util/Exception.h"
+#include "cbe/util/Optional.h"
 
 #include <iosfwd>
 #include <string>
@@ -120,7 +121,6 @@ public:
                                  const std::string&  tenant,
                                  const std::string&  client);
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   /**
    * Forms the type of the \p error return parameter for the synchronous version
    * of method
@@ -160,7 +160,6 @@ public:
                                  const std::string& tenant,
                                  const std::string& client,
                                  LogInError&        error);
-  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #endif // #ifndef CBE_NO_SYNC
 
   /**
@@ -183,8 +182,8 @@ public:
    * @param lastName   Last name of the owner of the new account
    * @param tenant     The identifier for the tenant, formerly known as
    *                   \c source.
-   * @param client     Tenant client or an empty string.
-   *                   Used by CloudMe and CloudTop.
+   * @param client     Describing platform running the software. 
+   *                   Names defined by the tenant administrator.
    * @param delegate   Pointer to a delegate::CreateAccountDelegate instance 
    *                   that is implemented by the user.
    * 
@@ -343,7 +342,7 @@ public:
    *             Here, class MyQueryDelegate is defined. 
    * </ul> 
    */
-  QueryChain query(ContainerId      containerId,
+  cbe::QueryChain query(ContainerId      containerId,
                    QueryDelegatePtr queryDelegate);
   /**
    * @brief Select %Item's of a container (table) with a filter (where).
@@ -353,7 +352,7 @@ public:
    *
    * @param filter Filter specifying the constraints of the requested items.
    */
-  QueryChain query(ContainerId      containerId,
+  cbe::QueryChain query(ContainerId      containerId,
                    Filter           filter,
                    QueryDelegatePtr queryDelegate);
 
@@ -386,7 +385,7 @@ public:
    *      "onQueryJoinError()" 
    * will be called in the event of success or failure respectively.
    */
-  QueryChainExt query(ContainerId           containerId,
+  cbe::QueryChainExt query(ContainerId           containerId,
                       QueryJoinDelegatePtr  queryJoinDelegate);
   /**
    * @brief Join multiple tables using filter (where).
@@ -396,7 +395,7 @@ public:
    *
    * @param filter Filter specifying the constraints of the requested items.
    */
-  QueryChainExt query(ContainerId           containerId,
+  cbe::QueryChainExt query(ContainerId           containerId,
                       Filter                filter,
                       QueryJoinDelegatePtr  queryJoinDelegate);
 
@@ -426,7 +425,7 @@ public:
    *             Here, we retrieve the \c cloudBackend class object. 
    * </ul> 
    */
-  QueryChainSync query(ContainerId  containerId);
+  cbe::QueryChainSync query(ContainerId  containerId);
 
   /**
    * @brief Synchronous [exception] filtered
@@ -436,13 +435,13 @@ public:
    *
    * @param filter Filter specifying the constraints of the requested items.
    */
-  QueryChainSync query(ContainerId  containerId,
+  cbe::QueryChainSync query(ContainerId  containerId,
                        Filter       filter);
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   /*! \see delegate::QueryJoinDelegate::ErrorInfo */
   using QueryJoinError = delegate::QueryJoinDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [non-throwing]
+   * @brief Synchronous [non-throwing] query
    * 
    * In line with synchronous query(ContainerId), but <b>throws
    * <u>no</u> exception</b> on error, instead the out/return parameter \p error
@@ -469,11 +468,11 @@ public:
    *      Sync [non-throwing] query
    * @include example/cloudbackend_query_syncNoThrow.cpp
    */
-  QueryChainSync query(ContainerId      containerId,
+  cbe::QueryChainSync query(ContainerId      containerId,
                        QueryJoinError&  error);
 
   /**
-   * @brief Synchronous [non-throwing] filtered
+   * @brief Synchronous [non-throwing] filtered query
    * 
    * Extended version of query(ContainerId,QueryJoinError&) with an  additional
    * filter parameter \p filter.
@@ -486,7 +485,7 @@ public:
    *             Here, we retrieve the \c cloudBackend class object. 
    * </ul> 
    */
-  QueryChainSync query(ContainerId      containerId,
+  cbe::QueryChainSync query(ContainerId      containerId,
                        Filter           filter,
                        QueryJoinError&  error);
 
@@ -554,6 +553,67 @@ public:
                           QueryDelegatePtr    delegate);
 
   /**
+   * Pointer to cbe::delegate::QueryDelegate that is passed into
+   * asynchronous version of method
+   * @ref search(QueryDelegatePtr)   "search()"
+   */
+
+#ifndef CBE_NO_SYNC
+  /**
+  * See delegate::object::QueryDelegate::Exception
+  */
+  using SearchException = delegate::QueryDelegate::Exception;
+  /**
+   * @brief Synchronous [exception]
+   * <b>Synchronous</b> version of
+   * search(std::string, cbe::ContainerId, QueryDelegatePtr)
+   * , and <b>throws an exception</b>, #SearchException, in case of a failed
+   * call.
+   * <br>See search(QueryDelegatePtr)
+   *
+   * @return Information about the search
+   *         &mdash; if the call was successful.<br>
+   *         See @ref cbe::cbe::QueryResult " "
+   * @throws #SearchException
+   */
+  cbe::QueryResult search(std::string         tags,
+                          cbe::ContainerId    containerId);
+
+  /**
+   * Forms the type of the \p error return parameter for the synchronous version
+   * of method
+   * @ref search(tags, containerId, SearchError&) "search()"
+   * <br>See delegate::QueryDelegate::ErrorInfo
+   */
+  using SearchError = delegate::QueryDelegate::ErrorInfo;
+  /**
+   * @brief Synchronous [non-throwing] search
+   * <b>Synchronous</b> version of
+   * search(tags, containerId, QueryDelegatePtr)
+   * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
+   * parameter \p error is used to provide the error information in connection
+   * with a failed call.
+   * <br>See search(tags, containerId,  QueryDelegatePtr)
+   *
+   * @param[out] error
+   *              Return parameter containing the error information in case
+   *              of a failed call. <br>
+   *              An empty return value will indicate failure, and the
+   *              #SearchError object passed in will we be populated with the
+   *              error information.
+   *
+   * @return Empty &mdash; i.e., <code><b>false</b></code> &mdash; indicates a
+   *         failed call, and the error information is passed out via the
+   *         \p error out/return parameter.
+   */
+  cbe::util::Optional<cbe::QueryResult> search(
+                                              std::string         tags,
+                                              cbe::ContainerId    containerId,
+                                              SearchError&        error);
+#endif // #ifndef CBE_NO_SYNC
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  /**
    * @brief Select Object's with specified key/values using filter.
    * 
    * Search the whole container for tags related to Objects in the container 
@@ -581,6 +641,64 @@ public:
                           cbe::ContainerId    containerId,
                           QueryDelegatePtr    delegate);
 
+
+  /**
+   * Pointer to cbe::delegate::QueryDelegate that is passed into
+   * asynchronous version of method
+   * @ref search(QueryDelegatePtr)   "search()"
+   */
+
+#ifndef CBE_NO_SYNC
+  /**
+  * See delegate::object::QueryDelegate::Exception
+  */
+  /**
+   * @brief Synchronous [exception]
+   * <b>Synchronous</b> version of
+   * search(cbe::Filter, cbe::ContainerId, QueryDelegatePtr)
+   * , and <b>throws an exception</b>, #SearchException, in case of a failed
+   * call.
+   * <br>See search(QueryDelegatePtr)
+   *
+   * @return Information about the search
+   *         &mdash; if the call was successful.<br>
+   *         See @ref cbe::cbe::QueryResult " "
+   * @throws #SearchException
+   */
+  cbe::QueryResult search(cbe::Filter         filter,
+                          cbe::ContainerId    containerId);
+
+  /**
+   * Forms the type of the \p error return parameter for the synchronous version
+   * of method
+   * @ref search(filter,containerId,SearchError&) "search()"
+   * <br>See delegate::QueryDelegate::ErrorInfo
+   */
+  /**
+   * @brief Synchronous [non-throwing] search
+   * <b>Synchronous</b> version of
+   * search(filter,containerId,QueryDelegatePtr)
+   * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
+   * parameter \p error is used to provide the error information in connection
+   * with a failed call.
+   * <br>See search(filter,containerId, QueryDelegatePtr)
+   *
+   * @param[out] error
+   *              Return parameter containing the error information in case
+   *              of a failed call. <br>
+   *              An empty return value will indicate failure, and the
+   *              #SearchError object passed in will we be populated with the
+   *              error information.
+   *
+   * @return Empty &mdash; i.e., <code><b>false</b></code> &mdash; indicates a
+   *         failed call, and the error information is passed out via the
+   *         \p error out/return parameter.
+   */
+  cbe::util::Optional<cbe::QueryResult> search(cbe::Filter         filter,
+                                               cbe::ContainerId    containerId,
+                                               SearchError&           error);
+#endif // #ifndef CBE_NO_SYNC
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   /**
    * @brief Casts an item to a container

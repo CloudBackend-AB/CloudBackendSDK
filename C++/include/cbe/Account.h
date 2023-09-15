@@ -21,8 +21,7 @@ using AccountPtr = std::shared_ptr<CBI::Account>;
 namespace cbe
 {
 /**
- * @brief login account information
- * 
+ * @brief Login account information.
  */
 class Account {
 public:

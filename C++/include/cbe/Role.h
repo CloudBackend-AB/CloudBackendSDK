@@ -28,7 +28,7 @@ using RolePtr = std::shared_ptr<CBI::Role>;
 namespace cbe
 {
 /**
- * @brief Role information
+ * @brief User %role information.
  * 
  */
 class Role {
@@ -95,7 +95,7 @@ public:
    */
   using ListMembersError = delegate::ListMembersDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing]
    * <b>Synchronous</b> version of
    * listMembers(ListMembersDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -169,7 +169,7 @@ public:
    */
   using AddRoleMemberError = delegate::AddRoleMemberDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing]
    * <b>Synchronous</b> version of
    * AddRoleMember(memberId, AddRoleMemberDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
@@ -241,7 +241,7 @@ public:
    */
   using RemoveRoleMemberError = delegate::RemoveRoleMemberDelegate::ErrorInfo;
   /**
-   * @brief Synchronous [no exception]
+   * @brief Synchronous [non-throwing]
    * <b>Synchronous</b> version of
    * RemoveRoleMember(memberId,RemoveRoleMemberDelegatePtr)
    * , and <b>throws <u>no</u> exception</b> on error, instead the out/return

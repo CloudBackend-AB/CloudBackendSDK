@@ -9,8 +9,10 @@
 
 namespace cbe {
 /**
+ * @brief Synchronous version of querychain.
+ * 
  * Provides the possibility to chain synchronous join() calls after either a
- * query() or join() synchronous call.
+ * query() or join() in a synchronous call.
  */
 class QueryChainSync : public QueryResult {
 public:
@@ -95,7 +97,6 @@ private:
 
   friend CloudBackend;
   friend Container;
-  friend class QueryChainSyncExt;
 
 template <class ImplT, typename... QueryAsyncArgsTs>
 friend
@@ -105,19 +106,12 @@ friend
                       QueryAsyncArgsTs&&...                     queryAsyncArgs);
   /*! \see delegate::JoinDelegate::ErrorInfo */
   using QueryJoinError = delegate::QueryJoinDelegate::ErrorInfo;
-#ifndef QUERY_CHAIN_QUERY_RESULT_BUG
   QueryChainSync(QueryResult&&    queryResult,
                  QueryChain&&     queryChain,
                  QueryJoinError*  errorInfo);
   QueryChainSync(QueryResult&&    queryResult,
                  QueryChain&&     queryChain,
                  const Impl&      impl);
-#else
-  QueryChainSync(QueryChain&&     queryChain,
-                 QueryJoinError*  errorInfo);
-  QueryChainSync(QueryChain&& queryChain,
-                 const Impl&  impl);
-#endif
   QueryChainSync(std::size_t  joinCallErrorIndex);
 }; // class QueryChainSync
 
