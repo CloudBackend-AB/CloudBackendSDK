@@ -69,6 +69,7 @@ int main(int argc, const char** argv) {
   std::ofstream ofs{qualFile1Name};
   ofs << "Line 11\n"  << "Line 12\n" << "Line 13\n" << std::flush;
   ofs.close();
+  std::cout << "Created file " << qualFile1Name << std::endl;
   std::cout << "Uploading object!" << std::endl;
   std::cout << "from: " << qualFile1Name << std::endl;
 
