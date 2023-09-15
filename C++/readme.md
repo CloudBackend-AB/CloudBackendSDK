@@ -23,6 +23,14 @@ bash installC++SDK.sh                       # install script
 ## Release notes
 ### Current version
 
+#### SDK C++ version: **2.1.1*
+
+- Corrections in some of the examples.
+- Definition of AclMap has been extended to handle acl for both user and group.
+  getAcl() and setAcl() modified accordingly.
+- Added missing synchronous calls.
+- Updates to the doxygen documentation.
+
 #### SDK C++ version: **2.1.0*
 
 - Minimum operating system: Linux Ubuntu 20.04 LTS.
