@@ -21,6 +21,7 @@ bash installC++SDK.sh                       # install script
 ------------------------------------------------------------------------
 
 ## Release notes
+2023-09-19
 ### Current version
 
 #### SDK C++ version: **2.1.1*
@@ -30,6 +31,7 @@ bash installC++SDK.sh                       # install script
   getAcl() and setAcl() modified accordingly.
 - Added missing synchronous calls.
 - Updates to the doxygen documentation.
+- Updated lib.
 
 #### SDK C++ version: **2.1.0*
 
