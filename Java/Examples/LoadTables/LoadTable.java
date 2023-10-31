@@ -76,9 +76,15 @@ public class LoadTable {
     return delegate.waitForRsp();
   }
 
-  public com.cbe.Object createObject(Container container, String title, Obj_KV_Map metadata) {
+  public com.cbe.Object createObject(com.cbe.Container container, String title, Obj_KV_Map metadata) {
     MyCreateObjectDelegate delegate = new MyCreateObjectDelegate();
-    container.createObject(title, delegate, metadata);
+    container.createObject(title, metadata, delegate);
+    return delegate.waitForRsp();
+  }
+
+  public static com.cbe.Object updateObjectKeyValues(com.cbe.Object object, Obj_KV_Map metadata) {
+    MyUpdateKeyValuesDelegate delegate = new MyUpdateKeyValuesDelegate();
+    object.updateKeyValues(metadata, delegate);
     return delegate.waitForRsp();
   }
 
@@ -106,7 +112,7 @@ public class LoadTable {
   // subtables and described as           /level1/level2/primarykey e.g. /unit1001/2022-01-19/1642609149
   // author: Anders Weister
   // company: CloudBackend AB
-  // date: 2022-02-18, 2022-12-16
+  // date: 2022-02-18, 2022-12-16, 2023-09-25
   
   //////////////////////////////////////////////////////////////////////////////
 
@@ -117,6 +123,7 @@ public class LoadTable {
     boolean foundItem    = false;
     boolean skipThisLine = false;
     boolean switchedDB   = false;
+    boolean keepExisitingObject = true;
     int i = 0;
     int getItem = 0;
     int noSearchableKeyIndexFromColumn = 99;    // No Searchable Key/Value index after column
@@ -167,6 +174,8 @@ public class LoadTable {
     filterO.setAscending(true); // sorting name
     filterO.setDataType(com.cbe.ItemType.Object);
 
+    com.cbe.Object recordObject = null;
+
     // for (i = 0; i < argv.length; i++) {
     //   System.out.println("argv[" + i + "]: " + argv[i]);
     // }
@@ -188,9 +197,10 @@ public class LoadTable {
     timestamp1 = Instant.now().getEpochSecond();
 
     LoadTable inst = new LoadTable();
-    com.cbe.CloudBackend cbobj = inst.myLogin("gh1");  // referencing user credentials
+    com.cbe.CloudBackend cbobj = inst.myLogin("aawold");  // referencing user credentials
     if (cbobj.account().userId()>0) {
       System.out.println("Authenticated as: " + cbobj.account().username() + "\t" + cbobj.account().firstName() + " " + cbobj.account().lastName());
+      System.out.println("Version: " + cbobj.version());
     } else {
       System.out.println("Login failed.");
       cbobj.terminate();
@@ -330,10 +340,37 @@ public class LoadTable {
             switchedDB = false;
             // level2 container selection done
           }
-          // System.out.println("Creating record object");
-          com.cbe.Object recordObject = inst.createObject(level2Container, primaryKey, metadata1);
-          // System.out.println("Record object created: " + recordObject.name() + "  (Id:" + recordObject.id() + " P:" + recordObject.parentId()+")");
-          System.out.println("/" + level1Container.name() + "/" + level2Container.name() + "/" + recordObject.name());
+          // level2 container check if object exists
+          qR = inst.queryF(cbobj, filterO, level2Container.id());
+          foundItem = false;
+          i = 0;
+          getItem = 0;
+          if(qR == null) {
+            System.out.println("Query failed null. ");
+          } else {
+            items = qR.getItemsSnapshot();
+            for(com.cbe.Item item : items) {
+              // System.out.println("Compare Item: " + item.name());
+              if(item.name().equals(primaryKey)) {
+                foundItem = true;
+                getItem = i;
+                level2ContainerId=item.id();
+                // System.out.println("reuse #" + getItem + " " + item.name() + "  (" + level2ContainerId + ")");
+                recordObject=com.cbe.CloudBackend.castObject(item);
+              }
+              i++;
+            }
+          }
+          if (foundItem && keepExisitingObject) {
+            System.out.println("updating object: " + primaryKey);
+            com.cbe.Object recordObject2=updateObjectKeyValues(recordObject, metadata1);
+            System.out.println("Record object updated: " + recordObject2.name() + "  (Id:" + recordObject2.id() + " P:" + recordObject2.parentId()+")");
+          } else {  
+            System.out.println("Creating record object");
+            com.cbe.Object recordObject3 = inst.createObject(level2Container, primaryKey, metadata1);
+            System.out.println("Record object created: " + recordObject3.name() + "  (Id:" + recordObject3.id() + " P:" + recordObject3.parentId()+")");
+          }
+          // System.out.println("/" + level1Container.name() + "/" + level2Container.name() + "/" + recordObject3.name());
         }
       }  
     }   
@@ -350,7 +387,9 @@ public class LoadTable {
     tempString2 = DateTimeformat.format(date);
     tempString = Long.toString(timestamp2-timestamp1);
     System.out.println("Run completed in: " + tempString + " s  @ " + tempString2 );
-    cbobj.terminate();
+    if (cbobj != null) {
+      cbobj.terminate();
+    }
     System.out.println(programName + " program end.");
   }  // main
 }
