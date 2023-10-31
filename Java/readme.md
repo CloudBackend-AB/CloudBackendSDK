@@ -68,4 +68,4 @@ bash installJavaSDK.sh                      # install script
 #### SDK Java version: 1.3.5
 - The Java wrappers are built on the C++ sdk version 1.3.5 this includes share actions but not group actions.
 
-#### Copyright © CloudBackend AB 2021-2022.
+#### Copyright © CloudBackend AB 2021-2023.
