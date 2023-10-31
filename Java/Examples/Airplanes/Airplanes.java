@@ -81,7 +81,7 @@ public class Airplanes {
       System.out.printf("%-14s ", V.getFirst());
     });
     System.out.print("\t");
-    parentContainer.createObject(name, delegate, metadata);
+    parentContainer.createObject(name, metadata, delegate);
     final var object = delegate.waitForRsp();
     System.out.println("Created object \"" + object.name() + "\" with id " +
                        object.id());
@@ -123,9 +123,12 @@ public class Airplanes {
     com.cbe.CloudBackend cbobj = inst.myLogin("gh2");
     if (cbobj.account().userId()>0) {
       System.out.println("Authenticated as: " + cbobj.account().username() + "\t" + cbobj.account().firstName() + " " + cbobj.account().lastName());
+      System.out.println("Version: " + cbobj.version());
     } else {
       System.out.println("Login failed.");
-      cbobj.terminate();
+      if (cbobj != null) {
+        cbobj.terminate();
+      }
       System.out.println(programName + " program stop.");
       return;
     }
