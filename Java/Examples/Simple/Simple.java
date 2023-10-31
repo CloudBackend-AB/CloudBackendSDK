@@ -220,7 +220,7 @@ public class Simple {
     try
     {
       System.out.println("create " + title);
-      tempObj = container.createObject(title, delegate, metadata);
+      tempObj = container.createObject(title, metadata, delegate);
       delegate.waitForRsp();
     }
     catch (RuntimeException e)
@@ -281,9 +281,9 @@ public class Simple {
     return;
   }
 
-  public AbstractMap<Long,com.cbe.Permissions> getContainerACL(com.cbe.Container container) {
+  public AbstractMap<Long,com.std.PermissionAclScopeEnum> getContainerACL(com.cbe.Container container) {
     MyAclDelegate delegate = new MyAclDelegate();
-    AbstractMap<Long, com.cbe.Permissions> myMap = null;
+    AbstractMap<Long, com.std.PermissionAclScopeEnum> myMap = null;
     try
     {
       container.getAcl(delegate);
@@ -373,6 +373,7 @@ public class Simple {
     com.cbe.CloudBackend cbobj = inst.myLogin("gh1");
     if (cbobj.account().userId()>0) {
       System.out.println("Authenticated as: " + cbobj.account().username() + "\t" + cbobj.account().firstName() + " " + cbobj.account().lastName());
+      System.out.println("Version: " + cbobj.version());
     } else {
       System.out.println("Login failed.");
       cbobj.terminate();
@@ -491,7 +492,9 @@ public class Simple {
     }
 
     System.out.println("Disconnecting.");
-    cbobj.terminate();
+    if (cbobj != null) {
+      cbobj.terminate();
+    }
     System.out.println(programName + " program end.");
   }  // main
 }   // class Simple

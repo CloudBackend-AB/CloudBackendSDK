@@ -9,6 +9,13 @@ cat /etc/issue | cut -d '\' -f1
 mkdir -p ~/cbe                              # if not already created
 mydir=${PWD}
 echo "moving" ${mydir} "to ~/cbe"
+if [ -d ~/cbe/${RELEASE} ];
+then
+  ls -ld ~/cbe/${RELEASE} ;
+  echo "renaming" ~/cbe/${RELEASE} "to" ~/cbe/removed_${RELEASE}_`date --iso`;
+  mv ~/cbe/${RELEASE} ~/cbe/removed_${RELEASE}_`date --iso`;
+  ls -ld ~/cbe/2*
+fi
 mv ${mydir} ~/cbe/${RELEASE}
 cd ~/cbe
 ls -l current

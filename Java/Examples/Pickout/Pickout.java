@@ -139,7 +139,7 @@ public class Pickout {
     com.cbe.Object tempObj = null;
     try
     {
-      tempObj = container.createObject(newName, delegate, metadata);
+      tempObj = container.createObject(newName, metadata, delegate);
       delegate.waitForRsp();
     }
     catch (RuntimeException e)
@@ -191,6 +191,7 @@ public class Pickout {
     com.cbe.CloudBackend cbobj = inst.myLogin("gh1");
     if (cbobj.account().userId()>0) {
       System.out.println("Authenticated as: " + cbobj.account().username() + "\t" + cbobj.account().firstName() + " " + cbobj.account().lastName());
+      System.out.println("Version: " + cbobj.version());
     } else {
       System.out.println("Login failed.");
       cbobj.terminate();
@@ -307,7 +308,9 @@ public class Pickout {
       }
     }
     System.out.println("Disconnecting.");
-    cbobj.terminate();
+    if (cbobj != null) {
+      cbobj.terminate();
+    }
     System.out.println(programName + " program end.");
   } // main
 }  // class Pickout

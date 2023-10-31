@@ -1,12 +1,13 @@
 ### CloudBackend SDK Java API.
 
-**lib** contains the jar files needed for installing and running the SDK.
+**lib** contains the lib files needed for installing and running the SDK.
 
 **Example** provides a number of code that can be run to learn how to use the API.
 
-**resources** contains information used by the Example code, e.g. user credentials 
+**resources** contains information used by the Example code,
+e.g. user credentials and the API java files.
 
-This has been tested on Ubuntu LTS 22.04 with OpenJDK 17.
+This has been tested on Ubuntu 20.04 and 22.04 LTS with OpenJDK 17.
 <br>To install:
 ```
 sudo apt install openjdk-17-jre-headless
@@ -24,12 +25,24 @@ bash installJavaSDK.sh                      # install script
 ------------------------------------------------------------------------
 ## Release notes
 ### Current version
+#### SDK Java version: **2.1.1**
+
+- Minimum operating system: Linux Ubuntu 20.04 LTS on x86_64.
+- Updated lib.
+  getAcl() and setAcl() modified accordingly.
+- Updates to the javadoc documentation.
+- Account::tenantContainerId() added.
+- Container::createObject() change in the order of the parameters.
+- Object::updateKeyValues() change in the order of the parameters.
+- AclMap has been extended to handle ACL for both user and group.
+- Updates in the examples accordingly.
+
+
+### Older versions
 #### SDK Java version: **2.0.1**
 
 - Updated Example code.
 - Installation script.
-
-### Older versions
 
 #### SDK Java version: **2.0.0**
 
@@ -55,4 +68,4 @@ bash installJavaSDK.sh                      # install script
 #### SDK Java version: 1.3.5
 - The Java wrappers are built on the C++ sdk version 1.3.5 this includes share actions but not group actions.
 
-#### Copyright © CloudBackend AB 2021-2022.
+#### Copyright © CloudBackend AB 2021-2023.

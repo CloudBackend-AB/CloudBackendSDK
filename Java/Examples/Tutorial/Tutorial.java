@@ -147,7 +147,7 @@ public class Tutorial {
     try
     {
       System.out.println("saving " + title);
-      tempObj = container.createObject(title, delegate, metadata);
+      tempObj = container.createObject(title, metadata, delegate);
       delegate.waitForRsp();
     }
     catch (RuntimeException e)
@@ -294,7 +294,9 @@ public class Tutorial {
     }
 
     System.out.println("Disconnecting.");
-    cbobj.terminate();
+    if (cbobj != null) {
+      cbobj.terminate();
+    }
     System.out.println(programName + " program end.");
   }  // main
 }   // class Tutorial

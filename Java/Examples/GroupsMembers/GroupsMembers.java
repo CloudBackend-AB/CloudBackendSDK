@@ -73,6 +73,7 @@ public class GroupsMembers {
     com.cbe.CloudBackend cbobj = inst.myLogin("gh2");
     if (cbobj.account().userId()>0) {
       System.out.println("Authenticated as: " + cbobj.account().username() + "\t" + cbobj.account().firstName() + " " + cbobj.account().lastName());
+      System.out.println("Version: " + cbobj.version());
     } else {
       System.out.println("Login failed.");
       cbobj.terminate();
@@ -121,8 +122,9 @@ public class GroupsMembers {
       System.out.println();
     }
     System.out.println();
-    System.out.println("SDK " + cbobj.version());
-    cbobj.terminate();
+    if (cbobj != null) {
+      cbobj.terminate();
+    }
     System.out.println(programName + " program end.");
   } // main()
 

@@ -39,8 +39,8 @@ Tenant a.k.a. signup source
 
 Change the user account for the sample program in user_credentials.cpp
 
-Notes: This SDK has been built and tested for Linux x86_64 Ubuntu 22 LTS
-and iOS respectively.
+Notes: This SDK has been built and tested for Linux x86_64 Ubuntu 22 LTS,
+Android and iOS respectively.
 
 ------------------------------------------------------------------------
 
@@ -55,8 +55,8 @@ then do:
 ```
 cd
 cd Downloads                                # or where you downloaded the package
-unzip CloudBackendSDK-main.zip              # or the zip file name
-cd CloudBackendSDK-main
+unzip CloudBackendSDK-2.1.1.zip             # or the zip file name
+cd CloudBackendSDK-2.1.1
 bash installSDK.sh
 ```
 
