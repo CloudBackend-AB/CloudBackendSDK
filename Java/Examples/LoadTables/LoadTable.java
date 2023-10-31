@@ -197,7 +197,7 @@ public class LoadTable {
     timestamp1 = Instant.now().getEpochSecond();
 
     LoadTable inst = new LoadTable();
-    com.cbe.CloudBackend cbobj = inst.myLogin("aawold");  // referencing user credentials
+    com.cbe.CloudBackend cbobj = inst.myLogin("gh3");  // referencing user credentials
     if (cbobj.account().userId()>0) {
       System.out.println("Authenticated as: " + cbobj.account().username() + "\t" + cbobj.account().firstName() + " " + cbobj.account().lastName());
       System.out.println("Version: " + cbobj.version());
