@@ -17,4 +17,4 @@ See the Examples directories for some alternatives.
 The SDK is built with dependency libs, i.e. poco and openssl.
 <br>Cloudbackend cannot ensure that any other versions of poco or openssl will work together with the Cloudbackend SDK.
 
-#### Copyright © CloudBackend AB 2021-2022.
+#### Copyright © CloudBackend AB 2021-2023.
