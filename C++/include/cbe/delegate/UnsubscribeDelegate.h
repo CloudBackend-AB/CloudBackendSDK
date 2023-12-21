@@ -1,5 +1,5 @@
-#ifndef CBE__delegate__UnsubscribeDelegate_h__
-#define CBE__delegate__UnsubscribeDelegate_h__
+#ifndef CBE__delegate__UnSubscribeDelegate_h__
+#define CBE__delegate__UnSubscribeDelegate_h__
 
 #include "cbe/Types.h"
 #include "cbe/util/Context.h"
@@ -9,33 +9,34 @@
 
 namespace cbe {
   namespace delegate {
-class UnsubscribeSuccess;
+class UnSubscribeSuccess;
 /**
  * Delegate class for the asynchronous version of methods:
  * <ul>
- *   <li> cbe::Container::unsubscribe
- *   <li> cbe::Object::unsubscribe
+ *   <li> cbe::Container::unSubscribe
+ *   <li> cbe::Object::unSubscribe
 * </ul>
  */
-class UnsubscribeDelegate {
+class UnSubscribeDelegate {
 public:
-  using Success = UnsubscribeSuccess;
+  using Success = UnSubscribeSuccess;
   /**
-   * Called upon successful Unsubscribe.
-   * @param object Instance of object that is being Unsubscribed.
+   * Called upon successful UnSubscribe.
+   * @param publishId The PublishId of the UnSubscribe.
+   * @param itemId Instance of ItemId that is being UnSubscribed.
    */
-  virtual void onUnsubscribeSuccess(cbe::PublishId  publishId, 
+  virtual void onUnSubscribeSuccess(cbe::PublishId  publishId, 
                                     cbe::ItemId     itemId) = 0;
 
   using Error = delegate::Error;
   /**
    * Called if an error is encountered.
    */
-  virtual void onUnsubscribeError(Error&&               error,
+  virtual void onUnSubscribeError(Error&&               error,
                                   cbe::util::Context&&  context) = 0;
 
   /**
-   * Contains all information about a failed Unsubscribe.
+   * Contains all information about a failed UnSubscribe.
    */
   struct ErrorInfo : cbe::util::ErrorInfoImpl<Error> {
     using Base::Base; // Inherit base class' constructors
@@ -45,42 +46,49 @@ public:
   /**
    * @brief exception thrown by
    * <ul>
-   * <li> @ref cbe::Container::unsubscribe() "Container::unsubscribe()"
-   * <li> @ref cbe::Object::unsubscribe()    "Object::unsubscribe()"
+   * <li> @ref cbe::Container::unSubscribe() "Container::unSubscribe()"
+   * <li> @ref cbe::Object::unSubscribe()    "Object::unSubscribe()"
    * </ul>
    * if the request fails.
    */
   struct Exception : cbe::util::ExceptionImpl<ErrorInfo> {
     using Base::Base; // Inherit base class' constructors
-  }; // class struct CloudBackend::UnsubscribeException
+  }; // class struct CloudBackend::UnSubscribeException
 #endif // #ifndef CBE_NO_SYNC
 
-  virtual ~UnsubscribeDelegate();
-}; // class UnsubscribeDelegate
+  virtual ~UnSubscribeDelegate();
+}; // class UnSubscribeDelegate
 
 /**
- * Pointer to UnsubscribeDelegate that is passed into:
+ * Pointer to UnSubscribeDelegate that is passed into:
  * <ul>
- *   <li> Container::unsubscribe(UnsubscribeDelegatePtr)
- *   <li> Object::unsubscribe(UnsubscribeDelegatePtr)
+ *   <li> Container::unSubscribe(UnSubscribeDelegatePtr)
+ *   <li> Object::unSubscribe(UnSubscribeDelegatePtr)
  * </ul>
  */
-using UnsubscribeDelegatePtr = std::shared_ptr<UnsubscribeDelegate>;
+using UnSubscribeDelegatePtr = std::shared_ptr<UnSubscribeDelegate>;
 
 /**
+ * @brief
  * Convenience type that bundles all parameters passed to method
- * cbe::delegate::onUnsubscribeSuccess.
+ * cbe::delegate::UnSubscribeDelegate::onUnSubscribeSuccess.
  */
-class UnsubscribeSuccess {
+class UnSubscribeSuccess {
 public:  
   cbe::PublishId   publishId{}; 
   cbe::ItemId         itemId{};
 
-  UnsubscribeSuccess();
-  UnsubscribeSuccess(cbe::PublishId  publishId, 
+  UnSubscribeSuccess();
+  UnSubscribeSuccess(cbe::PublishId  publishId, 
                      cbe::ItemId     itemId);
+  /**
+   * @brief Checks if current instance is valid.
+   * 
+   * @return \c true: is valid
+   */
+  explicit operator bool() const;
 };
   } // namespace delegate
 } // namespace cbe
 
-#endif // #ifndef CBE__delegate__UnsubscribeDelegate_h__
+#endif // #ifndef CBE__delegate__UnSubscribeDelegate_h__

@@ -2,16 +2,16 @@
 #include "cbe/CloudBackend.h"
 #include "cbe/Filter.h"
 #include "cbe/Types.h"
-#include "cbe/delegate/LogInDelegate.h"
-#include "cbe/delegate/CreateContainerDelegate.h"
-#include "cbe/delegate/QueryDelegate.h"
-#include "cbe/delegate/QueryJoinDelegate.h"
-#include "cbe/delegate/container/RemoveDelegate.h"
 
 #include <condition_variable>
 #include <iostream>
 #include <mutex>
 
+#include "cbe/delegate/LogInDelegate.h"
+#include "cbe/delegate/CreateContainerDelegate.h"
+#include "cbe/delegate/QueryDelegate.h"
+#include "cbe/delegate/QueryJoinDelegate.h"
+#include "cbe/delegate/container/RemoveDelegate.h"
 
 class LogInDelegate :  public cbe::delegate::LogInDelegate
 {

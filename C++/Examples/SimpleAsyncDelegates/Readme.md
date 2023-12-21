@@ -36,7 +36,11 @@ these test accounts.
 
 Compile with `sh compile.sh` and then run with `sh run.sh`
 
-**If you want to remove a container, either write a program or use the CLI.**
+**If you want to remove a container, use the CLI.**
  
 CLI command `rmdir yourContainerName`
+
+Release 2023-07-10
+------------------
+* The source code has been updated to the current version of the SDK C++.
 

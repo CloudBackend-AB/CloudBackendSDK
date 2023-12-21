@@ -93,6 +93,66 @@ public:
                                  const std::string&       client,
                                  LogInDelegatePtr         delegate);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+  /**
+   * @brief Depreciated log in.
+   * 
+   * Same as <b>Asynchronous</b> 
+   * @ref
+   * logIn(const std::string&,const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
+   * "logIn()"
+   * but without parameter \c client.
+   * \note This should not be used as it may be removed in a future release.
+   */
+  static cbe::CloudBackend logIn(const std::string&       username,
+                                 const std::string&       password,
+                                 const std::string&       tenant,
+                                 LogInDelegatePtr         delegate);
+
+  // Internal test
+  /**
+   * @brief (Internal) Logs in to the %CloudBackend service
+   * using
+   * \p client and \p useEdgeNodes.
+   *
+   * Same as <b>Asynchronous</b> 
+   * @ref
+   * logIn(const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
+   * "logIn()"
+   * but with additional parameters
+   * @param client    The identifier for the client or an empty string.
+   *                  Used by CloudMe and CloudTop.
+   * @param useEdgeNodes  Connect to edge nodes on the local network
+   */
+  static cbe::CloudBackend logIn(const std::string&       username,
+                                 const std::string&       password,
+                                 const std::string&       tenant,
+                                 const std::string&       client,
+                                 bool                     useEdgeNodes,
+                                 LogInDelegatePtr         delegate);
+  // Internal test
+  /**
+   * @brief (Internal) Logs in to the %CloudBackend service
+   * using
+   * \p client and \p host.
+   *
+   * Same as <b>Asynchronous</b> 
+   * @ref
+   * logIn(const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
+   * "logIn()"
+   * but with additional parameters
+   * @param client    The identifier for the client or an empty string.
+   *                  Used by CloudMe and CloudTop.
+   * @param host      Host/IP address to connect to or an empty string to use the default host
+   */
+  static cbe::CloudBackend logIn(const std::string&       username,
+                                 const std::string&       password,
+                                 const std::string&       tenant,
+                                 const std::string&       client,
+                                 const std::string&       host,
+                                 LogInDelegatePtr         delegate);
+#endif  // DOXYGEN_SHOULD_SKIP_THIS
+
 #ifndef CBE_NO_SYNC
   /**
    * \see delegate::LogInDelegate::Exception
@@ -120,6 +180,71 @@ public:
                                  const std::string&  password,
                                  const std::string&  tenant,
                                  const std::string&  client);
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+  /**
+   * @brief Depreciated Synchronous [exception] logIn.
+   * 
+   * <b>Synchronous</b> version of
+   * @ref
+   * logIn(const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
+   * "logIn()",
+   * and <b>throws an exception</b>, #LogInException,
+   * in case of a failed login.
+   *
+   * @return A %CloudBackend instance &mdash; if login was successful.
+   * @throws #LogInException
+   */
+  static cbe::CloudBackend logIn(const std::string&  username,
+                                 const std::string&  password,
+                                 const std::string&  tenant);
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  // Internal test
+  /**
+   * @brief (Internal) Synchronous [exception] logIn
+   * using
+   * \p client and \p useEdgeNodes.
+   * 
+   * <b>Synchronous</b> version of
+   * @ref
+   * logIn(const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
+   * "logIn()",
+   * and <b>throws an exception</b>, #LogInException, in case of a failed
+   * login.
+   * \see logIn(const std::string&,const std::string&,const std::string&,const std::string&,bool,LogInDelegatePtr)
+   *
+   * @return A %CloudBackend instance &mdash; if login was successful.
+   * @throws #LogInException
+   */
+  static cbe::CloudBackend logIn(const std::string&  username,
+                                 const std::string&  password,
+                                 const std::string&  tenant,
+                                 const std::string&  client,
+                                 bool                useEdgeNodes);
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  /**
+   * @brief (Internal) Synchronous [exception] logIn
+   * using
+   * \p client and \p host.
+   * 
+   * <b>Synchronous</b> version of
+   * @ref
+   * logIn(const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
+   * "logIn()",
+   * and <b>throws an exception</b>, #LogInException, in case of a failed
+   * login.
+   * \see logIn(const std::string&,const std::string&,const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
+   *
+   * @return A %CloudBackend instance &mdash; if login was successful.
+   * @throws #LogInException
+   */
+  static cbe::CloudBackend logIn(const std::string&  username,
+                                 const std::string&  password,
+                                 const std::string&  tenant,
+                                 const std::string&  client,
+                                 const std::string&  host);
+#endif  // DOXYGEN_SHOULD_SKIP_THIS
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   /**
    * Forms the type of the \p error return parameter for the synchronous version
@@ -160,6 +285,99 @@ public:
                                  const std::string& tenant,
                                  const std::string& client,
                                  LogInError&        error);
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+  /**
+   * @brief Depreciated Synchronous [non-throwing] logIn
+   * 
+   * <b>Synchronous</b> version of
+   * @ref
+   * logIn(const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
+   * "logIn()",
+   * and <b>throws <u>no</u> exception</b> on error, instead the out/return
+   * parameter \p error is used to provide the error information.
+   *
+   * @param[out] error
+   *              Return parameter containing the error information in case
+   *              of a failed login. <br>
+   *              The return value, of type #CloudBackend, will indicate
+   *              <code><b>false</b></code> on a failed login, and the
+   *              LogInError object passed in will we be populated with the
+   *              error information.
+   *
+   * @return If empty, <code><b>false</b></code>, an error has occurred.
+   *         I.e., the login has failed, and the error information has been
+   *         passed out via the \p error out/return parameter.
+   *
+   */
+  static cbe::CloudBackend logIn(const std::string& username,
+                                 const std::string& password,
+                                 const std::string& tenant,
+                                 LogInError&        error);
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  // Internal test
+  /**
+   * @brief (Internal) Synchronous [non-throwing] logIn
+   * using
+   * \p client and \p useEdgeNodes.
+   * 
+   * <b>Synchronous</b> version of
+   * @ref
+   * logIn(const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
+   * "logIn()",
+   * and <b>throws <u>no</u> exception</b> on error, instead the out/return
+   * parameter \p error is used to provide the error information.
+   *
+   * @param[out] error
+   *              Return parameter containing the error information in case
+   *              of a failed login. <br>
+   *              The return value, of type #CloudBackend, will indicate
+   *              <code><b>false</b></code> on a failed login, and the
+   *              LogInError object passed in will we be populated with the
+   *              error information.
+   *
+   * @return If empty, <code><b>false</b></code>, an error has occurred.
+   *         I.e., the login has failed, and the error information has been
+   *         passed out via the \p error out/return parameter.
+   */
+  static cbe::CloudBackend logIn(const std::string& username,
+                                 const std::string& password,
+                                 const std::string& tenant,
+                                 const std::string& client,
+                                 bool               useEdgeNodes,
+                                 LogInError&        error);
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  /**
+   * @brief (Internal) Synchronous [non-throwing] logIn
+   * using
+   * \p client and \p host.
+   * 
+   * <b>Synchronous</b> version of
+   * @ref
+   * logIn(const std::string&,const std::string&,const std::string&,LogInDelegatePtr)
+   * "logIn()",
+   * and <b>throws <u>no</u> exception</b> on error, instead the out/return
+   * parameter \p error is used to provide the error information.
+   *
+   * @param[out] error
+   *              Return parameter containing the error information in case
+   *              of a failed login. <br>
+   *              The return value, of type #CloudBackend, will indicate
+   *              <code><b>false</b></code> on a failed login, and the
+   *              LogInError object passed in will we be populated with the
+   *              error information.
+   *
+   * @return If empty, <code><b>false</b></code>, an error has occurred.
+   *         I.e., the login has failed, and the error information has been
+   *         passed out via the \p error out/return parameter.
+   */
+  static cbe::CloudBackend logIn(const std::string& username,
+                                 const std::string& password,
+                                 const std::string& tenant,
+                                 const std::string& client,
+                                 const std::string& host,
+                                 LogInError&        error);
+#endif  // DOXYGEN_SHOULD_SKIP_THIS
 #endif // #ifndef CBE_NO_SYNC
 
   /**
@@ -188,14 +406,14 @@ public:
    *                   that is implemented by the user.
    * 
    */
-  static cbe::CloudBackend createAccount(const std::string&       username,
-                                         const std::string&       password,
-                                         const std::string&       email,
-                                         const std::string&       firstName,
-                                         const std::string&       lastName,
-                                         const std::string&       tenant,
-                                         const std::string&       client,
-                                         CreateAccountDelegatePtr delegate);
+  static cbe::UserId createAccount(const std::string&       username,
+                            const std::string&       password,
+                            const std::string&       email,
+                            const std::string&       firstName,
+                            const std::string&       lastName,
+                            const std::string&       tenant,
+                            const std::string&       client,
+                            CreateAccountDelegatePtr delegate);
 #ifndef CBE_NO_SYNC
   /**
    * See delegate::CreateAccountDelegate::Exception
@@ -218,13 +436,46 @@ public:
    *         if account creation was successful.
    * @throws #CreateAccountException
    */
-  static cbe::CloudBackend createAccount(const std::string&       username,
-                                         const std::string&       password,
-                                         const std::string&       email,
-                                         const std::string&       firstName,
-                                         const std::string&       lastName,
-                                         const std::string&       tenant,
-                                         const std::string&       client);
+  static cbe::UserId createAccount(const std::string&       username,
+                            const std::string&       password,
+                            const std::string&       email,
+                            const std::string&       firstName,
+                            const std::string&       lastName,
+                            const std::string&       tenant,
+                            const std::string&       client);
+
+  /**
+   * Forms the type of the \p error return parameter for the synchronous version
+   * of method
+   * @ref createAccount(username,password,email,firstname,lastname,tenant,client,CreateAccountError&) "createAccount()"
+   * <br>See delegate::CreateAccountDelegate::ErrorInfo
+   */
+  using CreateAccountError = delegate::CreateAccountDelegate::ErrorInfo;
+  /**
+   * @brief Synchronous [no exception]
+   * <b>Synchronous</b> version of
+   * createAccount(username,password,email,firstname,lastname,tenant,client,CreateAccountDelegatePtr)
+   * , and <b>throws <u>no</u> exception</b> on error, instead the out/return
+   * parameter \p error is used to provide the error information in connection
+   * with a failed call. <br>See createAccount(username,password,email,firstname,lastname,tenant,client,CreateAccountDelegatePtr) @param[out] error
+   *              Return parameter containing the error information in case
+   *              of a failed call. <br>
+   *              An empty return value will indicate failure, and the
+   *              #CreateAccountError object passed in will we be populated with the
+   *              error information.
+   *
+   * @return Empty &mdash; i.e., <code><b>false</b></code> &mdash; indicates a
+   *         failed call, and the error information is passed out via the
+   *         \p error out/return parameter.
+   */
+  static cbe::util::Optional<cbe::UserId> createAccount(const std::string&  username,
+                                                 const std::string&  password,
+                                                 const std::string&  email,
+                                                 const std::string&  firstName,
+                                                 const std::string&  lastName,
+                                                 const std::string&  tenant,
+                                                 const std::string&  client,
+                                                 CreateAccountError& error);
 #endif // #ifndef CBE_NO_SYNC
 
 
@@ -699,6 +950,41 @@ public:
                                                SearchError&           error);
 #endif // #ifndef CBE_NO_SYNC
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+  /**
+  * (CloudMe) Send REST API request:
+  * @param uri set uri with request E.g., /v1/users/{user_id}
+  * @param requestType set the request type e.g: GET, POST, PUT, DELETE.
+  * @param contentType e.g.: text/xml, application/octet-stream, 
+  * application/x-www-form-urlencoded; charset=utf-8, application/xml.
+  * @param delegate is the callback pointer to where the API returns from 
+  * server/edge node. \n 
+  * Implement APIEventProtocol and the callback 
+  * onAPIResponse(std::string response).
+  */
+  // void restRequest(std::string          uri,
+  //                  cbe::http_t          requestType,
+  //                  std::string          contentType,
+  //                  cbe::APIDelegatePtr  delegate);
+
+  /**
+  * (CloudMe) Send SOAP API request:
+  * \note No need to add SOAP prefix or suffix, this is handled by the sdk. 
+  * only the body and request action/call is needed here.
+  * @param body set the body of the request.
+  * @param soapAction set api call ex queryFolder
+  * @param delegate is the callback pointer to where the API returns from 
+  * server/edge node. \n 
+  * Implement APIEventProtocol and the callback 
+  * onAPIResponse(std::string response).
+  */
+
+  // void soapRequest(std::string          body,
+  //                  std::string          soapAction,
+  //                  cbe::APIDelegatePtr  delegate);
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
   /**
    * @brief Casts an item to a container

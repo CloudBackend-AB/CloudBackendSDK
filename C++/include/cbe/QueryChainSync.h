@@ -89,7 +89,7 @@ public:
    * Returns the QueryResult provided to the delegate after the the last query()
    * or join() call.
    */
-  QueryResult getQueryResult();
+  QueryResult getQueryResult() const;
 
 private:
   struct  Impl;

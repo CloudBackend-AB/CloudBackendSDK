@@ -1,5 +1,5 @@
-#ifndef CBE__delegate__UnpublishDelegate_h__
-#define CBE__delegate__UnpublishDelegate_h__
+#ifndef CBE__delegate__UnPublishDelegate_h__
+#define CBE__delegate__UnPublishDelegate_h__
 
 #include "cbe/Types.h"
 #include "cbe/util/Context.h"
@@ -9,35 +9,35 @@
 
 namespace cbe {
   namespace delegate {
-class UnpublishSuccess; 
+class UnPublishSuccess; 
 /**
  * Delegate class for the asynchronous version of methods:
  * <ul>
- *   <li> cbe::Container::unpublish
- *   <li> cbe::Object::unpublish
+ *   <li> cbe::Container::unPublish
+ *   <li> cbe::Object::unPublish
  * </ul>
  */
-class UnpublishDelegate {
+class UnPublishDelegate {
 public:
-  using Success = UnpublishSuccess;
+  using Success = UnPublishSuccess;
   /**
-   * Called upon successful unpublish.
+   * Called upon successful unPublish.
    * @param publishId Id of the publictoion being published.
    * @param itemId    Id of the item - cbe::Object or cbe::Container - that
-   *                  has been unpublished
+   *                  has been unPublished
    */
-  virtual void onUnpublishSuccess(cbe::PublishId  publishId, 
+  virtual void onUnPublishSuccess(cbe::PublishId  publishId, 
                                   cbe::ItemId     itemId) = 0;
   
   using Error = delegate::Error;
   /**
    * Called if an error was encountered.
    */
-  virtual void onUnpublishError(Error&&               error,
+  virtual void onUnPublishError(Error&&               error,
                                 cbe::util::Context&&  context) = 0;
   
   /**
-   * Contains all information about a failed Unpublish.
+   * Contains all information about a failed UnPublish.
    */
   struct ErrorInfo : cbe::util::ErrorInfoImpl<Error> {
       using Base::Base; // Inherit base class' constructors
@@ -47,44 +47,51 @@ public:
   /**
    * @brief exception thrown by
    * <ul>
-   * <li> @ref cbe::Container::unpublish() "Container::unpublish()"
-   * <li> @ref cbe::Object::unpublish()    "Object::unpublish()"
+   * <li> @ref cbe::Container::unPublish() "Container::unPublish()"
+   * <li> @ref cbe::Object::unPublish()    "Object::unPublish()"
    * </ul>
    * if the request fails.
    */
   struct Exception : cbe::util::ExceptionImpl<ErrorInfo> {
       using Base::Base; // Inherit base class' constructors
-  }; // class struct CloudBackend::UnpublishException
+  }; // class struct CloudBackend::UnPublishException
 #endif // #ifndef CBE_NO_SYNC
 
-  virtual ~UnpublishDelegate();
-}; // class UnpublishDelegate
+  virtual ~UnPublishDelegate();
+}; // class UnPublishDelegate
 
 /**
- * Pointer to UnpublishDelegate that is passed into:
+ * Pointer to UnPublishDelegate that is passed into:
  * <ul>
- *   <li> Container::unpublish(UnpublishDelegatePtr)
- *   <li> Object::unpublish(UnpublishDelegatePtr)
+ *   <li> Container::unPublish(UnPublishDelegatePtr)
+ *   <li> Object::unPublish(UnPublishDelegatePtr)
  * </ul>
  */
-using UnpublishDelegatePtr = std::shared_ptr<UnpublishDelegate>;
+using UnPublishDelegatePtr = std::shared_ptr<UnPublishDelegate>;
 
 /**
+ * @brief
  * Convenience type that bundles all parameters passed to method
- * cbe::delegate::onUnpublishError.
+ * cbe::delegate::UnPublishDelegate::onUnPublishError.
  */
-class UnpublishSuccess {
+class UnPublishSuccess {
 public:  
   cbe::PublishId   publishId{}; 
   cbe::ItemId      itemId{};
 
-  UnpublishSuccess();
-  UnpublishSuccess(cbe::DefaultCtor);
-  UnpublishSuccess(cbe::PublishId  publishId, 
+  UnPublishSuccess();
+  UnPublishSuccess(cbe::DefaultCtor);
+  UnPublishSuccess(cbe::PublishId  publishId, 
                    cbe::ItemId     itemId);
+/**
+   * @brief Checks if current instance is valid.
+   * 
+   * @return \c true: is valid
+   */
+  explicit operator bool() const;
 };
 
       } // namespace delegate
 } // namespace cbe
 
-#endif // #ifndef CBE__delegate__UnpublishDelegate_h__
+#endif // #ifndef CBE__delegate__UnPublishDelegate_h__

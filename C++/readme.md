@@ -24,7 +24,14 @@ bash installC++SDK.sh                       # install script
 2023-09-19
 ### Current version
 
-#### SDK C++ version: **2.1.1*
+#### SDK C++ version: 2.1.2
+
+- Updated lib with improved password encryption.
+- CreateAccount() method now returns userId instead of CloudBackend object.
+- Tidied up the test files.
+- Bug fixes.
+
+#### SDK C++ version: 2.1.1
 
 - Corrections in some of the examples.
 - Definition of AclMap has been extended to handle acl for both user and group.
@@ -33,7 +40,7 @@ bash installC++SDK.sh                       # install script
 - Updates to the doxygen documentation.
 - Updated lib.
 
-#### SDK C++ version: **2.1.0*
+#### SDK C++ version: 2.1.0
 
 - Minimum operating system: Linux Ubuntu 20.04 LTS.
 - Added synchronous api.
@@ -44,16 +51,16 @@ bash installC++SDK.sh                       # install script
 - Additional example programs.
 
 ### Older versions
-#### SDK C++ version: **2.0.2**
+#### SDK C++ version: 2.0.2
 
 - Examples with improved error handling
 
 
-#### SDK C++ version: **2.0.1**
+#### SDK C++ version: 2.0.1
 
 - New installation script
 
-#### SDK C++ version: **2.0.0**
+#### SDK C++ version: 2.0.0
 
 - The Protocols shared pointers have been replaced with object classes and more detailed Delegate classes.
 

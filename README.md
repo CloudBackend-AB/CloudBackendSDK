@@ -1,13 +1,17 @@
 ![version](https://badgen.net/badge/version/2.1.1/green)
 ![platform](https://badgen.net/badge/platform/ubuntu)
-![languages](https://badgen.net/badge/language/C++,Java,Android,iOS/purple?list=|)
-# CloudBackendSDK 2.1.1
+![languages](https://badgen.net/badge/language/C++,Java,Android/purple?list=|)
+# CloudBackendSDK 2.1.2
 This repository contains the CloudBackend SDK, a build for Linux x86_64 Ubuntu 22 LTS.
 It contains both the synchronous and the asynchronous API.
 The CloudBackend SDK is a tool for application developers that provides a simple way to store data in the cloud.
 
 To learn more about the SDK, see developer documentation links via:
 https://cloudbackend.com/
+
+### Other versions of the SDK
+*iOS:* https://github.com/CloudBackend-AB/CloudBackendSDK_iOS
+*Android:* Coming soon!
 
 ### SDK Content
 languages: Java and C++, each containing lib and example code.
@@ -40,7 +44,6 @@ Tenant a.k.a. signup source
 Change the user account for the sample program in user_credentials.cpp
 
 Notes: This SDK has been built and tested for Linux x86_64 Ubuntu 22 LTS,
-Android and iOS respectively.
 
 ------------------------------------------------------------------------
 
