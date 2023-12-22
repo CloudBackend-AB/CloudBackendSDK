@@ -1,4 +1,4 @@
-![version](https://badgen.net/badge/version/2.1.1/green)
+![version](https://badgen.net/badge/version/2.1.2/green)
 ![platform](https://badgen.net/badge/platform/ubuntu)
 ![languages](https://badgen.net/badge/language/C++,Java,Android/purple?list=|)
 # CloudBackendSDK 2.1.2
@@ -10,8 +10,9 @@ To learn more about the SDK, see developer documentation links via:
 https://cloudbackend.com/
 
 ### Other versions of the SDK
-*iOS:* https://github.com/CloudBackend-AB/CloudBackendSDK_iOS
-*Android:* Coming soon!
+**iOS:** https://github.com/CloudBackend-AB/CloudBackendSDK_iOS
+
+**Android:** Included in this repo, will soon get its own.
 
 ### SDK Content
 languages: Java and C++, each containing lib and example code.
