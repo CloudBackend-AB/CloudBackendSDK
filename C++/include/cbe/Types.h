@@ -168,19 +168,6 @@ namespace cbe {
     Role = 3,
   };
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-  /**
-   * ApplicationType is not used in this version of groups but will be added
-   * later.
-   */
-  enum class ApplicationType : application_t {
-    Open   = 1,
-    Invite = 2,
-    Review = 3,
-    Closed = 4
-  };
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
   /**
    * @brief Default constructor marker.
    * 
@@ -243,23 +230,6 @@ namespace cbe {
     Tag          = 16,
     Group        = 32
   };
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-  /**
-   * HttpType is used when you want to call rest requests directly.
-   * 
-   * CloudMe test.
-   * \note This might in the future be taken out since we may parse 
-   * the URI string where the request type would be present instead.
-  */
-  enum class HttpType : http_t {
-    GET    = 1,
-    POST   = 2,
-    PUT    = 3,
-    DELETE = 4,
-    HEAD   = 5
-  };
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
   /**
    * Type of invite. 
