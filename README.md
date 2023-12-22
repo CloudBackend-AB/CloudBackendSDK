@@ -59,8 +59,8 @@ then do:
 ```
 cd
 cd Downloads                                # or where you downloaded the package
-unzip CloudBackendSDK-2.1.1.zip             # or the zip file name
-cd CloudBackendSDK-2.1.1
+unzip CloudBackendSDK-2.1.2.zip             # or the zip file name
+cd CloudBackendSDK-2.1.2
 bash installSDK.sh
 ```
 
