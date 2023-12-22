@@ -1,4 +1,4 @@
-# CloudBackendSDK 2.1
+# CloudBackendSDK 2.1.2
 This repository contains the CloudBackend SDK, a build for Linux x86_64 Ubuntu 22 LTS.
 It contains both the synchronous and the asynchronous API.
 The CloudBackend SDK is a tool for application developers that provides a simple way to store data in the cloud.
@@ -21,7 +21,7 @@ bash installC++SDK.sh                       # install script
 ------------------------------------------------------------------------
 
 ## Release notes
-2023-09-19
+2023-12-21
 ### Current version
 
 #### SDK C++ version: 2.1.2
