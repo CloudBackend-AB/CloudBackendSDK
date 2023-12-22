@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 # installSDK.sh
 # CloudBackend 2022-2023.
-export RELEASE="2.1.1"
+export RELEASE="2.1.2"
 echo "Installing CloudBackend SDK version" ${RELEASE}
 echo    "Minimum   o/s: Ubuntu 20.04"
 echo -n "Installed o/s: "
