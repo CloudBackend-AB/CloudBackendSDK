@@ -10,20 +10,13 @@ The CloudBackend SDK is a tool for application developers that provides a simple
 To learn more about the SDK, see developer documentation links via:
 https://cloudbackend.com/
 
-### Other versions of the SDK
-**iOS:** https://github.com/CloudBackend-AB/CloudBackendSDK_iOS
-
-**Android:** Included in this repo, will soon get its own.
-
 ### SDK Content
 languages: Java and C++, each containing lib and example code.
 
-tools: cli, dashboard example files and test data files.
+### Database service in the cloud
+Available to use to create, inspect and clean up test data and its structure.
 
-UI: XIOS/3 partner browser User Interface bundle extension for login to CloudBackend.
-
-### Dashboard
-Login to the dashboard at
+Login to the database service at
 https://db.cloudbackend.com/
 
 ### Accounts
@@ -41,11 +34,11 @@ so it is advisable to create a container to work in and not upload anything priv
 The test account have some limitations. To get your own tenant account see
 https://cloudbackend.com/developer.html#how
 
-Tenant a.k.a. signup source
+Tenant is a.k.a. signup source
 
 Change the user account for the sample program in user_credentials.cpp
 
-Notes: This SDK has been built and tested for Linux x86_64 Ubuntu 22 LTS,
+Notes: Recommended platform for this SDK is Linux x86_64 Ubuntu 22 LTS,
 
 ------------------------------------------------------------------------
 
