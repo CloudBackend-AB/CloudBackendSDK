@@ -36,7 +36,7 @@ case "$exercise" in
   "1")
   # Section 1:
     echo "compile example code."
-     ${COMPILER_COMMAND} ${WARNINGS} -o "cb_traverse1" "${CODE_PATH}cb_traverse1.cpp" ${libCBE} -I "../../include/"
+     ${COMPILER_COMMAND} ${WARNINGS} -o "cb_traverse1" "${CODE_PATH}cb_traverse1.cpp" ${libCBE} -I "../../include/" -ldl
     if [ $? -eq 0 ]
     then
         echo "to run use: sh run.sh 1"
@@ -45,7 +45,7 @@ case "$exercise" in
   "2")
   # Section 2:
     echo "compile example code."
-     ${COMPILER_COMMAND} ${WARNINGS} -o "cb_traverse2" "${CODE_PATH}cb_traverse2.cpp" ${libCBE} -I "../../include/"
+     ${COMPILER_COMMAND} ${WARNINGS} -o "cb_traverse2" "${CODE_PATH}cb_traverse2.cpp" ${libCBE} -I "../../include/" -ldl
     if [ $? -eq 0 ]
     then
         echo "to run use: sh run.sh 2"
@@ -54,7 +54,7 @@ case "$exercise" in
   "3")
   # Section 3:
     echo "compile example code."
-     ${COMPILER_COMMAND} ${WARNINGS} -o "cb_traverse3" "${CODE_PATH}cb_traverse3.cpp" ${libCBE} -I "../../include/"
+     ${COMPILER_COMMAND} ${WARNINGS} -o "cb_traverse3" "${CODE_PATH}cb_traverse3.cpp" ${libCBE} -I "../../include/" -ldl
     if [ $? -eq 0 ]
     then
         echo "to run use: sh run.sh 3"
@@ -63,7 +63,7 @@ case "$exercise" in
   "4")
   # Section 4:
     echo "compile example code."
-     ${COMPILER_COMMAND} ${WARNINGS} -o "cb_traverse4" "${CODE_PATH}cb_traverse4.cpp" ${libCBE} -I "../../include/"
+     ${COMPILER_COMMAND} ${WARNINGS} -o "cb_traverse4" "${CODE_PATH}cb_traverse4.cpp" ${libCBE} -I "../../include/" -ldl
     if [ $? -eq 0 ]
     then
         echo "to run use: sh run.sh 4"
@@ -73,7 +73,7 @@ case "$exercise" in
   "5")
   # Section 5:
     echo "compile example code."
-     ${COMPILER_COMMAND} ${WARNINGS} -o "cb_traverse5" "${CODE_PATH}cb_traverse5.cpp" ${libCBE} -I "../../include/"
+     ${COMPILER_COMMAND} ${WARNINGS} -o "cb_traverse5" "${CODE_PATH}cb_traverse5.cpp" ${libCBE} -I "../../include/" -ldl
     if [ $? -eq 0 ]
     then
         echo "to run use: sh run.sh 5"

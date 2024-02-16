@@ -35,7 +35,7 @@ echo "about to compile exercise:" ${exe}
 case "${exe}" in
     1|2|3)
     # Tutorial exercise 1, 2, 3:
-    ${COMPILER_COMMAND} ${WARNINGS} -o tut${exe} Main.cpp Logic${exe}.cpp ${libCBE} -I "../../include"
+    ${COMPILER_COMMAND} ${WARNINGS} -o tut${exe} Main.cpp Logic${exe}.cpp ${libCBE} -I "../../include" -ldl
     command_result=$?
     ;;
     

@@ -25,6 +25,12 @@ bash installJavaSDK.sh                      # install script
 ------------------------------------------------------------------------
 ## Release notes
 ### Current version
+#### SDK Java version: **2.1.3**
+
+- Minimum operating system: Linux Ubuntu 20.04 LTS on x86_64.
+- Minimum Java: openjdk-17-jre
+- Updated lib with improved password encryption.
+
 #### SDK Java version: **2.1.1**
 
 - Minimum operating system: Linux Ubuntu 20.04 LTS on x86_64.
@@ -68,4 +74,4 @@ bash installJavaSDK.sh                      # install script
 #### SDK Java version: 1.3.5
 - The Java wrappers are built on the C++ sdk version 1.3.5 this includes share actions but not group actions.
 
-#### Copyright © CloudBackend AB 2021-2023.
+#### Copyright © CloudBackend AB 2021-2024.

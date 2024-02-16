@@ -1,4 +1,8 @@
-CloudBackend AB 2022-2023.
+CloudBackend AB 2022-2024.
+
+Release 2024-02-12
+------------------
+* The source code has been updated with the new demo path.
 
 Release 2023-07-10
 ------------------

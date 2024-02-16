@@ -1,4 +1,4 @@
-# CloudBackend AB 2023.
+# CloudBackend AB 2023 - 2024.
 
 ## This is an Example of a test program.
 
@@ -36,6 +36,10 @@ Compile with `sh compile.sh` and then run with `sh run.sh`
 **If you want to remove a container, use the CLI.**
  
 CLI command `rmdir yourContainerName`
+
+Release 2023-02-12
+------------------
+* Minor updates.
 
 Release 2023-07-10
 ------------------

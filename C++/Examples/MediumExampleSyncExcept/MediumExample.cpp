@@ -16,10 +16,14 @@
 #include "../user_credentials.cpp"
 
 int main(int argc, const char** argv) {
-  static constexpr const char testContainer[] = "testContainer";
-  cbe::Container myContainer{cbe::DefaultCtor{}};
+  static constexpr const char testContainer[] = "z-MediumExample";
 
-// - - - - - - - - - - - - - - - login - - - - - - - - - - - - - - - - - - - - -
+  cbe::Container rootContainer{cbe::DefaultCtor{}};
+  cbe::Container myContainer{cbe::DefaultCtor{}};
+  cbe::Filter objectFilter;
+  objectFilter.setDataType(cbe::ItemType::Object);
+
+  // - - - - - - - - - - - - - - - login - - - - - - - - - - - - - - - - - - - -
   cbe::CloudBackend cloudBackend{ cbe::DefaultCtor{} };
   try {
     cloudBackend = cbe::CloudBackend::logIn(username, password, tenant, client);
@@ -35,6 +39,8 @@ int main(int argc, const char** argv) {
               << std::endl;
     return 9;
   }
+  rootContainer = cloudBackend.account().rootContainer();
+  std::cout << "login: " << cloudBackend.account().username() << std::endl;
 
 // - - - - - - - - - - - - check for existing container - - - - - - - - - - - -
   cbe::QueryResult resultSet = cloudBackend.account().rootContainer().query();
@@ -47,24 +53,28 @@ int main(int argc, const char** argv) {
   }
   if (!myContainer){
     std::cout << "Creating a new container!" << std::endl;
-    myContainer = 
-          cloudBackend.account().rootContainer().createContainer(testContainer);
+    myContainer = rootContainer.createContainer(testContainer);
   }
-// - - - - - - - - - - - - - - - upload_syncExcept - - - - - - - - - - - - - - -
+  // - - - - - - - - - - - - - - - upload_syncExcept - - - - - - - - - - - - - -
   constexpr const char* const uploadPath = "/tmp/";
-  constexpr const char* const myObjectFileName = "myObject";
-  const std::string           qualFile1Name = 
-                                     std::string{uploadPath} + myObjectFileName;
+  constexpr const char* const myObjectFileName = "Medium_B_a_message";
+  const std::string qualFile1Name = std::string{uploadPath} + 
+                                                myObjectFileName;
+  cbe::Object anObject{cbe::DefaultCtor{}};
   cbe::Object object{cbe::DefaultCtor{}};
   cbe::Object::Streams streams;
+  std::cout << "Create local file " << qualFile1Name << std::endl;
   std::ofstream ofs{qualFile1Name};
-  ofs << "Line 11\n"  << "Line 12\n" << "Line 13\n" << std::flush;
+  ofs << "Line a\n"
+      << "Line b\n"
+      << "Line c\n"
+      << std::flush;
   ofs.close();
-  std::cout << "Created file " << qualFile1Name << std::endl;
   try
   {
-    std::cout << "Uploading file!" << std::endl;
-    std::cout << "from: " << qualFile1Name << std::endl;
+  std::cout << "Uploading object from "
+            << qualFile1Name
+            << std::endl;
     object = myContainer.upload(qualFile1Name);
     streams = object.getStreams();
   }
@@ -77,26 +87,35 @@ int main(int argc, const char** argv) {
     cloudBackend.terminate();
     return 2;
   }
-// - - - - - - - - - - - - - - - uploadStream_syncExcept - - - - - - - - - - - -
-  constexpr const char* const myFile2Name = "myObject_Stream2";
+  // - - - - - - - - - - - - - - - uploadStream_syncExcept - - - - - - - - - - -
+  constexpr const char* const myFile2Name = "Medium_B_an_attachment";
   const std::string qualFile2Name = std::string{uploadPath} + myFile2Name;
+
   std::ofstream ofs3{qualFile2Name};
-  ofs3 << "Line 21\n"  << "Line 22\n" << "Line 23\n" << "Line 24\n"
-       << std::flush;
+  ofs3  << "line 21\n"
+        << "line 22\n"
+        << "line 23\n"
+        << "line 24\n"
+        << std::flush;
   ofs3.close();
-
-  const auto nextStreamId = std::max_element(std::begin(streams), 
-                                             std::end(streams),
-                                  [](const cbe::Stream& stream1,
-                                     const cbe::Stream& stream2) {
-                                    return stream1.streamId < stream2.streamId;
-                                  })->streamId + 1;
-
+  std::cout << "Uploading additional stream from: " 
+            << qualFile2Name 
+            << std::endl;
+  const auto nextStreamId =
+              std::max_element(std::begin(streams), std::end(streams),
+                               [](const cbe::Stream& stream1,
+                                  const cbe::Stream& stream2) {
+                                 return stream1.streamId < stream2.streamId;
+                              })->streamId + 1;
   try
   {
-    std::cout << "Uploading stream!" << std::endl;
-    std::cout << "from: " << qualFile2Name << std::endl;
     object.uploadStream(qualFile2Name, nextStreamId);
+    std::cout << "home://"
+              << myContainer.name() 
+              << "/"
+              << object.name() 
+              << " now has two streams."
+              << std::endl;
     streams = object.getStreams();
   }
   catch (const cbe::util::Exception& e)
@@ -106,15 +125,19 @@ int main(int argc, const char** argv) {
     cloudBackend.terminate();
     return 3;
   }
-// - - - - - - - - - - - - downloadStream_syncExcept - - - - - - - - - - - - - -
-  constexpr const char* const downloadPath = "/tmp/download_stream_";
+  // - - - - - - - - - - - - downloadStream_syncExcept - - - - - - - - - - - - -
+  std::cout << "Downloading stream:" << std::endl;
+  constexpr const char* const downloadPath = "/tmp/Medium_B_download_stream_";
   for (const auto& stream : streams) {
     const auto path =  std::string{downloadPath} + 
-                                   std::to_string(stream.streamId) + "_";
+                       std::to_string(stream.streamId) + "_of_";
     try
     {
-      std::cout << "Downloading stream!" << std::endl;
-      std::cout << "to: " << path << std::endl;
+    std::cout << stream.streamId
+              << " to: "
+              << path
+              << object.name()
+              << std::endl;
       auto result = object.downloadStream(path, stream);
     }
     catch (const cbe::util::Exception& e)
@@ -125,21 +148,25 @@ int main(int argc, const char** argv) {
       return 4;
     }
   }
-// - - - - - - - - - - - cloudbackend_query_syncExcept - - - - - - - - - - - - -
+  // - - - - - - - - - - - cloudbackend_query_syncExcept - - - - - - - - - - - -
   try
   {
-    std::cout << "Querying!" << std::endl;
-    const cbe::ContainerId myContainerId = 
-                                    cloudBackend.account().rootContainer().id();
-    auto queryResult = cloudBackend.query(myContainerId).getQueryResult();
+    std::cout << "Content of "
+              << myContainer.name()
+              << std::endl;
+    auto queryResult = myContainer.query(objectFilter).getQueryResult();
     cbe::QueryResult::ItemsSnapshot itemsSnapshot = 
-                                                 queryResult.getItemsSnapshot();
-    std::cout << "---Table---" << std::endl;
+                                          queryResult.getItemsSnapshot();
+    std::cout << "--------- table content -----------" << std::endl;
     for (auto& item : itemsSnapshot) {
-      std::cout << "  " << item.name() << std::endl;
+      anObject = cloudBackend.castObject(item);
+      std::cout << " sum "
+                << anObject.length()
+                << " Bytes\t"
+                << anObject.name()
+                << std::endl;
     }
-    std::cout << "-----------" << std::endl;
-
+    std::cout << "-----------------------------------" << std::endl;
   }
   catch (const cbe::util::Exception& e)
   {
@@ -148,7 +175,7 @@ int main(int argc, const char** argv) {
     cloudBackend.terminate();
     return 5;
   }
-  std::cout << "Example done!" << std::endl;
+  std::cout << "Example Medium done" << std::endl;
   cloudBackend.terminate();
   return 0;
 } // int main()

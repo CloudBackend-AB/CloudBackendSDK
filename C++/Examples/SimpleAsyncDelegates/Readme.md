@@ -1,14 +1,11 @@
-# CloudBackend AB 2022-2023.
+# CloudBackend AB 2023 - 2024.
 
-## This is a simple Example of a test program.
+## This is an Example of a test program.
 
-In the SimpleEx.cpp you will find all the code for the test program
-built with CloudBackend AB:s Software Development Kit.
-
-You can follow the code in the main function in file **SimpleEx.cpp**
+You can follow the code in the main function in file **MediumExample.cpp**
 together with comments to support how to use the library.
 
-In **user_credentials.cpp** you need to fill in, copy paste user info
+In **../user_credentials.cpp** you need to fill in, copy paste user info
 from within that file, the user credentials that you are going to use. 
 There are three to choose from and you are free to choose any of them
 but remember multiple people might use the same account
@@ -40,7 +37,10 @@ Compile with `sh compile.sh` and then run with `sh run.sh`
  
 CLI command `rmdir yourContainerName`
 
+Release 2023-02-12
+------------------
+* Minor updates.
+
 Release 2023-07-10
 ------------------
-* The source code has been updated to the current version of the SDK C++.
-
+* First release to the current version of the SDK C++.

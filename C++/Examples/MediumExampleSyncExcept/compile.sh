@@ -27,7 +27,7 @@ case "$exercise" in
   "1")
   # section 1:
     echo "compile example code."
-     ${compiler_command} -o "mediumExample" "${code_path}MediumExample.cpp" ${libcbe} -I "../../include"
+     ${compiler_command} -o "mediumExample" "${code_path}MediumExample.cpp" ${libcbe} -I "../../include" -ldl
     if [ $? -eq 0 ]
     then
         echo "to run use: sh run.sh"

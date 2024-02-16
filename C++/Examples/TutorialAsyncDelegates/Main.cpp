@@ -21,17 +21,23 @@ int main(int argc, char *argv[])
   catch (cbe::util::Exception& e){
     std::cout << "Got exception: \"" << e.what() 
               << "\"\nType: "        << e.typeAsString() << std::endl;
-    exercise.myCloudBackend.terminate();
+    if (exercise.myCloudBackend) {
+      exercise.myCloudBackend.terminate();
+    }
     return 1;
   }
   // If something fails that is not an exception we get the following case
   catch (...)
   {
     std::cerr << "Error caused termination of program" << std::endl;
-    exercise.myCloudBackend.terminate();
+    if (exercise.myCloudBackend) {
+      exercise.myCloudBackend.terminate();
+    }
     return 9;
   }
   std::cout << "Ending program " << progName << std::endl;
-  exercise.myCloudBackend.terminate();
+  if (exercise.myCloudBackend) {
+    exercise.myCloudBackend.terminate();
+  }
   return 0;
 }

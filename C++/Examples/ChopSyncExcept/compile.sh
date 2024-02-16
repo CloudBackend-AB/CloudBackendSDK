@@ -1,5 +1,5 @@
 # compile.sh <excercise>
-# release 2022-04-08
+# release 2024-02-16
 
 PARENTSCRIPT_PATH="$(dirname "$0")"
 echo "$PARENTSCRIPT_PATH" 
@@ -33,7 +33,7 @@ case "$exercise" in
   "1")
   # Section 1:
     echo "compile example code."
-     ${COMPILER_COMMAND} -o "partition_large_csv_file" "${CODE_PATH}partition_large_csv_file.cpp" ${libCBE} -I "../../include"
+     ${COMPILER_COMMAND} -o "partition_large_csv_file" "${CODE_PATH}partition_large_csv_file.cpp" ${libCBE} -I "../../include" -ldl
     if [ $? -eq 0 ]
     then
         echo "to run use: ./partition_large_csv_file -?"
