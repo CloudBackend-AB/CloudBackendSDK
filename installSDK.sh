@@ -61,6 +61,7 @@ fi
 
 echo ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
 cd
-ls -l cbe/current
-echo "next: go to " `pwd`
+ls -l ~/cbe/current
+echo "next: go to ~/cbe/current"
+echo
 echo "do: cd .."
