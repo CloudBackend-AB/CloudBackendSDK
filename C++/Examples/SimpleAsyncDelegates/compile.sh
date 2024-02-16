@@ -1,10 +1,7 @@
-#!/usr/bin/sh
-# compile.sh
-# release 2023-02-03
-
-PARENTSCRIPT_PATH="$(dirname "$0")"
-cd ${PARENTSCRIPT_PATH}
-echo ${PWD}
+# compile.sh <excercise>
+# release 2023-07-05
+parentscript_path="$(dirname "$0")"
+cd "$parentscript_path"
 
 if [ $# -gt 0 ]
 then
@@ -12,47 +9,34 @@ then
 else
     exercise="1"
 fi
-ARCH=`uname -m`
-echo "computer architechture ${ARCH}"
-case "${ARCH}" in
+arch=`uname -m`
+case "$arch" in
     "x86_64")
-    COMPILER_COMMAND="g++ -std=c++11 -pthread -ggdb3"
-    #libCBE="../../lib/Linux_x86/libcb_sdk.so"
-    libCBE="../../lib/Linux_x86/libcb_sdk.a"
-    CODE_PATH="./"
+    compiler_command="g++ -std=c++11 -pthread "
+    #libcbe="../../lib/linux_x86/libcb_sdk.so"
+    libcbe="../../lib/Linux_x86/libcb_sdk.a"
+    code_path="./"
     ;;
 
-    # "armv6l")
-    # COMPILER_COMMAND="arm-linux-gnueabihf-g++ -mcpu=arm1176jzf-s -mfpu=vfp -fPIC -ldl -pthread "
-    # libCBE="libCloudBackend-rpi.a"
-    # ;;
-
-    # "armv7l")
-    # COMPILER_COMMAND="arm-linux-gnueabihf-g++ -mcpu=cortex-a53 -mfpu=neon-vfpv4 -fPIC -ldl -pthread "
-    # libCBE="libCloudBackend-rpi.a"
-    # ;;
-
     *)
-    uname -a
-    echo "platform not supported in this release"
     exit 1
     ;;
 esac
 
 case "$exercise" in
   "1")
+  # section 1:
     echo "compile example code."
-     ${COMPILER_COMMAND} -o "simpleExample" "${CODE_PATH}SimpleEx.cpp" ${libCBE} -I "../../include" 
+     ${compiler_command} -o "mediumExample" "${code_path}MediumExample.cpp" ${libcbe} -I "../../include" -ldl
     if [ $? -eq 0 ]
     then
-        echo "To run use: sh run.sh"
-    else
-        echo "Error encountered."
+        echo "to run use: sh run.sh"
     fi
     ;;
 
     *)
-    # Default.
+    # default.
     echo "syntax: "$0" <1-7> "
     ;;
 esac
+
