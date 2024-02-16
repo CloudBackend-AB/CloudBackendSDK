@@ -25,6 +25,12 @@ bash installJavaSDK.sh                      # install script
 ------------------------------------------------------------------------
 ## Release notes
 ### Current version
+#### SDK Java version: **2.1.3**
+
+- Minimum operating system: Linux Ubuntu 20.04 LTS on x86_64.
+- Minimum Java: openjdk-17-jre
+- Updated lib with improved password encryption.
+
 #### SDK Java version: **2.1.1**
 
 - Minimum operating system: Linux Ubuntu 20.04 LTS on x86_64.
