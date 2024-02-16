@@ -1,5 +1,5 @@
 /*
-    CloudBackend AB 2022 - 2023.
+    CloudBackend AB 2022 - 2024.
 */
 
 #include "partition_large_csv_file.h"
@@ -492,8 +492,8 @@ int main(int argc, char *argv[]) {
                 << "-n number_of_rows\tthe number of rows to upload, default is all to the end of the csv-file \n"
                 << "-chunk max chunk size \te.g. rows per object file, default 50 000 \n"
                 << "-uc user_credentials \tfile in directory .cbe with login to CloudBackend\n"
-                << "-container name \tthe CloudBackend full container path and name to store the data objects\n"
-                << "Example : ./partition_large_csv_file -csv test.csv -chunk 1000 -container Choped"
+                << "-container name \tthe CloudBackend full container path and name to store the data objects\n\n"
+                << "Example : ./partition_large_csv_file -csv test.csv -chunk 1000 -container z-Choped"
                 << std::endl;
       return 0;
     }
