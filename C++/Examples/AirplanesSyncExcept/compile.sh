@@ -42,7 +42,7 @@ esac
 case "$exercise" in
   "1")
     echo "compile example code."
-     ${COMPILER_COMMAND} -o "airplanes" "${CODE_PATH}main.cpp" "${CODE_PATH}Airplanes.cpp" ${libCBE} -I "../../include"
+     ${COMPILER_COMMAND} -o "airplanes" "${CODE_PATH}main.cpp" "${CODE_PATH}Airplanes.cpp" ${libCBE} -I "../../include" -ldl
     if [ $? -eq 0 ]
     then
         echo "to run use: sh run.sh"
