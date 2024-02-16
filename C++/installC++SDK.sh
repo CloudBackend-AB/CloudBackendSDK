@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # installC++SDK.sh
-# CloudBackend 2023-09-19.
+# CloudBackend 2024-02-16.
 echo "Installing CloudBackend C++ SDK."
 echo -n "Checking g++ version: "
 g++ --version                               # check that the compiler is installed
@@ -10,9 +10,27 @@ then
   sudo apt-get install g++                  # if not already installed
 fi
 cd lib/Linux_x86
-unzip lib*.zip
-cd -
+pwd
+if [ -f libcb_sdka.zip ];
+then
+    unzip -DD libcb_sdka.zip
+    if [[ $? -eq 0 ]];
+    then
+        rm libcb_sdka.zip
+    fi
+fi
+if [ -f libcb_sdkso.zip ];
+then
+    unzip -DD libcb_sdkso.zip
+    if [[ $? -eq 0 ]];
+    then
+        rm libcb_sdkso.zip
+    fi
+fi
+pwd
+ls -lh lib*
 echo
+cd -
 echo "Compile and run C++ installation test"
 cd Examples/SimpleAsyncDelegates            # Simple code example directory
 sh compile.sh                               # compile the test program
