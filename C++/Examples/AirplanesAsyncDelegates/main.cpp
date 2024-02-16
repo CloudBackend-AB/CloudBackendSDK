@@ -73,13 +73,14 @@ int main() {
     return 1;
   } else {
     std::cout << "Login as: "
-              << account.username()  << "\t"
+              << account.username()  << " \t"
               << account.firstName() << " "
               << account.lastName()
               << std::endl;
   }
   cbe::Container rootContainer = account.rootContainer();
-  cbe::Container simulation{cbe::DefaultCtor{}};
+  cbe::Container demo{cbe::DefaultCtor{}};
+  cbe::Container aero{cbe::DefaultCtor{}};
   cbe::Container airports{cbe::DefaultCtor{}};
   cbe::Container planes{cbe::DefaultCtor{}};
   cbe::QueryResult myQueryResult{cbe::DefaultCtor{}};
@@ -87,7 +88,8 @@ int main() {
   cbe::Filter containerFilter;
   containerFilter.setAscending(true);
   containerFilter.setDataType(cbe::ItemType::Container);
-  std::string startContainerName = "Simulation";
+  std::string demoContainerName = "Demo";
+  std::string aeroContainerName = "Aero";
   std::string airportsName = "Airports";
   std::string planesName = "Planes";
   Random rand;
@@ -95,26 +97,67 @@ int main() {
   try {
     myQueryResult = airplanes.query(containerFilter, rootContainer.id());
     for (const auto& item : myQueryResult.getItemsSnapshot()) {
-      if (item.name() == startContainerName) {
-        simulation=cbe::CloudBackend::castContainer(item);
+      if (item.name() == demoContainerName) {
+        demo=cbe::CloudBackend::castContainer(item);
         break;
       }
     }
 
-    if (simulation) {
-        std::cout << "Using: /"
-                  << simulation.name()
-                  << std::endl;
+    if (demo) {
+      std::cout << "Using:  \t/"
+                << demo.name()
+                << std::endl;
     } else {
-      simulation = airplanes.createContainer(rootContainer, startContainerName);
-      std::cout << "Created: /" << simulation.name()
-                << " with id: " << simulation.id()
+      demo = airplanes.createContainer(rootContainer, demoContainerName);
+      std::cout << "Created: \t/"
+                << demo.name()
+                << "\t\t(" << demo.id() << ")"
                 << std::endl;
     }
 
-    myQueryResult = airplanes.query(containerFilter, simulation.id());
+    myQueryResult = airplanes.query(containerFilter, demo.id());
+    for (const auto& item : myQueryResult.getItemsSnapshot()) {
+      if (item.name() == aeroContainerName) {
+        aero=cbe::CloudBackend::castContainer(item);
+        break;
+      }
+    }
+
+    if (aero) {
+      std::cout << "Using:  \t/"
+                << demo.name()
+                << "/"
+                << aero.name()
+                << std::endl;
+    } else {
+      aero = airplanes.createContainer(demo, aeroContainerName);
+      std::cout << "Created: \t/"
+                << demo.name()
+                << "/"
+                << aero.name()
+                << "\t(" << aero.id() << ")"
+                << std::endl;
+    }
+
+    if (aero) {
+      std::cout << "Using:  \t/"
+                << demo.name()
+                << "/"
+                << aero.name()
+                << std::endl;
+    } else {
+      aero = airplanes.createContainer(rootContainer, aeroContainerName);
+      std::cout << "Created: \t/"
+                << demo.name()
+                << "/"
+                << aero.name()
+                << "\t(" << aero.id() << ")"
+                << std::endl;
+    }
+
+    myQueryResult = airplanes.query(containerFilter, aero.id());
     myItemsSnapshot = myQueryResult.getItemsSnapshot();
-    std::cout << "Content of: " << simulation.name() << std::endl;
+    std::cout << "Content of: " << aero.name() << std::endl;
     for (const auto& item : myItemsSnapshot) {
       if (item.name() == airportsName) {
         std::cout << "Found: "
@@ -130,17 +173,21 @@ int main() {
     }
 
     if (airports) {
-      std::cout << "Using: /" 
-                << simulation.name()
+      std::cout << "Using:  \t/"
+                << demo.name()
+                << "/"
+                << aero.name()
                 << "/"
                 << airports.name()
                 << std::endl;
     } else {
       // Create some data points for airports
       std::cout << "\nLoad " << airportsName << std::endl;
-      airports = airplanes.createContainer(simulation, airportsName);
+      airports = airplanes.createContainer(aero, airportsName);
       std::cout << "Created: /" 
-                << simulation.name()
+                << demo.name()
+                << "/"
+                << aero.name()
                 << "/"
                 << airports.name()
                 << std::endl;
@@ -158,7 +205,9 @@ int main() {
     int i = 0;
     int selection = 0;
     std::string pName;
-    std::cout << "Content of: " << simulation.name() << std::endl;
+    myQueryResult = airplanes.query(containerFilter, aero.id());
+    myItemsSnapshot = myQueryResult.getItemsSnapshot();
+    std::cout << "Content of: /" << demo.name() << "/" << aero.name() << std::endl;
     std::cout << "0 : - none - create a new set" << std::endl;
     for (const auto& item : myItemsSnapshot) {
       pName = item.name();
@@ -184,9 +233,9 @@ int main() {
       }
       std::string myPlanesName = planesName + "_" + numbers.substr(1,10);
       std::cout << "\nLoad planes" << '\n';
-      planes = airplanes.createContainer(simulation, myPlanesName);
+      planes = airplanes.createContainer(aero, myPlanesName);
       std::cout << "Created: /" 
-                << simulation.name()
+                << aero.name()
                 << "/"
                 << planes.name()
                 << std::endl;
@@ -204,9 +253,9 @@ int main() {
       for (auto index=100U; index<160U; index++) {
         const auto location = entries[rand.nextInt(entriesSize)].location;
         cbe::KeyValues keyValues{
+          {"ACID",     {std::to_string(rand.nextInt(9000)+1000), true}},
           {"Location", {location, true}},
-          {"Model",    {aircraftModels[rand.nextInt(aircraftModelsSize)], true}},
-          {"ACID",     {std::to_string(rand.nextInt(9000)+1000), true}}};
+          {"Model",    {aircraftModels[rand.nextInt(aircraftModelsSize)], true}}};
         const auto flight = airLines[rand.nextInt(airLinesSize)] +
                             std::to_string(index);
         airplanes.createObject(planes, flight, std::move(keyValues));
