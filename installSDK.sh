@@ -60,24 +60,7 @@ else
 fi
 
 echo ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
-read -p "Install CLI tool (Y/n) " Answer
-if [ "${Answer}" = "n" ] || [ "${Answer}" = "N" ];
-then
-  echo "skip tools.";
-else
-  echo "Installing CloudBackend CLI."
-  cd ~/cbe/current                            # the release directory
-  cd tools                                    # cli
-  pwd
-  unzip new_cli.zip                           # unpack the new_cli
-  ./new_cli -uc gh1  << EOF                   # start new_cli with user credentials of githubtester1
-  help
-  set
-  logout
-EOF
-fi
-echo "done."
 cd
 ls -l cbe/current
-cd cbe/current
 echo "next: go to " `pwd`
+echo "do: cd .."
