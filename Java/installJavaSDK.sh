@@ -7,7 +7,7 @@ javac --version                             # check javac version
 read -p "Do you want to install openjdk-17-jre-headless (y/N) ? " Answer
 if [ "${Answer}" = "y" ];
 then
-  sudo apt-get install openjdk-17-jre-headless # if not already installed
+  sudo apt-get install openjdk-17-jdk-headless # if not already installed
 fi
 echo
 echo "Unpacking Java SDK lib "
