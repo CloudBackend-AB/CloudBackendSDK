@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 # installJavaSDK.sh
-# CloudBackend 2024-02-16.
+# CloudBackend 2024-03-22.
 echo "Installing CloudBackend Java SDK."
 echo -n "Checking Java version: "
 javac --version                             # check javac version
