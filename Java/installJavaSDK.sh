@@ -4,7 +4,7 @@
 echo "Installing CloudBackend Java SDK."
 echo -n "Checking Java version: "
 javac --version                             # check javac version
-read -p "Do you want to install openjdk-17-jre-headless (y/N) ? " Answer
+read -p "Do you want to install openjdk-17-jdk-headless (y/N) ? " Answer
 if [ "${Answer}" = "y" ];
 then
   sudo apt-get install openjdk-17-jdk-headless # if not already installed
